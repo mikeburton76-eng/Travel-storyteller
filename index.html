@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Travel Storyteller</title>
+<style>
+  body { margin: 0; background: #eef2f5; color: #1c2b36; font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  main { max-width: 640px; margin: 0 auto; padding: 40px 20px 80px; }
+  h1 { font-family: Georgia, "Times New Roman", serif; font-size: 2rem; margin: 0 0 8px; }
+  .intro { margin: 0 0 24px; color: #4a5c69; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  input { flex: 1 1 260px; font-size: 1rem; padding: 12px 14px; border: 1px solid #9fb0bc; border-radius: 6px; background: #fff; color: inherit; }
+  button { font-size: 1rem; padding: 12px 20px; border: 0; border-radius: 6px; background: #1f5f7a; color: #fff; cursor: pointer; }
+  button:disabled { background: #8aa3b0; cursor: not-allowed; }
+  #go:disabled { cursor: wait; }
+  input:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid #e0a100; outline-offset: 2px; }
+  #status { margin-top: 24px; color: #4a5c69; }
+  #error { margin-top: 24px; padding: 12px 14px; background: #fbe9e7; border-left: 4px solid #b3261e; display: none; }
+  #result { display: none; margin-top: 28px; }
+  #story { font-family: Georgia, "Times New Roman", serif; font-size: 1.15rem; line-height: 1.7; }
+  #story p { margin: 0 0 1em; }
+  #note { font-style: italic; color: #4a5c69; }
+  #voiceSettings { margin: 24px 0; padding: 14px; background: #fff; border: 1px solid #c3cfd8; border-radius: 8px; }
+  #voiceSelect { width: 100%; margin: 8px 0 12px; padding: 10px; font: inherit; }
+  #voiceHelp { color: #4a5c69; line-height: 1.5; }
+  #speech { margin: 20px 0 0; padding: 14px; background: #fff; border: 1px solid #c3cfd8; border-radius: 8px; }
+  #speech .controls { display: flex; gap: 8px; flex-wrap: wrap; }
+  #speech button { padding: 10px 16px; }
+  #speechMsg { margin: 10px 0 0; font-size: 0.95rem; color: #4a5c69; }
+  #sources { margin-top: 24px; padding-top: 16px; border-top: 1px solid #c3cfd8; }
+  #sources h2 { font-size: 1rem; margin: 0 0 8px; }
+  #sources ul { margin: 0; padding-left: 20px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Travel Storyteller</h1>
+  <p class="intro">Type a place, and hear its story.</p>
+
+  <div class="row">
+    <input id="place" type="text" placeholder="e.g. Buxton Crescent" aria-label="Place name">
+    <button id="go">Tell me the story</button>
+  </div>
+
+  <section id="voiceSettings" aria-label="Narration voice">
+    <label for="voiceSelect">Narration voice</label>
+    <select id="voiceSelect"><option value="">Loading available voices…</option></select>
+    <button id="previewVoice" type="button">Try this voice</button>
+    <p id="voiceHelp" role="status">Choose a voice and try a short sample. Your choice is remembered in this browser when storage is available.</p>
+  </section>
+
+  <div id="status" role="status"></div>
+  <div id="error" role="alert"></div>
+
+  <section id="result">
+    <div id="story"></div>
+    <p id="note"></p>\n    <button id="moreBtn" type="button" disabled>Tell me more</button>
+
+    <div id="speech">
+      <div class="controls">
+        <button id="listenBtn">Listen to story</button>
+        <button id="pauseBtn" disabled>Pause</button>
+        <button id="resumeBtn" disabled>Resume</button>
+        <button id="stopBtn" disabled>Stop</button>
+      </div>
+      <p id="speechMsg" role="status"></p>
+    </div>
+
+    <div id="sources">
+      <h2>Where these facts came from</h2>
+      <ul id="sourceList"></ul>
+    </div>
+  </section>
+</main>
+
+<script>
+  // ============================================================
+  // PART 1: Ask the helper for a story (this is unchanged)
+  // ============================================================
+
+  // The address of the helper running on your computer.
+  const HELPER_URL = "http://localhost:3000/story";
+
+  const placeInput = document.getElementById("place");
+  const goButton = document.getElementById("go");
+  const statusBox = document.getElementById("status");
+  const errorBox = document.getElementById("error");
+  const resultBox = document.getElementById("result");
+  const storyBox = document.getElementById("story");
+  const noteBox = document.getElementById("note");
+  const sourceList = document.getElementById("sourceList");
+
+  let currentStory = ""; // the most recent section to read aloud
+  let fullStory = "";
+  let activePlace = "";
+  const moreBtn = document.getElementById("moreBtn");
+
+  async function tellStory() {
+    const place = placeInput.value.trim();
+    if (!place) { placeInput.focus(); return; }
+
+    stopSpeaking(); // silence any story that is still being read
+    moreBtn.disabled = true;
+    fullStory = "";
+    activePlace = place;
+    errorBox.style.display = "none";
+    resultBox.style.display = "none";
+    goButton.disabled = true;
+    statusBox.textContent = "Looking up facts and writing your story. This can take 10 to 20 seconds...";
+
+    try {
+      const response = await fetch(HELPER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ place: place })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Something went wrong.");
+
+      currentStory = data.story || "";
+      fullStory = currentStory;
+      moreBtn.disabled = !currentStory;
+
+      // Show the story, one paragraph at a time (safe: uses textContent, not HTML)
+      storyBox.innerHTML = "";
+      currentStory.split(/\n\s*\n/).forEach(function (text) {
+        const p = document.createElement("p");
+        p.textContent = text;
+        storyBox.appendChild(p);
+      });
+
+      noteBox.textContent = data.note || "";
+
+      sourceList.innerHTML = "";
+      (data.sources || []).forEach(function (s) {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = s.url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = s.title + " (Wikipedia)";
+        li.appendChild(a);
+        sourceList.appendChild(li);
+      });
+
+      resultBox.style.display = "block";
+      statusBox.textContent = "";
+    } catch (e) {
+      statusBox.textContent = "";
+      errorBox.style.display = "block";
+      errorBox.textContent = (e instanceof TypeError)
+        ? "Can't reach the helper. Check that Terminal is still running 'node server.js'."
+        : e.message;
+    } finally {
+      goButton.disabled = false;
+    }
+  }
+
+  moreBtn.addEventListener("click", async function () {
+    if (!activePlace || !fullStory) return;
+    stopSpeaking();
+    moreBtn.disabled = true;
+    goButton.disabled = true;
+    errorBox.style.display = "none";
+    statusBox.textContent = "Finding something new about " + activePlace + "...";
+    try {
+      const response = await fetch(HELPER_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ place: activePlace, previousStory: fullStory })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Something went wrong.");
+      const extra = (data.story || "").trim();
+      if (!extra) {
+        statusBox.textContent = data.note || "No further verified facts found about this place.";
+        return;
+      }
+      currentStory = extra;
+      fullStory += "\\n\\n" + extra;
+      const heading = document.createElement("h2");
+      heading.textContent = "More about " + activePlace;
+      storyBox.appendChild(heading);
+      extra.split(/\\n\\s*\\n/).forEach(function (text) {
+        const p = document.createElement("p");
+        p.textContent = text;
+        storyBox.appendChild(p);
+      });
+      if (data.note) noteBox.textContent = data.note;
+      (data.sources || []).forEach(function (s) {
+        if ([...sourceList.querySelectorAll("a")].some(function (a) { return a.href === s.url; })) return;
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = s.url; a.target = "_blank"; a.rel = "noopener";
+        a.textContent = s.title + " (Wikipedia)";
+        li.appendChild(a); sourceList.appendChild(li);
+      });
+      statusBox.textContent = "";
+      startText(extra); // speak only the new section, using the saved voice
+    } catch (e) {
+      statusBox.textContent = "";
+      errorBox.style.display = "block";
+      errorBox.textContent = e.message;
+    } finally {
+      goButton.disabled = false;
+      moreBtn.disabled = false;
+    }
+  });
+
+  goButton.addEventListener("click", tellStory);
+  placeInput.addEventListener("keydown", function (e) { if (e.key === "Enter") tellStory(); });
+
+  // ============================================================
+  // PART 2: Read the story aloud (new)
+  // ============================================================
+
+  const listenBtn = document.getElementById("listenBtn");
+  const pauseBtn = document.getElementById("pauseBtn");
+  const resumeBtn = document.getElementById("resumeBtn");
+  const stopBtn = document.getElementById("stopBtn");
+  const voiceSelect = document.getElementById("voiceSelect");
+  const previewVoice = document.getElementById("previewVoice");
+  const voiceHelp = document.getElementById("voiceHelp");
+  const voiceStorageKey = "travelStoryteller.voiceURI";
+  let preferredVoice = "";
+  try { preferredVoice = localStorage.getItem(voiceStorageKey) || ""; } catch (_) {}
+  let availableVoices = [];
+  const speechMsg = document.getElementById("speechMsg");
+
+  const speechSupported = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+
+  let sessionId = 0; // changes every time we start or stop, so old callbacks are ignored
+  let chunks = [];
+  let chunkIndex = 0;
+
+  // Show the right buttons for each state: "idle", "speaking" or "paused"
+  function setState(state) {
+    listenBtn.disabled = (state !== "idle");
+    previewVoice.disabled = (state !== "idle");
+    voiceSelect.disabled = (state !== "idle");
+    pauseBtn.disabled = (state !== "speaking");
+    resumeBtn.disabled = (state !== "paused");
+    stopBtn.disabled = (state === "idle");
+    if (state === "idle") speechMsg.textContent = "";
+    if (state === "speaking") speechMsg.textContent = "Reading the story aloud...";
+    if (state === "paused") speechMsg.textContent = "Paused.";
+  }
+
+  // Chrome can cut off long text, so we read the story in small pieces.
+  function splitIntoChunks(text) {
+    const sentences = text.replace(/\s+/g, " ").match(/[^.!?]+[.!?]+["')\]]*\s*|[^.!?]+$/g) || [text];
+    const result = [];
+    let current = "";
+    sentences.forEach(function (s) {
+      if ((current + s).length > 200 && current) {
+        result.push(current.trim());
+        current = s;
+      } else {
+        current += s;
+      }
+    });
+    if (current.trim()) result.push(current.trim());
+    return result;
+  }
+
+  function refreshVoices() {
+    availableVoices = window.speechSynthesis.getVoices();
+    const previous = voiceSelect.value;
+    voiceSelect.textContent = "";
+    if (!availableVoices.length) {
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "No voices available yet";
+      voiceSelect.appendChild(option);
+      voiceHelp.textContent = "Waiting for browser voices. Try again in a moment or reload this page.";
+      return;
+    }
+    availableVoices.forEach(function (voice) {
+      const option = document.createElement("option");
+      option.value = voice.voiceURI;
+      option.textContent = voice.name + " — " + voice.lang;
+      voiceSelect.appendChild(option);
+    });
+    const selected = availableVoices.find(function (v) { return v.voiceURI === preferredVoice; }) ||
+      availableVoices.find(function (v) { return v.voiceURI === previous; }) ||
+      availableVoices.find(function (v) { return v.lang === "en-GB"; }) || availableVoices[0];
+    voiceSelect.value = selected.voiceURI;
+    voiceHelp.textContent = preferredVoice && selected.voiceURI !== preferredVoice
+      ? "Your saved voice is unavailable here. Choose and preview another voice."
+      : "These are the voices this browser offers. If Siri Voice 2 is missing, this page cannot select it. Try another voice from the list.";
+  }
+
+  function pickVoice() {
+    return availableVoices.find(function (v) { return v.voiceURI === voiceSelect.value; }) || null;
+  }
+
+  voiceSelect.addEventListener("change", function () {
+    preferredVoice = voiceSelect.value;
+    try {
+      localStorage.setItem(voiceStorageKey, preferredVoice);
+      voiceHelp.textContent = "Voice saved. Click Try this voice to hear it.";
+    } catch (_) {
+      voiceHelp.textContent = "Voice selected for this visit. This browser could not save the choice.";
+    }
+  });
+
+  function speakNextChunk(id) {
+    if (id !== sessionId) return; // this reading was stopped or replaced
+    if (chunkIndex >= chunks.length) { setState("idle"); return; }
+
+    const utterance = new SpeechSynthesisUtterance(chunks[chunkIndex]);
+    const voice = pickVoice();
+    if (voice) { utterance.voice = voice; utterance.lang = voice.lang; } else { utterance.lang = "en-GB"; }
+    utterance.rate = 0.95;
+
+    utterance.onend = function () {
+      if (id !== sessionId) return;
+      chunkIndex += 1;
+      speakNextChunk(id);
+    };
+    utterance.onerror = function (event) {
+      if (id !== sessionId) return;
+      if (event.error === "canceled" || event.error === "interrupted") return;
+      sessionId += 1;
+      setState("idle");
+      speechMsg.textContent = "Sorry, the voice stopped unexpectedly (" + event.error + ").";
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function startSpeaking() {
+    if (!speechSupported) return;
+    startText(currentStory);
+  }
+
+  function startText(text) {
+    if (!speechSupported || !text) return;
+    if (!pickVoice()) refreshVoices();
+    if (!pickVoice()) {
+      voiceHelp.textContent = "No browser voices are available yet. Reload the page and try again.";
+      return;
+    }
+    window.speechSynthesis.cancel();
+    sessionId += 1;
+    chunks = splitIntoChunks(text);
+    chunkIndex = 0;
+    setState("speaking");
+    speakNextChunk(sessionId);
+  }
+
+  function pauseSpeaking() {
+    window.speechSynthesis.pause();
+    setState("paused");
+  }
+
+  function resumeSpeaking() {
+    window.speechSynthesis.resume();
+    setState("speaking");
+  }
+
+  function stopSpeaking() {
+    if (!speechSupported) return;
+    sessionId += 1; // makes any waiting pieces do nothing
+    window.speechSynthesis.cancel();
+    setState("idle");
+  }
+
+  if (!speechSupported) {
+    listenBtn.disabled = true;
+    previewVoice.disabled = true;
+    voiceSelect.disabled = true;
+    voiceHelp.textContent = "This browser does not support narration.";
+    speechMsg.textContent = "Sorry, this browser can't read text aloud. Please use Google Chrome.";
+  } else {
+    previewVoice.addEventListener("click", function () {
+      startText("Welcome to Travel Storyteller. Discover the stories behind the places around you, from the streets of Buxton to somewhere entirely new.");
+    });
+    listenBtn.addEventListener("click", startSpeaking);
+    pauseBtn.addEventListener("click", pauseSpeaking);
+    resumeBtn.addEventListener("click", resumeSpeaking);
+    stopBtn.addEventListener("click", stopSpeaking);
+
+    // Chrome loads its list of voices a moment after the page opens.
+    refreshVoices();
+    window.speechSynthesis.addEventListener("voiceschanged", refreshVoices);
+
+    // Stop talking if the page is closed or refreshed.
+    window.addEventListener("beforeunload", function () { window.speechSynthesis.cancel(); });
+  }
+</script>
+</body>
+</html>
