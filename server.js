@@ -3,7 +3,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const MODEL = "claude-sonnet-5";
 
 if (typeof fetch !== "function") {
@@ -13,7 +13,7 @@ if (typeof fetch !== "function") {
 
 function readApiKey() {
   try {
-    const key = fs.readFileSync(
+    const key = process.evn.ANTHROPIC_API_KEY || fs.readFileSync(
       path.join(__dirname, "api-key.txt"), "utf8"
     ).trim();
     return !key || key.startsWith("PASTE") ? "" : key;
