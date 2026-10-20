@@ -269,3 +269,32 @@ server.listen(PORT, "0.0.0.0", () => {
   );
   console.log("Leave this window open. Press Control+C to stop it.");
 });
+// Password protection for Travel Storyteller
+const originalListeners = server.listeners("request");
+
+server.removeAllListeners("request");
+
+server.on("request", (req, res) => {
+  const password = process.env.APP_PASSWORD;
+
+  if (!password) {
+    res.writeHead(503, { "Content-Type": "text/plain" });
+    return res.end("APP_PASSWORD has not been configured.");
+  }
+
+  const expected = "Basic " + Buffer.from(
+    "traveller:" + password
+  ).toString("base64");
+
+  if (req.headers.authorization !== expected) {
+    res.writeHead(401, {
+      "WWW-Authenticate": 'Basic realm="Travel Storyteller"',
+      "Content-Type": "text/plain"
+    });
+    return res.end("Username and password required.");
+  }
+
+  for (const listener of originalListeners) {
+    listener.call(server, req, res);
+  }
+});
