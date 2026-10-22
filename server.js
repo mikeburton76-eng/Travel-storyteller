@@ -13,7 +13,7 @@ if (typeof fetch !== "function") {
 
 function readApiKey() {
   try {
-    const key = process.evn.ANTHROPIC_API_KEY || fs.readFileSync(
+    const key = process.env.ANTHROPIC_API_KEY || fs.readFileSync(
       path.join(__dirname, "api-key.txt"), "utf8"
     ).trim();
     return !key || key.startsWith("PASTE") ? "" : key;
