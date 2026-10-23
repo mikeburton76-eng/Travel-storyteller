@@ -24,13 +24,13 @@ function readApiKey() {
 
 const WIKI = "https://en.wikipedia.org/w/api.php";
 const WIKI_HEADERS = {
-  "User-Agent": "TravelStoryHelper/0.1 (personal learning project)"
+  "User-Agent": "TravelStoryteller/1.0 (https://github.com/mikeburton76-eng/Travel-storyteller)"
 };
 
 async function wikiSearch(place) {
   const url = `${WIKI}?action=query&list=search&srsearch=${encodeURIComponent(place)}&srlimit=3&format=json`;
   const res = await fetch(url, { headers: WIKI_HEADERS });
-  if (!res.ok) throw new Error("Wikipedia search failed");
+  if (!res.ok) throw new Error(`Wikipedia search failed (HTTP ${res.status}).`);
   const data = await res.json();
   return (data.query?.search || []).map(s => s.title);
 }
@@ -38,7 +38,7 @@ async function wikiSearch(place) {
 async function wikiExtract(title) {
   const url = `${WIKI}?action=query&prop=extracts|info&inprop=url&explaintext=1&redirects=1&titles=${encodeURIComponent(title)}&format=json`;
   const res = await fetch(url, { headers: WIKI_HEADERS });
-  if (!res.ok) throw new Error("Wikipedia page fetch failed");
+  if (!res.ok) throw new Error(`Wikipedia page fetch failed (HTTP ${res.status}).`);
   const data = await res.json();
   const page = Object.values(data.query.pages)[0];
   return {
