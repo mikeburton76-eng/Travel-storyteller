@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Storyteller GPS Test</title></head>
+<body style="font-family:system-ui;padding:24px;max-width:500px;margin:auto">
+<h1>Travel Storyteller — GPS Test</h1>
+<p>This is a separate experiment. Your working Storyteller is unchanged.</p>
+<p>Tap the button to allow Safari to access your location. This test does not send or save your location.</p>
+<button id="start" style="font-size:20px;padding:12px">Start GPS</button>
+<button id="stop" style="font-size:20px;padding:12px" disabled>Stop</button>
+<p id="status" role="status">GPS is off.</p>
+<p id="details"></p>
+<p><small>Test while stationary, not driving. Keep this page open.</small></p>
+<script>
+let watchId = null;
+document.getElementById("start").onclick = () => {
+  if (!navigator.geolocation) { document.getElementById("status").textContent = "GPS unavailable in this browser."; return; }
+  document.getElementById("status").textContent = "Waiting for location permission and GPS…";
+  document.getElementById("start").disabled = true;
+  document.getElementById("stop").disabled = false;
+  watchId = navigator.geolocation.watchPosition(
+    p => {
+      document.getElementById("status").textContent = "GPS is working!";
+      document.getElementById("details").textContent = "Location: " + p.coords.latitude.toFixed(5) + ", " + p.coords.longitude.toFixed(5) + " — accuracy approximately " + Math.round(p.coords.accuracy) + " metres. Updated " + new Date(p.timestamp).toLocaleTimeString("en-GB");
+    },
+    e => { document.getElementById("status").textContent = "Location error: " + e.message; },
+    {enableHighAccuracy:true, maximumAge:10000, timeout:25000}
+  );
+};
+document.getElementById("stop").onclick = () => {
+  if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+  watchId = null;
+  document.getElementById("start").disabled = false;
+  document.getElementById("stop").disabled = true;
+  document.getElementById("status").textContent = "GPS stopped.";
+};
+</script></body></html>
