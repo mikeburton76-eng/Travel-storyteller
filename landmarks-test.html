@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Travel Storyteller — Nearby Landmarks Test</title>
+<style>
+body{margin:0;background:#edf3f5;color:#21313b;font:17px/1.5 -apple-system,BlinkMacSystemFont,Arial,sans-serif}
+main{max-width:600px;margin:auto;padding:25px 20px 70px}
+h1{font: bold 31px Georgia,serif;line-height:1.2}
+.panel{background:white;border-radius:12px;padding:18px;margin:16px 0}
+button{background:#17617c;color:white;border:0;border-radius:9px;font:inherit;padding:12px 16px;margin:5px 6px 5px 0}
+button:disabled{opacity:.45}
+li{margin:12px 0}
+small,.muted{color:#526573}
+#status,#placesStatus{font-weight:600}
+</style>
+</head>
+<body><main>
+<h1>Travel Storyteller — Landmark Test</h1>
+<p>This is a separate GPS experiment. Your working Storyteller remains unchanged.</p>
+<section class="panel"><h2>1. Your GPS location</h2>
+<button id="start">Start GPS</button><button id="stop" disabled>Stop GPS</button>
+<p id="status" role="status">GPS is off.</p><p id="location"></p>
+</section>
+<section class="panel"><h2>2. Interesting places nearby</h2>
+<p>After GPS finds your location, tap the button below. We'll search for named landmarks within about 2 km.</p>
+<p><small>Privacy: tapping Find nearby landmarks sends your current coordinates to the public OpenStreetMap Overpass service. This test doesn't store your location in Storyteller.</small></p>
+<button id="find" disabled>Find nearby landmarks</button>
+<p id="placesStatus" role="status">Waiting for GPS.</p><ol id="places"></ol>
+</section>
+<p><small>Try this while stationary or walking, never while driving. This is an early experiment: landmark listings may be incomplete and aren't verified historical stories.</small></p>
+<script>
+const el = id => document.getElementById(id);
+let watch = null, position = null;
+const radians = n => n * Math.PI / 180;
+function metres(a,b,c,d) {
+ const x = radians(c-a), y = radians(d-b);
+ const h = Math.sin(x/2)**2 + Math.cos(radians(a))*Math.cos(radians(c))*Math.sin(y/2)**2;
+ return Math.round(6371000 * 2 * Math.asin(Math.min(1,Math.sqrt(h))));
+}
+el("start").onclick = () => {
+ if (!navigator.geolocation) { el("status").textContent="This browser doesn't support location."; return; }
+ el("status").textContent="Waiting for GPS permission and location…";
+ el("start").disabled=true; el("stop").disabled=false;
+ watch=navigator.geolocation.watchPosition(p => {
+   position={lat:p.coords.latitude,lon:p.coords.longitude};
+   el("status").textContent="GPS is working!";
+   el("location").textContent="Estimated accuracy: "+Math.round(p.coords.accuracy)+" metres. Updated "+new Date(p.timestamp).toLocaleTimeString("en-GB");
+   el("find").disabled=false;
+   if (!el("places").children.length) el("placesStatus").textContent="Ready to find landmarks.";
+ }, e => {
+   el("status").textContent="GPS problem: "+e.message;
+ }, {enableHighAccuracy:true,maximumAge:10000,timeout:25000});
+};
+el("stop").onclick=()=>{
+ if(watch!==null) navigator.geolocation.clearWatch(watch);
+ watch=null;position=null;el("start").disabled=false;el("stop").disabled=true;el("find").disabled=true;
+ el("status").textContent="GPS stopped.";el("location").textContent="";
+};
+el("find").onclick=async()=>{
+ if(!position)return;
+ const p={...position};el("find").disabled=true;el("placesStatus").textContent="Looking for landmarks…";
+ el("places").replaceChildren();
+ const q='[out:json][timeout:20];(nwr(around:2000,'+p.lat+','+p.lon+')[tourism~"attraction|museum|viewpoint|gallery"];nwr(around:2000,'+p.lat+','+p.lon+')[historic~"monument|castle|ruins|archaeological_site|memorial"];);out center 100;';
+ const controller=new AbortController();
+ const timer=setTimeout(()=>controller.abort(),26000);
+ try {
+  const res=await fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q),{signal:controller.signal});
+  if(!res.ok)throw Error("Service unavailable");
+  const json=await res.json();const named=new Map();
+  for(const item of json.elements||[]) {
+   const name=item.tags?.name;
+   const lat=item.lat??item.center?.lat,lon=item.lon??item.center?.lon;
+   if(!name||!Number.isFinite(lat)||!Number.isFinite(lon))continue;
+   const d=metres(p.lat,p.lon,lat,lon),key=name.toLowerCase();
+   if(!named.has(key)||d<named.get(key).distance)named.set(key,{name,distance:d});
+  }
+  const list=[...named.values()].sort((a,b)=>a.distance-b.distance).slice(0,10);
+  el("placesStatus").textContent=list.length?"Found "+list.length+" nearby places.":"No named landmarks found within 2 km. GPS is still working.";
+  for(const item of list){const li=document.createElement("li");li.textContent=item.name+" — about "+item.distance+" metres away";el("places").appendChild(li);}
+ }catch(err){el("placesStatus").textContent="GPS works, but the landmarks service did not respond. Try again later.";}
+ finally{clearTimeout(timer);el("find").disabled=!position;}
+};
+</script></main></body></html>
