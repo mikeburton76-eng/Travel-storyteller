@@ -40,6 +40,8 @@ a{color:#075a79;font-weight:600}
 const $=id=>document.getElementById(id);
 const categories=[["🏛️","Historic Places"],["🎟️","Things to Do"],["🍽️","Places to Eat"],["🥾","Walks"],["📷","Sightseeing"],["💎","Hidden Gems"],["🎭","Museums & Culture"],["👨‍👩‍👧","Family Activities"]];
 let selected="Historic Places";
+let cardVersion=0;
+const photoCache=new Map();
 const buxton=[
 ["Buxton Crescent","A grand Georgian crescent at the heart of Buxton's spa-town history.","Buxton Crescent","🏛️"],
 ["Buxton Opera House","An Edwardian theatre designed by architect Frank Matcham.","Buxton Opera House","🎭"],
@@ -54,13 +56,14 @@ const buxton=[
 function wiki(q){return "https://en.wikipedia.org/wiki/Special:Search?search="+encodeURIComponent(q)}
 function maps(q){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q)}
 function draw(items,title){
+ const version=++cardVersion;
  $("resultsHeading").textContent=title;$("cards").replaceChildren();
  for(const item of items){
   const [name,description,query,icon,thumb]=item;
   const card=document.createElement("article");card.className="card";
-  const photo=document.createElement("div");photo.className="photo";
-  if(thumb){const img=document.createElement("img");img.src=thumb;img.alt="";img.loading="lazy";img.onerror=()=>{photo.replaceChildren(document.createTextNode(icon||"🏛️"))};photo.append(img)}
-  else photo.textContent=icon||"🏛️";
+  const photo=document.createElement("div");photo.className="photo";photo.dataset.lookup=query||name;
+  if(thumb){const img=document.createElement("img");img.src=thumb;img.alt="";img.loading="lazy";img.decoding="async";img.referrerPolicy="no-referrer";img.onerror=()=>{photo.replaceChildren(document.createTextNode(icon||"🏛️"))};photo.append(img)}
+  else {photo.textContent=icon||"🏛️"; if(photoCache.has(query||name))addPhoto(photo,photoCache.get(query||name),icon)}
   const body=document.createElement("div");body.className="card-body";
   const h=document.createElement("h3");h.textContent=name;
   const p=document.createElement("p");p.textContent=description||"Discover more about this place.";
@@ -69,6 +72,38 @@ function draw(items,title){
   const map=document.createElement("a");map.href=maps(name+", "+($("town").value.trim()||"Buxton"));map.target="_blank";map.rel="noopener";map.textContent="View map ↗";
   links.append(read,map);body.append(h,p,links);card.append(photo,body);$("cards").append(card);
  }
+ if(items===buxton)loadBuxtonPhotos(version);
+}
+function addPhoto(photo,url,icon){
+ if(!url)return;
+ const img=document.createElement("img");
+ img.src=url;img.alt="Photograph of "+photo.dataset.lookup;
+ img.loading="lazy";img.decoding="async";img.referrerPolicy="no-referrer";
+ img.onerror=()=>{photo.replaceChildren(document.createTextNode(icon||"🏛️"))};
+ photo.replaceChildren(img);
+}
+async function loadBuxtonPhotos(version){
+ // Fetch only small image URLs, not image files. The browser lazily loads thumbnails when visible.
+ const titles=buxton.map(item=>item[2]);
+ try{
+  const data=await wikipedia({titles:titles.join("|"),redirects:"1",prop:"pageimages",piprop:"thumbnail",pithumbsize:"360"});
+  const normalized=new Map();
+  for(const n of data.query?.normalized||[])normalized.set(n.from,n.to);
+  for(const n of data.query?.redirects||[])normalized.set(n.from,n.to);
+  const images=new Map();
+  for(const page of Object.values(data.query?.pages||{}))if(page.thumbnail?.source)images.set(page.title,page.thumbnail.source);
+  for(const item of buxton){
+   let title=item[2];const visited=new Set();
+   while(normalized.has(title)&&!visited.has(title)){visited.add(title);title=normalized.get(title)}
+   const url=images.get(title);
+   if(!url)continue;
+   photoCache.set(item[2],url);
+   if(version!==cardVersion)continue;
+   for(const photo of $("cards").querySelectorAll(".photo")){
+    if(photo.dataset.lookup===item[2])addPhoto(photo,url,item[3]);
+   }
+  }
+ }catch(e){/* Keep lightweight icon fallback if Wikipedia is unavailable. */}
 }
 function showCategory(){
  $("categories").replaceChildren();
