@@ -6,8 +6,8 @@
 <section><p>“Hello Mike. Welcome to Buxton.”</p><button id="start">Prepare Isabella</button><button id="cancel" disabled>Cancel</button>
 <p id="status" role="status" aria-live="polite">Ready to begin.</p><p id="detail"></p>
 <audio id="player" controls playsinline hidden></audio>
-<p><small>Use Wi-Fi and keep this page open. The first model download can take a few minutes. When ready, press play below the message.</small></p></section>
-<p><small>Voice check 2 · Kokoro bf_isabella · Your main Travel Storyteller app is unchanged.</small></p></main>
+<p><small>Use Wi-Fi and keep this page open. Speech generation has up to five minutes after the model loads. The first model download can take a few minutes. When ready, press play below the message.</small></p></section>
+<p><small>Voice check 3 · Speech generation limit: 5 minutes · Kokoro bf_isabella · Your main Travel Storyteller app is unchanged.</small></p></main>
 <script>
 const workerSource = "\nlet model;\nself.onmessage = async ({data}) => {\n  try {\n    if (!model) {\n      self.postMessage({type:\"stage\", text:\"Loading the Kokoro speech library…\"});\n      const {KokoroTTS} = await import(\"https://cdn.jsdelivr.net/npm/kokoro-js@1.2.1/dist/kokoro.web.js\");\n      self.postMessage({type:\"stage\", text:\"Downloading and preparing Isabella’s model…\"});\n      model = await KokoroTTS.from_pretrained(\"onnx-community/Kokoro-82M-v1.0-ONNX\", {\n        dtype:\"q8\", device:\"wasm\",\n        progress_callback: p => self.postMessage({type:\"progress\", file:p.file || \"\", progress:p.progress, status:p.status})\n      });\n    }\n    self.postMessage({type:\"generating\"});\n    const audio = await model.generate(data.text, {voice:\"bf_isabella\", speed:0.9});\n    const blob = await audio.toBlob();\n    self.postMessage({type:\"audio\", blob});\n  } catch(e) { self.postMessage({type:\"error\", text:e?.message || String(e)}); }\n};";
 const start = document.getElementById("start"), cancel = document.getElementById("cancel");
@@ -38,7 +38,7 @@ start.onclick=()=>{
       }
       if(data.type==="generating") {
         stage="Creating your short Isabella sample…"; detail.textContent="Model loaded. Generating bf_isabella.";
-        deadline(90000,"The model loaded, but speech generation did not finish within 90 seconds. Please tell Chat."); show();
+        deadline(300000,"The model loaded, but speech generation did not finish within 5 minutes. Please tell Chat."); show();
       }
       if(data.type==="error") { detail.textContent=data.text; fail("Isabella could not finish. Please send the message below to Chat."); }
       if(data.type==="audio") {
