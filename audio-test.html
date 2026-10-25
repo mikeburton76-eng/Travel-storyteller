@@ -1,0 +1,53 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Travel Storyteller — Audio Check</title><style>
+body{margin:0;background:#edf3f5;color:#21313b;font:17px/1.5 -apple-system,BlinkMacSystemFont,Arial,sans-serif}
+main{max-width:600px;margin:auto;padding:25px 18px 65px}h1{font:700 31px Georgia,serif;line-height:1.2}
+.panel{background:white;border-radius:14px;padding:18px;margin:15px 0}
+button{background:#17617c;color:white;border:0;border-radius:9px;padding:13px 16px;font:600 17px system-ui;margin:6px 6px 6px 0}
+button.secondary{background:#51636d}select{width:100%;padding:11px;font:16px system-ui;border:1px solid #a8b6bd;border-radius:9px}
+#status{font-weight:700}#words{padding:15px;background:#e6f0f3;border-radius:10px}
+small,.muted{color:#536873}li{margin:5px 0}
+</style></head><body><main><h1>🔊 Travel Storyteller Audio Check</h1>
+<p>Let's test the iPhone voice while you're safely parked or at home. This is separate from your working Storyteller.</p>
+<div class="panel"><h2>1. Choose a voice</h2><label for="voices">Available English voices on this phone</label><select id="voices"><option value="">Checking voices…</option></select>
+<p class="muted"><small>Voices are provided by your phone. This test doesn't download or store any voice models.</small></p></div>
+<div class="panel"><h2>2. Hear the sample</h2><p id="words">Welcome to Travel Storyteller. As you travel, I'll tell you about interesting places nearby.</p>
+<button id="play">▶ Play test voice</button><button id="stop" class="secondary">■ Stop</button>
+<p id="status" role="status" aria-live="polite">Ready to test.</p>
+<p id="detail" class="muted"></p></div>
+<div class="panel"><h2>3. What happened?</h2>
+<p>If you see <strong>Speaking started</strong> but hear nothing, check your iPhone's audio output (Control Centre → audio output) and whether sound is going to your car or headphones.</p>
+<p>If it says <strong>Speech error</strong> or <strong>No start event</strong>, tell me what appears below.</p>
+<ol id="log"></ol></div>
+<p class="muted"><small>Press Play yourself to authorise audio. No GPS or internet voice service is used in this test. Safari may behave differently if the phone is locked or another app is playing audio.</small></p>
+<script>
+const $=id=>document.getElementById(id);
+const sample=$("words").textContent;
+const synth=window.speechSynthesis;
+let attempt=0,started=false,watchdog=null;
+function note(t){const li=document.createElement("li");li.textContent=new Date().toLocaleTimeString("en-GB")+": "+t;$("log").prepend(li)}
+function status(t,detail=""){$("status").textContent=t;$("detail").textContent=detail;note(t)}
+function voices(){if(!synth){status("Speech unavailable","This browser does not support built-in speech.");return}
+ const available=synth.getVoices().filter(v=>/^en(-|_)/i.test(v.lang));
+ const old=$("voices").value;$("voices").replaceChildren();
+ if(!available.length){const o=new Option("No English voices listed — use default","");$("voices").append(o);return}
+ const preferred=available.find(v=>/en-GB/i.test(v.lang)&&/serena|kate|martha|female|google/i.test(v.name))||available.find(v=>/en-GB/i.test(v.lang))||available[0];
+ for(const v of available){const o=new Option(v.name+" ("+v.lang+")"+(v.localService?" • on-device":""),v.voiceURI);$("voices").append(o)}
+ $("voices").value=available.some(v=>v.voiceURI===old)?old:preferred.voiceURI;
+}
+voices();if(synth)synth.onvoiceschanged=voices;
+$("play").onclick=()=>{
+ if(!synth){status("Speech unavailable");return}
+ const thisAttempt=++attempt;started=false;clearTimeout(watchdog);
+ synth.cancel();
+ const u=new SpeechSynthesisUtterance(sample);u.lang="en-GB";u.rate=.92;u.volume=1;
+ const selected=synth.getVoices().find(v=>v.voiceURI===$("voices").value);
+ if(selected)u.voice=selected;
+ status("Starting speech…","Selected voice: "+(selected?.name||"iPhone default"));
+ u.onstart=()=>{if(thisAttempt!==attempt)return;started=true;status("Speaking started","If you hear nothing, check where the iPhone is sending audio.")};
+ u.onend=()=>{if(thisAttempt!==attempt)return;clearTimeout(watchdog);status("Speech finished","Did you hear the sample?")};
+ u.onerror=e=>{if(thisAttempt!==attempt)return;clearTimeout(watchdog);status("Speech error: "+(e.error||"unknown"),"Try another voice, then press Play again.")};
+ synth.speak(u);
+ watchdog=setTimeout(()=>{if(thisAttempt===attempt&&!started){status("No start event after 8 seconds","The iPhone speech engine has not reported starting. Try a different voice.")}},8000);
+};
+$("stop").onclick=()=>{attempt++;clearTimeout(watchdog);if(synth)synth.cancel();status("Stopped")};
+</script></main></body></html>
