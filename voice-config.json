@@ -1,6 +1,6 @@
 {
   "defaultVoice": "en_GB-southern_english_female-low",
-  "speed": 0.95,
+  "speed": 0.85,
   "voices": {
     "en_GB-southern_english_female-low": "Southern English Female — British English"
   }
