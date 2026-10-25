@@ -1,0 +1,18 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Auto Story Voice Test</title><style>body{font:17px/1.5 system-ui;background:#edf3f5;color:#203440;margin:0}main{max-width:570px;margin:auto;padding:22px}h1{font:700 30px Georgia,serif}.panel{background:white;padding:18px;border-radius:14px;margin:15px 0}button{background:#17617c;color:white;border:0;border-radius:9px;padding:14px;font:600 16px system-ui;margin:5px 0;width:100%}button:disabled{opacity:.45}#words{background:#e7f1f4;padding:15px;border-radius:9px}small{color:#526573}</style></head><body><main><h1>🔊 Automatic Story Test</h1><p>Test automatic landmark narration at home, without driving. Your main Storyteller is unchanged.</p><div class="panel"><h2>Step 1 — Enable audio</h2><button id="enable">Enable Audio</button><p id="status" role="status">Not enabled.</p></div><div class="panel"><h2>Step 2 — Simulate a landmark</h2><button id="simulate" disabled>Simulate Nearby Landmark</button><p id="words">The story will appear here.</p><p id="result" role="status"></p><button id="stop">Stop Speaking</button></div><p><small>This test doesn't use GPS or download any voice models. Your iPhone supplies the voice. The page must remain open for speech to work reliably.</small></p></main><script>
+const $=id=>document.getElementById(id);
+const stories=[["Buxton Crescent","You are near Buxton Crescent, a magnificent Georgian building at the heart of Buxton's spa town history."],["Buxton Opera House","You are near Buxton Opera House, an Edwardian theatre designed by Frank Matcham."],["Poole's Cavern","You are near Poole's Cavern, a spectacular limestone cave shaped over thousands of years."]];
+let next=0,attempt=0;
+function speak(words,label){
+ if(!window.speechSynthesis){$("result").textContent="Speech unavailable.";return}
+ const id=++attempt;speechSynthesis.cancel();$("words").textContent=words;$("result").textContent="Attempting narration for "+label+"…";
+ const u=new SpeechSynthesisUtterance(words);u.lang="en-GB";u.rate=.93;u.volume=1;
+ const vs=speechSynthesis.getVoices();u.voice=vs.find(v=>v.lang.startsWith("en-GB")&&/serena|kate|martha|female|google/i.test(v.name))||vs.find(v=>v.lang.startsWith("en-GB"))||null;
+ u.onstart=()=>{if(id===attempt)$("result").textContent="Speech started: "+label};
+ u.onend=()=>{if(id===attempt)$("result").textContent="Speech finished: "+label};
+ u.onerror=e=>{if(id===attempt)$("result").textContent="Speech error: "+e.error};
+ speechSynthesis.speak(u);
+}
+$("enable").onclick=()=>{$("simulate").disabled=false;$("status").textContent="Audio enabled. Did you hear the short message?";speak("Travel Storyteller audio is ready.","audio check")};
+$("simulate").onclick=()=>{const s=stories[next++%stories.length];speak(s[1],s[0])};
+$("stop").onclick=()=>{attempt++;speechSynthesis?.cancel();$("result").textContent="Stopped."};
+</script></body></html>
