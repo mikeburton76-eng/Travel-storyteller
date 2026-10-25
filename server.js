@@ -2,6 +2,8 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const { createSpeechService } = require("./speech-service");
+const speech = createSpeechService();
 
 const PORT = process.env.PORT || 3000;
 const MODEL = "claude-sonnet-5";
@@ -148,6 +150,33 @@ const storyHistory = new Map();
 const server = http.createServer(async (req, res) => {
   if (req.method === "OPTIONS") {
     return sendJson(res, 204, {});
+  }
+
+  if (req.method === "GET" && req.url === "/voices") {
+    return sendJson(res, 200, speech.config);
+  }
+
+  if (req.method === "GET" && req.url === "/voice-test") {
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+    return res.end(fs.readFileSync(path.join(__dirname, "voice-test.html"), "utf8"));
+  }
+
+  if (req.method === "POST" && req.url === "/speech") {
+    try {
+      const body = JSON.parse(await readBody(req));
+      if (typeof body.text !== "string" || !body.text.trim() || body.text.length > 1800 ||
+          (body.voice !== undefined && !Object.hasOwn(speech.config.voices, body.voice))) {
+        return sendJson(res, 400, { error: "Please provide up to 1,800 characters and a supported narrator." });
+      }
+      const wav = await speech.generate(body.text, body.voice);
+      if (res.destroyed) return;
+      res.writeHead(200, { "Content-Type": "audio/wav", "Content-Length": wav.length, "Cache-Control": "private, no-store" });
+      return res.end(wav);
+    } catch (error) {
+      console.error("Voice error:", error.message);
+      if (res.destroyed) return;
+      return sendJson(res, error.status || 500, { error: "The narrator could not finish. " + error.message });
+    }
   }
 
   // Serve the actual app on the iPhone.

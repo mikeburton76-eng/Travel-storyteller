@@ -46,7 +46,8 @@
   <section id="voiceSettings" aria-label="Narration voice">
     <label for="voiceSelect">Narration voice</label>
     <select id="voiceSelect"><option value="">Loading available voices…</option></select>
-    <button id="previewVoice" type="button">Try this voice</button>
+    <button id="previewVoice" type="button" disabled>Try this voice</button>
+    <audio id="narratorAudio" controls playsinline hidden style="width:100%;margin-top:12px"></audio>
     <p id="voiceHelp" role="status">Choose a voice and try a short sample. Your choice is remembered in this browser when storage is available.</p>
   </section>
 
@@ -55,7 +56,8 @@
 
   <section id="result">
     <div id="story"></div>
-    <p id="note"></p>\n    <button id="moreBtn" type="button" disabled>Tell me more</button>
+    <p id="note"></p>
+    <button id="moreBtn" type="button" disabled>Tell me more</button>
 
     <div id="speech">
       <div class="controls">
@@ -80,7 +82,7 @@
   // ============================================================
 
   // The address of the helper running on your computer.
-  const HELPER_URL = "http://localhost:3000/story";
+  const HELPER_URL = "/story";
 
   const placeInput = document.getElementById("place");
   const goButton = document.getElementById("go");
@@ -113,7 +115,7 @@
       const response = await fetch(HELPER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ place: place })
+        body: JSON.stringify({ place: place, reset: true })
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Something went wrong.");
@@ -150,7 +152,7 @@
       statusBox.textContent = "";
       errorBox.style.display = "block";
       errorBox.textContent = (e instanceof TypeError)
-        ? "Can't reach the helper. Check that Terminal is still running 'node server.js'."
+        ? "Could not reach Travel Storyteller. Please try again shortly."
         : e.message;
     } finally {
       goButton.disabled = false;
@@ -178,11 +180,11 @@
         return;
       }
       currentStory = extra;
-      fullStory += "\\n\\n" + extra;
+      fullStory += "\n\n" + extra;
       const heading = document.createElement("h2");
       heading.textContent = "More about " + activePlace;
       storyBox.appendChild(heading);
-      extra.split(/\\n\\s*\\n/).forEach(function (text) {
+      extra.split(/\n\s*\n/).forEach(function (text) {
         const p = document.createElement("p");
         p.textContent = text;
         storyBox.appendChild(p);
@@ -215,180 +217,73 @@
   // PART 2: Read the story aloud (new)
   // ============================================================
 
-  const listenBtn = document.getElementById("listenBtn");
-  const pauseBtn = document.getElementById("pauseBtn");
-  const resumeBtn = document.getElementById("resumeBtn");
-  const stopBtn = document.getElementById("stopBtn");
-  const voiceSelect = document.getElementById("voiceSelect");
-  const previewVoice = document.getElementById("previewVoice");
-  const voiceHelp = document.getElementById("voiceHelp");
-  const voiceStorageKey = "travelStoryteller.voiceURI";
-  let preferredVoice = "";
-  try { preferredVoice = localStorage.getItem(voiceStorageKey) || ""; } catch (_) {}
-  let availableVoices = [];
-  const speechMsg = document.getElementById("speechMsg");
-
-  const speechSupported = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
-
-  let sessionId = 0; // changes every time we start or stop, so old callbacks are ignored
-  let chunks = [];
-  let chunkIndex = 0;
-
-  // Show the right buttons for each state: "idle", "speaking" or "paused"
-  function setState(state) {
-    listenBtn.disabled = (state !== "idle");
-    previewVoice.disabled = (state !== "idle");
-    voiceSelect.disabled = (state !== "idle");
-    pauseBtn.disabled = (state !== "speaking");
-    resumeBtn.disabled = (state !== "paused");
-    stopBtn.disabled = (state === "idle");
-    if (state === "idle") speechMsg.textContent = "";
-    if (state === "speaking") speechMsg.textContent = "Reading the story aloud...";
-    if (state === "paused") speechMsg.textContent = "Paused.";
+  const listenBtn = document.getElementById('listenBtn');
+  const pauseBtn = document.getElementById('pauseBtn');
+  const resumeBtn = document.getElementById('resumeBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const voiceSelect = document.getElementById('voiceSelect');
+  const previewVoice = document.getElementById('previewVoice');
+  const voiceHelp = document.getElementById('voiceHelp');
+  const speechMsg = document.getElementById('speechMsg');
+  const audio = document.getElementById('narratorAudio');
+  let request, token = 0, audioURL, voiceReady = false, state = 'idle';
+  function setState(next) {
+    state = next;
+    listenBtn.disabled = next !== 'idle' || !voiceReady;
+    previewVoice.disabled = next !== 'idle' || !voiceReady;
+    voiceSelect.disabled = next !== 'idle' || !voiceReady;
+    pauseBtn.disabled = next !== 'speaking';
+    resumeBtn.disabled = next !== 'paused';
+    stopBtn.disabled = next === 'idle';
   }
-
-  // Chrome can cut off long text, so we read the story in small pieces.
-  function splitIntoChunks(text) {
-    const sentences = text.replace(/\s+/g, " ").match(/[^.!?]+[.!?]+["')\]]*\s*|[^.!?]+$/g) || [text];
-    const result = [];
-    let current = "";
-    sentences.forEach(function (s) {
-      if ((current + s).length > 200 && current) {
-        result.push(current.trim());
-        current = s;
-      } else {
-        current += s;
-      }
-    });
-    if (current.trim()) result.push(current.trim());
-    return result;
-  }
-
-  function refreshVoices() {
-    availableVoices = window.speechSynthesis.getVoices();
-    const previous = voiceSelect.value;
-    voiceSelect.textContent = "";
-    if (!availableVoices.length) {
-      const option = document.createElement("option");
-      option.value = "";
-      option.textContent = "No voices available yet";
-      voiceSelect.appendChild(option);
-      voiceHelp.textContent = "Waiting for browser voices. Try again in a moment or reload this page.";
-      return;
-    }
-    availableVoices.forEach(function (voice) {
-      const option = document.createElement("option");
-      option.value = voice.voiceURI;
-      option.textContent = voice.name + " — " + voice.lang;
-      voiceSelect.appendChild(option);
-    });
-    const selected = availableVoices.find(function (v) { return v.voiceURI === preferredVoice; }) ||
-      availableVoices.find(function (v) { return v.voiceURI === previous; }) ||
-      availableVoices.find(function (v) { return v.lang === "en-GB"; }) || availableVoices[0];
-    voiceSelect.value = selected.voiceURI;
-    voiceHelp.textContent = preferredVoice && selected.voiceURI !== preferredVoice
-      ? "Your saved voice is unavailable here. Choose and preview another voice."
-      : "These are the voices this browser offers. If Siri Voice 2 is missing, this page cannot select it. Try another voice from the list.";
-  }
-
-  function pickVoice() {
-    return availableVoices.find(function (v) { return v.voiceURI === voiceSelect.value; }) || null;
-  }
-
-  voiceSelect.addEventListener("change", function () {
-    preferredVoice = voiceSelect.value;
-    try {
-      localStorage.setItem(voiceStorageKey, preferredVoice);
-      voiceHelp.textContent = "Voice saved. Click Try this voice to hear it.";
-    } catch (_) {
-      voiceHelp.textContent = "Voice selected for this visit. This browser could not save the choice.";
-    }
-  });
-
-  function speakNextChunk(id) {
-    if (id !== sessionId) return; // this reading was stopped or replaced
-    if (chunkIndex >= chunks.length) { setState("idle"); return; }
-
-    const utterance = new SpeechSynthesisUtterance(chunks[chunkIndex]);
-    const voice = pickVoice();
-    if (voice) { utterance.voice = voice; utterance.lang = voice.lang; } else { utterance.lang = "en-GB"; }
-    utterance.rate = 0.95;
-
-    utterance.onend = function () {
-      if (id !== sessionId) return;
-      chunkIndex += 1;
-      speakNextChunk(id);
-    };
-    utterance.onerror = function (event) {
-      if (id !== sessionId) return;
-      if (event.error === "canceled" || event.error === "interrupted") return;
-      sessionId += 1;
-      setState("idle");
-      speechMsg.textContent = "Sorry, the voice stopped unexpectedly (" + event.error + ").";
-    };
-
-    window.speechSynthesis.speak(utterance);
-  }
-
-  function startSpeaking() {
-    if (!speechSupported) return;
-    startText(currentStory);
-  }
-
-  function startText(text) {
-    if (!speechSupported || !text) return;
-    if (!pickVoice()) refreshVoices();
-    if (!pickVoice()) {
-      voiceHelp.textContent = "No browser voices are available yet. Reload the page and try again.";
-      return;
-    }
-    window.speechSynthesis.cancel();
-    sessionId += 1;
-    chunks = splitIntoChunks(text);
-    chunkIndex = 0;
-    setState("speaking");
-    speakNextChunk(sessionId);
-  }
-
-  function pauseSpeaking() {
-    window.speechSynthesis.pause();
-    setState("paused");
-  }
-
-  function resumeSpeaking() {
-    window.speechSynthesis.resume();
-    setState("speaking");
-  }
-
   function stopSpeaking() {
-    if (!speechSupported) return;
-    sessionId += 1; // makes any waiting pieces do nothing
-    window.speechSynthesis.cancel();
-    setState("idle");
+    token++; request?.abort(); request = null; audio.pause();
+    audio.removeAttribute('src'); audio.load(); audio.hidden = true;
+    if (audioURL) URL.revokeObjectURL(audioURL); audioURL = null;
+    setState('idle'); speechMsg.textContent = '';
   }
-
-  if (!speechSupported) {
-    listenBtn.disabled = true;
-    previewVoice.disabled = true;
-    voiceSelect.disabled = true;
-    voiceHelp.textContent = "This browser does not support narration.";
-    speechMsg.textContent = "Sorry, this browser can't read text aloud. Please use Google Chrome.";
-  } else {
-    previewVoice.addEventListener("click", function () {
-      startText("Welcome to Travel Storyteller. Discover the stories behind the places around you, from the streets of Buxton to somewhere entirely new.");
-    });
-    listenBtn.addEventListener("click", startSpeaking);
-    pauseBtn.addEventListener("click", pauseSpeaking);
-    resumeBtn.addEventListener("click", resumeSpeaking);
-    stopBtn.addEventListener("click", stopSpeaking);
-
-    // Chrome loads its list of voices a moment after the page opens.
-    refreshVoices();
-    window.speechSynthesis.addEventListener("voiceschanged", refreshVoices);
-
-    // Stop talking if the page is closed or refreshed.
-    window.addEventListener("beforeunload", function () { window.speechSynthesis.cancel(); });
+  async function startText(text) {
+    if (!text || !voiceReady) return;
+    stopSpeaking(); const id = token;
+    const controller = request = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 190000);
+    setState('loading');
+    voiceHelp.textContent = 'Preparing your narrator…';
+    speechMsg.textContent = 'Creating narration on the server…';
+    try {
+      const response = await fetch('/speech', { method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({text,voice:voiceSelect.value}), signal:controller.signal });
+      if (!response.ok) { const data=await response.json(); throw Error(data.error || 'Narration failed.'); }
+      const blob = await response.blob(); if (id !== token) return;
+      audioURL = URL.createObjectURL(blob); audio.src = audioURL; audio.hidden = false;
+      voiceHelp.textContent = 'Narrator: '+voiceSelect.options[voiceSelect.selectedIndex].text+'.';
+      try { await audio.play(); if (id === token) setState('speaking'); }
+      catch (_) { if(id === token) { setState('idle'); speechMsg.textContent='Narration is ready. Press play on the audio player above.'; } }
+    } catch (error) {
+      if (id !== token) return;
+      setState('idle');
+      const message=error.name === 'AbortError' ? 'The narration request timed out. Please try again.' : error.message;
+      voiceHelp.textContent=message; speechMsg.textContent=message;
+    } finally { clearTimeout(timer); if (id === token) request=null; }
   }
+  audio.addEventListener('playing',()=>{setState('speaking');speechMsg.textContent='Reading the story aloud…';});
+  audio.addEventListener('pause',()=>{if(state==='speaking'&&!audio.ended){setState('paused');speechMsg.textContent='Paused.';}});
+  audio.addEventListener('ended',()=>{setState('idle');speechMsg.textContent='Finished.';});
+  audio.addEventListener('error',()=>{if(audio.getAttribute('src')){setState('idle');voiceHelp.textContent='The audio could not play. Please try again.';}});
+  previewVoice.addEventListener('click',()=>startText('Hello Mike. Welcome to Buxton.'));
+  listenBtn.addEventListener('click',()=>startText(currentStory));
+  pauseBtn.addEventListener('click',()=>audio.pause());
+  resumeBtn.addEventListener('click',()=>audio.play().catch(()=>{speechMsg.textContent='Press play on the audio player above.';}));
+  stopBtn.addEventListener('click',stopSpeaking);
+  voiceSelect.addEventListener('change',()=>{try{localStorage.setItem('travelStoryteller.narrator',voiceSelect.value);}catch(_){}voiceHelp.textContent='Narrator saved. Tap Try this voice to listen.';});
+  setState('idle');
+  fetch('/voices').then(response=>{if(!response.ok)throw Error('Could not load narrators.');return response.json();}).then(config=>{
+    voiceSelect.replaceChildren();for(const [id,name]of Object.entries(config.voices))voiceSelect.add(new Option(name,id));
+    let saved;try{saved=localStorage.getItem('travelStoryteller.narrator');}catch(_){}
+    voiceSelect.value=Object.hasOwn(config.voices,saved)?saved:config.defaultVoice;
+    voiceReady=true;setState('idle');voiceHelp.textContent='Choose a narrator. Your selection is remembered on this device.';
+  }).catch(error=>{voiceHelp.textContent=error.message;});
+  window.addEventListener('pagehide',stopSpeaking);
 </script>
 </body>
 </html>

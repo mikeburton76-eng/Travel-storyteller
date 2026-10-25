@@ -1,0 +1,19 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Isabella — server voice test</title><style>body{background:#edf3f5;color:#203440;font:17px/1.5 system-ui;margin:0}main{max-width:560px;margin:auto;padding:28px 20px}h1{font:700 32px Georgia}section{background:white;border-radius:14px;padding:20px}button,select{font:inherit;padding:12px;border-radius:8px;margin:8px 0}button{background:#17617c;color:white;border:0}button:disabled{opacity:.5}audio{width:100%}#detail{overflow-wrap:anywhere}</style></head><body><main><h1>Isabella, ready to travel</h1><section><label for="voice">Narrator</label><select id="voice"><option value="bf_isabella">Isabella — British English</option></select><p>“Hello Mike. Welcome to Buxton.”</p><button id="prepare">Prepare voice sample</button><button id="cancel" disabled>Cancel</button><p id="message" role="status">The server creates the audio. Your phone just plays it.</p><audio id="audio" controls playsinline hidden></audio><p id="detail"></p></section></main><script>
+const voice=document.getElementById('voice'), button=document.getElementById('prepare'), cancel=document.getElementById('cancel'), message=document.getElementById('message'), audio=document.getElementById('audio'), detail=document.getElementById('detail');
+let controller, url, token=0;
+fetch('/voices').then(r=>{if(!r.ok)throw Error('Could not load narrator list.');return r.json()}).then(config=>{voice.replaceChildren();for(const [id,name]of Object.entries(config.voices))voice.add(new Option(name,id));voice.value=config.defaultVoice;}).catch(e=>{detail.textContent=e.message});
+button.onclick=async()=>{
+ const id=++token; controller=new AbortController(); const request=controller;
+ button.disabled=true;voice.disabled=true;cancel.disabled=false;audio.pause();audio.hidden=true;
+ message.textContent='Creating your sample on the server…';detail.textContent='The first request needs to load the voice model.';
+ const timeout=setTimeout(()=>request.abort(),190000);
+ try{const r=await fetch('/speech',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:'Hello Mike. Welcome to Buxton.',voice:voice.value}),signal:request.signal});
+ if(!r.ok){const d=await r.json();throw Error(d.error||'Voice request failed.');}
+ const blob=await r.blob();if(id!==token)return;
+ if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(blob);audio.src=url;audio.hidden=false;message.textContent='Your sample is ready. Press play.';detail.textContent='Created on the server using '+voice.options[voice.selectedIndex].text+'.';
+ }catch(e){if(id===token){message.textContent=e.name==='AbortError'?'Request stopped. You can try again.':'The server could not create the voice.';detail.textContent=e.name==='AbortError'?'':e.message;}}
+ finally{clearTimeout(timeout);if(id===token){button.disabled=false;voice.disabled=false;cancel.disabled=true;controller=null;}}
+};
+cancel.onclick=()=>{token++;controller?.abort();controller=null;button.disabled=false;voice.disabled=false;cancel.disabled=true;message.textContent='Cancelled.';};
+window.addEventListener('pagehide',()=>{token++;controller?.abort();audio.pause();if(url)URL.revokeObjectURL(url);});
+</script></body></html>

@@ -1,0 +1,4 @@
+node_modules/
+.voice-model/
+api-key.txt
+*.wav

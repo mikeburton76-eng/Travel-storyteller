@@ -1,0 +1,10 @@
+{
+  "defaultVoice": "bf_isabella",
+  "speed": 0.9,
+  "voices": {
+    "bf_isabella": "Isabella — British English",
+    "bf_emma": "Emma — British English",
+    "bf_alice": "Alice — British English",
+    "bf_lily": "Lily — British English"
+  }
+}

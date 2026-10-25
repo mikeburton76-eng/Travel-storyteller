@@ -3,6 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "postinstall": "node scripts/prepare-voice.mjs",
+    "prepare:voice": "node scripts/prepare-voice.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "3.8.1",
+    "kokoro-js": "1.2.1"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
