@@ -16,7 +16,7 @@ test('reject unsupported voices, cap concurrency, cache completed audio', async 
     await assert.rejects(service.generate('x'.repeat(1801)), /1,800/);
     const first = service.generate('Hello');
     await assert.rejects(service.generate('Another story'), /another request/);
-    assert.equal(worker.task.voice, 'bf_isabella');
+    assert.equal(worker.task.voice, 'en_GB-southern_english_female-low');
     const wav = Buffer.from('RIFF test fixture');
     worker.emit('message', { id: worker.task.id, wav });
     assert.deepEqual(await first, wav);

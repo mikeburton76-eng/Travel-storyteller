@@ -1,9 +1,8 @@
-const { Worker } = require('node:worker_threads');
-const path = require('node:path');
+const { PythonVoiceWorker } = require('./python-voice-worker');
 const crypto = require('node:crypto');
 const config = require('./voice-config.json');
 
-function createSpeechService({ makeWorker = () => new Worker(path.join(__dirname, 'voice-worker.mjs')), timeoutMs = 180000 } = {}) {
+function createSpeechService({ makeWorker = () => new PythonVoiceWorker(), timeoutMs = 180000 } = {}) {
   let worker, pending, idleTimer, nextId = 0;
   const cache = new Map();
   let cacheBytes = 0;
@@ -30,8 +29,8 @@ function createSpeechService({ makeWorker = () => new Worker(path.join(__dirname
         }
         cache.set(task.key, wav); cacheBytes += wav.length;
       }
+      stop(); // Each speech process exits after one story, releasing its model.
       task.resolve(wav);
-      idleTimer = setTimeout(stop, 120000); idleTimer.unref();
     });
     current.on('error', error => { if (current === worker) fail(error); });
     current.on('exit', code => { if (current === worker) fail(new Error('The voice process stopped (exit ' + code + ').')); });

@@ -1,0 +1,7 @@
+.git
+node_modules
+.voice-model
+.piper-model
+.piper-python
+api-key.txt
+*.wav

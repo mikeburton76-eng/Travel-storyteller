@@ -1,10 +1,7 @@
 {
-  "defaultVoice": "bf_isabella",
-  "speed": 0.9,
+  "defaultVoice": "en_GB-southern_english_female-low",
+  "speed": 0.95,
   "voices": {
-    "bf_isabella": "Isabella — British English",
-    "bf_emma": "Emma — British English",
-    "bf_alice": "Alice — British English",
-    "bf_lily": "Lily — British English"
+    "en_GB-southern_english_female-low": "Southern English Female — British English"
   }
 }

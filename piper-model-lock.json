@@ -1,0 +1,10 @@
+{
+  "repository": "rhasspy/piper-voices",
+  "revision": "1af0d6b01d3dbe698a426f0c3424650ef77fc131",
+  "directory": "en/en_GB/southern_english_female/low",
+  "files": {
+    "en_GB-southern_english_female-low.onnx": "f2f37aed1b3a093476f719d1379ba0c0b1b1cf6f1ef99288e2ebf502971a07c3",
+    "en_GB-southern_english_female-low.onnx.json": "a1af43310f8756161506e849a2863d342a98b0853af9e2437581d39e9922d0e5",
+    "MODEL_CARD": "41a64585a49d46362042b1a01b0a4b54127518eb50063c45846e2703e5790260"
+  }
+}
