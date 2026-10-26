@@ -1,9 +1,10 @@
 const { PythonVoiceWorker } = require('./python-voice-worker');
 const crypto = require('node:crypto');
 const config = require('./voice-config.json');
+const settings = require('./speech-settings.json');
 
-function createSpeechService({ makeWorker = () => new PythonVoiceWorker(), timeoutMs = 180000 } = {}) {
-  let worker, pending, idleTimer, nextId = 0;
+function createSpeechService({ makeWorker = () => new PythonVoiceWorker(), timeoutMs = 180000, idleMs = Math.max(0, Math.min(300, Number(settings.keepWarmSeconds) || 0)) * 1000 } = {}) {
+  let worker, pending, idleTimer, startupTimer, nextId = 0;
   const cache = new Map();
   let cacheBytes = 0;
   function remember(key, entry) {
@@ -16,8 +17,15 @@ function createSpeechService({ makeWorker = () => new PythonVoiceWorker(), timeo
   }
   function stop() {
     clearTimeout(idleTimer);
+    clearTimeout(startupTimer);
     const old = worker; worker = null;
     if (old) old.terminate();
+  }
+  function idle() {
+    clearTimeout(idleTimer);
+    if (idleMs <= 0) { stop(); return; }
+    idleTimer = setTimeout(stop, idleMs);
+    idleTimer.unref?.();
   }
   function fail(error) {
     if (pending) { clearTimeout(pending.timer); pending.cleanup(); pending.reject(error); pending = null; }
@@ -26,6 +34,16 @@ function createSpeechService({ makeWorker = () => new PythonVoiceWorker(), timeo
   function ensureWorker() {
     if (worker) return;
     const current = worker = makeWorker();
+    startupTimer = setTimeout(() => {
+      if (worker === current) fail(new Error('Voice preparation took too long on this server.'));
+    }, timeoutMs);
+    startupTimer.unref?.();
+    current.on('ready', data => {
+      if (current !== worker) return;
+      clearTimeout(startupTimer);
+      console.log('Voice engine ready; load seconds:', data?.loadSeconds);
+      if (!pending) idle();
+    });
     current.on('chunk', data => {
       if (current !== worker || !pending || data.id !== pending.id || !pending.onChunk) return;
       try {
@@ -42,11 +60,11 @@ function createSpeechService({ makeWorker = () => new PythonVoiceWorker(), timeo
       if (task.onChunk) {
         if (!task.sections.length) { stop(); task.reject(new Error('The narrator returned no audio.')); return; }
         remember(task.key, { sections: task.sections, bytes: task.bytes });
-        stop(); task.resolve(); return;
+        idle(); task.resolve(); return;
       }
       const wav = Buffer.from(data.wav);
       remember(task.key, { wav, bytes: wav.length });
-      stop(); // Each speech process exits after one story, releasing its model.
+      idle(); // Reuse briefly; release the model after inactivity.
       task.resolve(wav);
     });
     current.on('error', error => { if (current === worker) fail(error); });
@@ -74,9 +92,15 @@ function createSpeechService({ makeWorker = () => new PythonVoiceWorker(), timeo
       const cleanup = () => signal?.removeEventListener('abort', abort);
       pending = { id, key, resolve, reject, onChunk, cleanup, sections: [], bytes: 0, timer: setTimeout(() => fail(new Error('Voice generation took too long on this server.')), timeoutMs) };
       signal?.addEventListener('abort', abort, { once: true });
-      worker.postMessage({ id, text: text.trim(), voice, speed: config.speed, stream: !!onChunk });
+      try { worker.postMessage({ id, text: text.trim(), voice, speed: config.speed, stream: !!onChunk }); }
+      catch (error) { fail(error); }
     });
   }
-  return { generate, close: () => fail(new Error('Voice service closed.')), config };
+  function warm() {
+    ensureWorker();
+    // Warmup starts on real story requests, never a keep-alive ping.
+    if (worker.ready && !pending) idle();
+  }
+  return { generate, warm, close: () => fail(new Error('Voice service closed.')), config };
 }
 module.exports = { createSpeechService };

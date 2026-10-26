@@ -1,0 +1,4 @@
+{
+  "prewarmDuringStory": true,
+  "keepWarmSeconds": 120
+}

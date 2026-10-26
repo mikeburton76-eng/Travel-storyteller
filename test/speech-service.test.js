@@ -68,6 +68,65 @@ test('stream delivers the opening section before completion and cancellation fre
   workers[1].emit('message', { id: workers[1].task.id, done: true });
   await next;
   assert.deepEqual(sections, ['first', 'next']);
-  assert.equal(workers[1].terminated, true);
+  assert.notEqual(workers[1].terminated, true);
+  service.close();
+});
+
+test('preparation overlaps other work and sequential new stories reuse one engine', async () => {
+  const workers = [];
+  const service = createSpeechService({ makeWorker: () => { const w = new FakeWorker(); workers.push(w); return w; } });
+  try {
+    service.warm(); service.warm();
+    assert.equal(workers.length, 1);
+    assert.equal(workers[0].task, undefined, 'warmup must not invent narration');
+    workers[0].emit('ready', { loadSeconds: 1 });
+    const first = service.generate('First uncached story');
+    const firstId = workers[0].task.id;
+    workers[0].emit('message', { id: firstId, wav: Buffer.from('first') });
+    await first;
+    assert.notEqual(workers[0].terminated, true);
+    const second = service.generate('Second uncached story');
+    assert.equal(workers.length, 1);
+    workers[0].emit('message', { id: firstId, wav: Buffer.from('stale') });
+    workers[0].emit('message', { id: workers[0].task.id, wav: Buffer.from('second') });
+    assert.equal((await second).toString(), 'second');
+  } finally { service.close(); }
+});
+
+test('idle model is released and the next story gets a fresh engine', async () => {
+  const workers = [];
+  const service = createSpeechService({ makeWorker: () => { const w = new FakeWorker(); workers.push(w); return w; }, idleMs: 15 });
+  try {
+    service.warm(); workers[0].emit('ready');
+    await new Promise(resolve => setTimeout(resolve, 30));
+    assert.equal(workers[0].terminated, true);
+    const pending = service.generate('Fresh story');
+    assert.equal(workers.length, 2);
+    workers[1].emit('message', { id: workers[1].task.id, wav: Buffer.from('fresh') });
+    await pending;
+  } finally { service.close(); }
+});
+
+test('warmup errors and timeouts do not prevent a later narration retry', async () => {
+  const workers = [];
+  const service = createSpeechService({ makeWorker: () => { const w = new FakeWorker(); workers.push(w); return w; }, timeoutMs: 15 });
+  try {
+    service.warm(); workers[0].emit('error', Error('model loading failed'));
+    service.warm();
+    await new Promise(resolve => setTimeout(resolve, 30));
+    assert.equal(workers[1].terminated, true);
+    const pending = service.generate('Retry after warmup failure');
+    workers[2].emit('message', { id: workers[2].task.id, wav: Buffer.from('retry') });
+    assert.equal((await pending).toString(), 'retry');
+  } finally { service.close(); }
+});
+
+test('setting idle retention to zero restores per-story model release', async () => {
+  const worker = new FakeWorker();
+  const service = createSpeechService({ makeWorker: () => worker, idleMs: 0 });
+  const pending = service.generate('No retention');
+  worker.emit('message', { id: worker.task.id, wav: Buffer.from('audio') });
+  await pending;
+  assert.equal(worker.terminated, true);
   service.close();
 });

@@ -1,4 +1,4 @@
-"""Generate one story offline, then exit to release model memory."""
+"""Offline Piper synthesis; optional worker reuses one model until the parent stops it."""
 import hashlib
 import base64
 import io
@@ -37,15 +37,7 @@ def chunks(text, limit=180, opening_limit=None):
             cap = limit
 
 
-def generate(request, emit=None):
-    text, name, speed = request["text"], request["voice"], request["speed"]
-    config = json.loads((ROOT / "voice-config.json").read_text())
-    if not isinstance(text, str) or not text.strip() or len(text) > 1800:
-        raise ValueError("Invalid narration length.")
-    if name not in config["voices"]:
-        raise ValueError("Unsupported narrator.")
-    if not isinstance(speed, (int, float)) or not 0.5 <= speed <= 2:
-        raise ValueError("Invalid narration speed.")
+def load_voice(name):
     lock = json.loads((ROOT / "piper-model-lock.json").read_text())
     for filename, expected in lock["files"].items():
         with open(ROOT / ".piper-model" / filename, "rb") as stream:
@@ -59,6 +51,19 @@ def generate(request, emit=None):
     options.inter_op_num_threads = 1
     voice = PiperVoice(session=ort.InferenceSession(str(model), options, providers=["CPUExecutionProvider"]),
                        config=PiperConfig.from_dict(settings))
+    return voice, settings
+
+
+def generate(request, emit=None, prepared=None):
+    text, name, speed = request["text"], request["voice"], request["speed"]
+    config = json.loads((ROOT / "voice-config.json").read_text())
+    if not isinstance(text, str) or not text.strip() or len(text) > 1800:
+        raise ValueError("Invalid narration length.")
+    if name not in config["voices"]:
+        raise ValueError("Unsupported narrator.")
+    if not isinstance(speed, (int, float)) or not 0.5 <= speed <= 2:
+        raise ValueError("Invalid narration speed.")
+    voice, settings = prepared if prepared else load_voice(name)
     result = io.BytesIO()
     with wave.open(result, "wb") as wav:
         wav.setnchannels(1)
@@ -81,18 +86,58 @@ def generate(request, emit=None):
     return result.getvalue()
 
 
+def run_worker():
+    config = json.loads((ROOT / "voice-config.json").read_text())
+    name = config["defaultVoice"]
+    prepared = load_voice(name)
+    print(json.dumps({"ready": True, "load_seconds": round(time.monotonic() - started, 3),
+                      "peak_rss_bytes": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024}), flush=True)
+    while True:
+        line = sys.stdin.buffer.readline(12001)
+        if not line:
+            return
+        if len(line) > 12000 or not line.endswith(b"\n"):
+            raise ValueError("Voice request is too large.")
+        request = json.loads(line)
+        task_id = request["id"]
+        try:
+            if request["voice"] not in config["voices"]:
+                raise ValueError("Unsupported narrator.")
+            if request["voice"] != name:
+                # Retain only the chosen model, even if another voice is added later.
+                prepared = None
+                name = request["voice"]
+                prepared = load_voice(name)
+            begin = time.monotonic()
+            def emit(section):
+                print(json.dumps({"id": task_id, "wav": base64.b64encode(section).decode("ascii")}), flush=True)
+            wav = generate(request, emit if request.get("stream") else None, prepared)
+            if not request.get("stream"):
+                emit(wav)
+            print(json.dumps({"id": task_id, "done": True,
+                              "peak_rss_bytes": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024}), flush=True)
+            print(json.dumps({"generation_seconds": round(time.monotonic() - begin, 3),
+                              "peak_rss_mib": round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024, 1)}), file=sys.stderr, flush=True)
+        except Exception as error:
+            print(json.dumps({"id": task_id, "error": str(error)}), flush=True)
+            raise
+
+
 if __name__ == "__main__":
     try:
-        request = json.loads(sys.stdin.buffer.read(12000))
-        def emit(section):
-            print(json.dumps({"wav": base64.b64encode(section).decode("ascii")}), flush=True)
-        wav = generate(request, emit if request.get("stream") else None)
-        print(json.dumps({"generation_seconds": round(time.monotonic() - started, 3),
-                          "peak_rss_mib": round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024, 1)}), file=sys.stderr)
-        if request.get("stream"):
-            print(json.dumps({"done": True}), flush=True)
+        if "--worker" in sys.argv:
+            run_worker()
         else:
-            sys.stdout.buffer.write(wav)
+            request = json.loads(sys.stdin.buffer.read(12000))
+            def emit(section):
+                print(json.dumps({"wav": base64.b64encode(section).decode("ascii")}), flush=True)
+            wav = generate(request, emit if request.get("stream") else None)
+            print(json.dumps({"generation_seconds": round(time.monotonic() - started, 3),
+                              "peak_rss_mib": round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024, 1)}), file=sys.stderr)
+            if request.get("stream"):
+                print(json.dumps({"done": True}), flush=True)
+            else:
+                sys.stdout.buffer.write(wav)
     except Exception as error:
         print("Local voice error: " + str(error), file=sys.stderr)
         sys.exit(1)

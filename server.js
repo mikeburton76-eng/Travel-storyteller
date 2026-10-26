@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const { createSpeechService } = require("./speech-service");
 const speech = createSpeechService();
+const speechSettings = require('./speech-settings.json');
 
 const PORT = process.env.PORT || 3000;
 const MODEL = "claude-sonnet-5";
@@ -250,6 +251,11 @@ const server = http.createServer(async (req, res) => {
       }
 
       console.log("Looking up:", place);
+      // Start the replaceable speech engine while facts and prose are prepared.
+      // Failure here must not stop the written story; synthesis can retry later.
+      if (speechSettings.prewarmDuringStory) {
+        try { speech.warm(); } catch (error) { console.warn('Voice preparation:', error.message); }
+      }
       const sources = await gatherSources(place);
 
       if (sources.length === 0) {
