@@ -21,6 +21,8 @@ input{font:16px system-ui;padding:12px;width:100%;border:1px solid #9cabb3;borde
 .links{display:flex;gap:8px;flex-wrap:wrap;font-size:13px}
 a{color:#075a79;font-weight:600}
 #status{font-weight:600}.hidden{display:none}
+.photo{width:100%;border:0;padding:0;cursor:pointer;color:inherit;font-family:inherit;flex-shrink:0}.card-title{border:0;padding:0;background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}.card p,.reading p{white-space:normal;overflow-wrap:anywhere}.photo:focus-visible,.card-title:focus-visible{outline:3px solid #17617c;outline-offset:-3px}
+dialog.reading{border:0;border-radius:18px;width:calc(100% - 24px);max-width:650px;max-height:88vh;max-height:88dvh;padding:0;color:#23343e;background:#fff;overflow:auto;overscroll-behavior:contain}dialog::backdrop{background:rgba(15,30,40,.65)}.reading-head{position:sticky;top:0;background:#fff;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 20px;border-bottom:1px solid #e0e8eb;z-index:1}.reading-head p{margin:0}.reading-close{border:1px solid #b3c5cd;background:#fff;border-radius:8px;padding:10px 14px;font:600 15px system-ui;cursor:pointer}.reading-body{padding:20px}.reading h2{font:700 28px Georgia,serif;line-height:1.2;margin:0 0 15px}.reading p{font-size:17px;line-height:1.7;margin:0 0 16px}.detail-photo{margin:0 0 18px}.detail-photo img{width:100%;max-height:280px;object-fit:contain;background:#edf3f5;border-radius:10px}.detail-photo figcaption{font-size:12px;color:#526573;margin-top:5px}.reading .attribution{font-size:12px;color:#526573;line-height:1.5;margin-top:20px}.reading .more-copy{border-top:1px solid #dce6eb;margin-top:20px;padding-top:18px}.reading .more-copy h3{font-size:19px;margin:0 0 12px}.reading [hidden]{display:none!important}
 </style></head><body><main>
 <h1>Explore Nearby</h1>
 <p class="muted">Discover places to visit, read about their history, or plan your next trip. No audio required.</p>
@@ -37,7 +39,19 @@ a{color:#075a79;font-weight:600}
 </section>
 <section><h2 id="resultsHeading">Places to see in Buxton</h2><div class="cards" id="cards"></div></section>
 <p class="muted"><small>This is an experimental browsing page, separate from the working Travel Storyteller. Place listings are suggestions, not verified opening hours or access information. Searching other towns or using GPS queries Wikipedia; GPS needs permission and a secure connection. Do not operate this page while driving.</small></p>
-</main><script>
+</main>
+<dialog class="reading" id="placeDialog" aria-labelledby="detailTitle">
+ <div class="reading-head"><p id="detailKind" class="muted">About this place</p><button type="button" class="reading-close" id="detailClose">Close</button></div>
+ <div class="reading-body">
+  <h2 id="detailTitle"></h2>
+  <figure class="detail-photo" id="detailPhoto" hidden></figure>
+  <div id="detailSummary" aria-live="polite"></div>
+  <button type="button" class="action" id="detailMore" aria-expanded="false" aria-controls="detailFull">More detail</button>
+  <section id="detailFull" class="more-copy" hidden><h3>More from Wikipedia</h3><div id="detailFullText" aria-live="polite"></div></section>
+  <p class="attribution">Summary adapted from <a id="detailSource" target="_blank" rel="noopener">Wikipedia</a>. Additional introduction text by Wikipedia contributors. <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener">CC BY-SA 4.0</a>.</p>
+ </div>
+</dialog>
+<script>
 const $=id=>document.getElementById(id);
 const categories=[["📜","History & Stories"],["📍","Places to See"],["🎟️","Things to Do"],["🍽️","Places to Eat"],["🥾","Walks"],["📷","Sightseeing"],["💎","Hidden Gems"],["🎭","Museums & Culture"],["👨‍👩‍👧","Family Activities"]];
 let selected="Places to See";
@@ -82,7 +96,108 @@ function renderCurrent(onlyItems,heading){
   ?"Showing "+items.length+" "+(history?"history and story suggestions":"place suggestions")+" near "+locationLabel+"."
   :(history?"No historical stories identified here yet. Try Places to See or explore Buxton.":"No places found here. Try another location.");
 }
-function wiki(q){return "https://en.wikipedia.org/wiki/Special:Search?search="+encodeURIComponent(q)}
+const articleTitles={"Old Hall Hotel Buxton":"Old Hall Hotel","St Ann's Well Buxton":"St Ann's Well (Buxton)","Solomon's Temple Buxton":"Solomon's Temple, Buxton","Pavilion Gardens":"Buxton Pavilion Gardens"};
+function canonicalTitle(q){return articleTitles[q]||q}
+function wiki(q){return "https://en.wikipedia.org/wiki/"+encodeURIComponent(canonicalTitle(q).replace(/ /g,"_"))}
+// Short editorial summaries, checked against the linked Wikipedia articles.
+const simpleSummaries={
+ "Buxton Crescent":{
+  place:["The Crescent is the grand, curved Georgian building in the centre of Buxton. It was built between 1780 and 1789 for the Duke of Devonshire, with John Carr as its architect.","It was part of a plan to make Buxton a fashionable spa town, attracting visitors to its warm mineral springs."],
+  history:["In the late 1700s, the Duke of Devonshire wanted Buxton to become a fashionable spa town. The Crescent was a major part of that plan, built between 1780 and 1789.","Designed by John Carr, its sweeping shape was influenced by the Royal Crescent in Bath. Buxton's spring water was central to the town's appeal."]
+ },
+ "Buxton Opera House":{
+  place:["Buxton Opera House is the ornate theatre beside Pavilion Gardens. It opened in 1903 and was designed by Frank Matcham, an architect known for his theatres.","Despite its name, its story is not only about opera. The building has hosted live entertainment and also spent many years being used mainly as a cinema."],
+  history:["Buxton Opera House opened in 1903, with a design by theatre architect Frank Matcham. In 1927 it became a cinema, showing silent films before equipment for sound was added.","After refurbishment, it reopened for live performances in 1979. Its history brings together theatre, film and the town's cultural life."]
+ },
+ "Old Hall Hotel Buxton":{
+  place:["The Old Hall Hotel is one of Buxton's oldest buildings. The present building includes parts of an earlier fortified tower and was rebuilt in 1670.","Its most famous connection is with Mary, Queen of Scots, who stayed at the earlier building while visiting Buxton's waters in the 1500s."],
+  history:["Mary, Queen of Scots stayed at the earlier tower on this site on visits between 1573 and 1584. She came to take the waters while in the custody of the Earl of Shrewsbury.","The hall was later rebuilt in 1670, so the building you see today includes layers of history from different periods."]
+ },
+ "Devonshire Dome":{
+  place:["The Devonshire Dome is the large domed building above Buxton town centre. It began as stables, built in the late 1700s to serve visitors staying at the Crescent.","The building was later turned into a hospital. Its enormous dome was added during the changes that followed."],
+  history:["This building began with horses, rather than hospital beds. Built between 1780 and 1789, the original stables could house up to 120 horses belonging to visitors to the Crescent.","It later became the Devonshire Royal Hospital. The huge dome is part of the building's transformation from stables into a very different kind of landmark."]
+ },
+ "St Ann's Well Buxton":{
+  place:["St Ann's Well is the small drinking well opposite the Crescent, at the foot of The Slopes. It is supplied by Buxton's natural warm spring.","The present well dates from 1940, but the spring's importance is much older. People valued these waters in Roman times and throughout Buxton's later history."],
+  history:["Buxton's warm spring helped shape the town long before its Georgian buildings appeared. The Roman settlement grew around the waters, and the spring later became associated with St Anne.","The well has changed over the centuries. The structure visible today dates from 1940, on a site linked with much earlier wells."]
+ },
+ "Poole's Cavern":{
+  place:["Poole's Cavern is a natural limestone cave on the edge of Buxton. Inside are chambers and unusual stone formations shaped over a very long time.","It also has a human story: archaeological finds suggest people used the cave from the Bronze Age. It formally opened as a show cave in 1853."],
+  history:["Poole's Cavern has attracted people for far longer than it has been a tourist attraction. Archaeological finds suggest use from the Bronze Age, with evidence also linked to Roman Britain.","The cave formally opened to visitors as a show cave in 1853, although writers had described it as one of the wonders of the Peak much earlier."]
+ },
+ "Solomon's Temple Buxton":{
+  place:["Solomon's Temple is the small stone tower on Grin Low hill above Buxton. It is also called Grinlow Tower.","Despite its name, it is not an ancient religious temple. It is a Victorian landmark, built in 1896 to replace an earlier tower, with views across the surrounding landscape."]
+ },
+ "Aquae Arnemetiae":{
+  history:["Aquae Arnemetiae was the Roman settlement where Buxton stands today. It grew around the natural warm springs.","Its name means the waters of Arnemetia, a goddess associated with a sacred grove. This card is about the town's Roman past, rather than a complete Roman building that you can visit today."]
+ },
+ "Pavilion Gardens":{
+  place:["Pavilion Gardens is the landscaped park in central Buxton, with the River Wye, lakes, bridges and planted gardens.","The park opened in 1871 and was designed by Edward Milner. Its gardens and pavilion buildings are part of the town's Victorian character."],
+  history:["Pavilion Gardens opened in 1871, following a design by Edward Milner. The park grew out of earlier riverside walks and gardens connected with Buxton Old Hall.","It expanded in 1876. The waterways, bridges and pavilion buildings helped create a place for visitors and residents to stroll and spend time together."]
+ }
+};
+let detailVersion=0, detailController, detailItem, detailText="", detailLoading=false;
+let pageOverflow="";
+const detailCache=new Map();
+function paragraphs(target,texts){target.replaceChildren();for(const text of texts){const p=document.createElement("p");p.textContent=text;target.append(p)}}
+function introSentences(text){
+ const first=text.split(/\n\s*\n/).find(p=>p.trim())||text;
+ if(typeof Intl.Segmenter==="function")return Array.from(new Intl.Segmenter("en",{granularity:"sentence"}).segment(first),s=>s.segment).slice(0,2).join("").trim();
+ return first;
+}
+function setDetailPhoto(url,title,history){
+ const frame=$("detailPhoto");frame.replaceChildren();frame.hidden=!url;if(!url)return;
+ const img=document.createElement("img");img.src=url;img.alt="Image related to "+title;img.referrerPolicy="no-referrer";img.decoding="async";
+ img.onerror=()=>{if(frame.contains(img)){frame.replaceChildren();frame.hidden=true}};
+ const caption=document.createElement("figcaption");caption.textContent=(history?"Related place or illustration: ":"Image: ")+title;
+ frame.append(img,caption);
+}
+function openItem(item,mode){
+ detailController?.abort();const version=++detailVersion;detailItem=item;detailText="";detailLoading=false;
+ const [name,description,query,icon,thumb]=item;const history=mode==="History & Stories";
+ $("detailTitle").textContent=name;$("detailKind").textContent=history?"History & Stories":"Places to See";
+ const summary=simpleSummaries[query]?.[history?"history":"place"];
+ paragraphs($("detailSummary"),summary||[description||"Loading an introduction to this place…"]);
+ $("detailSource").href=wiki(query||name);$("detailSource").textContent="Wikipedia: "+canonicalTitle(query||name);
+ $("detailMore").hidden=false;$("detailMore").textContent="More detail";$("detailMore").disabled=false;$("detailMore").setAttribute("aria-expanded","false");
+ $("detailFull").hidden=true;$("detailFullText").replaceChildren();
+ setDetailPhoto(thumb||preferredPhotos[query]||photoCache.get(query),canonicalTitle(query||name),history);
+ const dialog=$("placeDialog");if(!dialog.open){pageOverflow=document.body.style.overflow;document.body.style.overflow="hidden";dialog.showModal()}dialog.scrollTop=0;
+ // Curated summaries open instantly. Other places get a complete introduction.
+ if(!summary)loadDetail(version,true);
+}
+async function loadDetail(version,updateOverview=false){
+ if(detailLoading)return;detailLoading=true;const item=detailItem;const query=item[2]||item[0];
+ const controller=detailController=new AbortController();const timer=setTimeout(()=>controller.abort(),12000);
+ try{
+  let page=detailCache.get(canonicalTitle(query));
+  if(!page){
+   const data=await wikipedia({titles:canonicalTitle(query),redirects:"1",prop:"extracts|info|pageimages|pageprops",inprop:"url",exintro:"1",explaintext:"1",piprop:"thumbnail",pithumbsize:"640"},{signal:controller.signal});
+   page=Object.values(data.query?.pages||{}).find(p=>p.extract?.trim()&&p.missing===undefined&&p.pageprops?.disambiguation===undefined);
+   if(!page)throw Error("No introduction is available for this item yet.");
+   if(detailCache.size>=32)detailCache.delete(detailCache.keys().next().value);detailCache.set(canonicalTitle(query),page);
+  }
+  if(version!==detailVersion||!$("placeDialog").open)return;
+  detailText=page.extract.trim();
+  if(updateOverview)paragraphs($("detailSummary"),[introSentences(detailText)]);
+  paragraphs($("detailFullText"),detailText.split(/\n\s*\n/).filter(Boolean));
+  $("detailSource").href=wiki(page.title);$("detailSource").textContent="Wikipedia: "+page.title;
+  if(page.thumbnail?.source&&!preferredPhotos[query])setDetailPhoto(page.thumbnail.source,page.title,$("detailKind").textContent==="History & Stories");
+ }catch(error){
+  if(version!==detailVersion)return;
+  paragraphs($("detailFullText"),["The extra introduction could not be loaded. The overview above is still available. You can retry or open the Wikipedia source below."]);
+  $("detailMore").textContent="Retry more detail";
+ }finally{clearTimeout(timer);if(version===detailVersion){detailLoading=false;$("detailMore").disabled=false}}
+}
+$("detailMore").onclick=async()=>{
+ const version=detailVersion;
+ $("detailFull").hidden=false;$("detailMore").setAttribute("aria-expanded","true");
+ if(!detailText){$("detailMore").disabled=true;paragraphs($("detailFullText"),["Loading more detail…"]);await loadDetail(version)}
+ if(version===detailVersion&&detailText)$("detailMore").hidden=true;
+};
+$("detailClose").onclick=()=>$("placeDialog").close();
+$("placeDialog").addEventListener("close",()=>{detailVersion++;detailController?.abort();document.body.style.overflow=pageOverflow});
+$("placeDialog").addEventListener("click",event=>{if(event.target===$("placeDialog"))$("placeDialog").close()});
 function maps(q){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q)}
 function draw(items,title){
  const version=++cardVersion;
@@ -90,15 +205,16 @@ function draw(items,title){
  for(const item of items){
   const [name,description,query,icon,thumb,kind,mapQuery]=item;
   const card=document.createElement("article");card.className="card";
-  const photo=document.createElement("div");photo.className="photo";photo.dataset.lookup=query||name;
+  const mode=selected;
+  const photo=document.createElement("button");photo.type="button";photo.className="photo";photo.dataset.lookup=query||name;photo.setAttribute("aria-label","Read about "+name);photo.onclick=()=>openItem(item,mode);
   if(thumb){const img=document.createElement("img");img.src=thumb;img.alt="";img.loading="lazy";img.decoding="async";img.referrerPolicy="no-referrer";img.onerror=()=>{photo.replaceChildren(document.createTextNode(icon||"🏛️"))};photo.append(img)}
   else {photo.textContent=icon||"🏛️"; if(preferredPhotos[query||name])addPhoto(photo,preferredPhotos[query||name],icon); else if(photoCache.has(query||name))addPhoto(photo,photoCache.get(query||name),icon)}
   const body=document.createElement("div");body.className="card-body";
-  const h=document.createElement("h3");h.textContent=name;
+  const h=document.createElement("h3");const titleButton=document.createElement("button");titleButton.type="button";titleButton.className="card-title";titleButton.textContent=name;titleButton.onclick=()=>openItem(item,mode);h.append(titleButton);
   const p=document.createElement("p");p.textContent=description||"Discover more about this place.";
   const badge=document.createElement("p");badge.className="badge";badge.textContent=selected==="History & Stories"?(kind==="past"?"Past place & story":kind==="story"?"Historical figure & story":"History of a place"):"Place to see";
   const links=document.createElement("div");links.className="links";
-  const read=document.createElement("a");read.href=wiki(query||name);read.target="_blank";read.rel="noopener";read.textContent=selected==="History & Stories"?"Read the history ↗":"About this place ↗";
+  const read=document.createElement("button");read.type="button";read.className="history-link";read.textContent=selected==="History & Stories"?"Read this story":"Read about this place";read.onclick=()=>openItem(item,mode);
   const map=document.createElement("a");map.href=maps(mapQuery||(query||name)+(locationIsBuxton?", Buxton":locationLabel==="your location"?"":", "+locationLabel));map.target="_blank";map.rel="noopener";map.textContent=selected==="History & Stories"?"Related location ↗":"View map ↗";
   links.append(read,map);
   if(selected==="Places to See"){
@@ -123,7 +239,7 @@ function addPhoto(photo,url,icon){
 }
 async function loadBuxtonPhotos(version){
  // Fetch only small image URLs, not image files. The browser lazily loads thumbnails when visible.
- const titles=buxton.map(item=>item[2]);
+ const titles=buxton.map(item=>canonicalTitle(item[2]));
  try{
   const data=await wikipedia({titles:titles.join("|"),redirects:"1",prop:"pageimages",piprop:"thumbnail",pithumbsize:"360"});
   const normalized=new Map();
@@ -132,7 +248,7 @@ async function loadBuxtonPhotos(version){
   const images=new Map();
   for(const page of Object.values(data.query?.pages||{}))if(page.thumbnail?.source)images.set(page.title,page.thumbnail.source);
   for(const item of buxton){
-   let title=item[2];const visited=new Set();
+   let title=canonicalTitle(item[2]);const visited=new Set();
    while(normalized.has(title)&&!visited.has(title)){visited.add(title);title=normalized.get(title)}
    const url=preferredPhotos[item[2]]||images.get(title);
    if(!url)continue;
@@ -162,10 +278,10 @@ function showCategory(){
   $("categories").append(b);
  }
 }
-async function wikipedia(params){
+async function wikipedia(params,options={}){
  const u=new URL("https://en.wikipedia.org/w/api.php");
  for(const [k,v] of Object.entries({action:"query",format:"json",origin:"*",...params}))u.searchParams.set(k,v);
- const res=await fetch(u.toString());if(!res.ok)throw Error("Wikipedia unavailable");return await res.json();
+ const res=await fetch(u.toString(),options);if(!res.ok)throw Error("Wikipedia unavailable");return await res.json();
 }
 async function nearby(lat,lon,label,version){
  $("status").textContent="Finding places near "+label+"…";
