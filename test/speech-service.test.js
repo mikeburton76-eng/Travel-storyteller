@@ -46,3 +46,28 @@ test('worker errors reject the request and release resources', async () => {
   assert.equal(worker.terminated, true);
   service.close();
 });
+
+test('stream delivers the opening section before completion and cancellation frees the worker', async () => {
+  const workers = [];
+  const service = createSpeechService({ makeWorker: () => { const w = new FakeWorker(); workers.push(w); return w; } });
+  const controller = new AbortController();
+  const sections = [];
+  const pending = service.generate('First sentence. Second sentence.', undefined, {
+    onChunk: wav => sections.push(wav.toString()), signal: controller.signal
+  });
+  assert.equal(workers[0].task.stream, true);
+  workers[0].emit('chunk', { id: workers[0].task.id, wav: Buffer.from('first') });
+  assert.deepEqual(sections, ['first']);
+  await assert.rejects(service.generate('Another request'), /another request/);
+  controller.abort();
+  await assert.rejects(pending, /cancelled/);
+  assert.equal(workers[0].terminated, true);
+  const next = service.generate('Next', undefined, { onChunk: wav => sections.push(wav.toString()) });
+  workers[0].emit('chunk', { id: workers[0].task.id, wav: Buffer.from('stale') });
+  workers[1].emit('chunk', { id: workers[1].task.id, wav: Buffer.from('next') });
+  workers[1].emit('message', { id: workers[1].task.id, done: true });
+  await next;
+  assert.deepEqual(sections, ['first', 'next']);
+  assert.equal(workers[1].terminated, true);
+  service.close();
+});

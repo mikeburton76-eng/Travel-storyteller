@@ -161,21 +161,47 @@ const server = http.createServer(async (req, res) => {
     return res.end(fs.readFileSync(path.join(__dirname, "voice-test.html"), "utf8"));
   }
 
-  if (req.method === "POST" && req.url === "/speech") {
+  if (req.method === "GET" && req.url === "/narration-player.js") {
+    res.writeHead(200, { "Content-Type": "text/javascript; charset=utf-8", "Cache-Control": "no-store" });
+    return res.end(fs.readFileSync(path.join(__dirname, "narration-player.js")));
+  }
+
+  if (req.method === "POST" && (req.url === "/speech" || req.url === "/speech-stream")) {
+    const controller = new AbortController();
+    const disconnected = () => { if (!res.writableEnded) controller.abort(); };
+    res.on('close', disconnected);
     try {
       const body = JSON.parse(await readBody(req));
       if (typeof body.text !== "string" || !body.text.trim() || body.text.length > 1800 ||
           (body.voice !== undefined && !Object.hasOwn(speech.config.voices, body.voice))) {
         return sendJson(res, 400, { error: "Please provide up to 1,800 characters and a supported narrator." });
       }
-      const wav = await speech.generate(body.text, body.voice);
+      if (req.url === '/speech-stream') {
+        const started = Date.now();
+        let sections = 0;
+        // Flush each complete WAV section immediately; proxies must not buffer it.
+        res.writeHead(200, { 'Content-Type': 'application/x-ndjson', 'Cache-Control': 'private, no-store, no-transform', 'X-Accel-Buffering': 'no' });
+        res.flushHeaders();
+        await speech.generate(body.text, body.voice, { signal: controller.signal, onChunk: wav => {
+          if (controller.signal.aborted) throw Error('Narration cancelled.');
+          if (++sections === 1) console.log('Voice first section ready in', Date.now() - started, 'ms');
+          res.write(JSON.stringify({ wav: wav.toString('base64') }) + '\n');
+          if (res.writableLength > 24 * 1024 * 1024) throw Error('The audio connection is too slow.');
+        } });
+        console.log('Voice complete in', Date.now() - started, 'ms; sections:', sections);
+        return res.end(JSON.stringify({ done: true }) + '\n');
+      }
+      const wav = await speech.generate(body.text, body.voice, { signal: controller.signal });
       if (res.destroyed) return;
       res.writeHead(200, { "Content-Type": "audio/wav", "Content-Length": wav.length, "Cache-Control": "private, no-store" });
       return res.end(wav);
     } catch (error) {
       console.error("Voice error:", error.message);
       if (res.destroyed) return;
+      if (res.headersSent) return res.end(JSON.stringify({ error: 'The narrator could not finish. ' + error.message }) + '\n');
       return sendJson(res, error.status || 500, { error: "The narrator could not finish. " + error.message });
+    } finally {
+      res.off('close', disconnected);
     }
   }
 

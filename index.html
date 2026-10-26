@@ -76,6 +76,7 @@
   </section>
 </main>
 
+<script src="/narration-player.js"></script>
 <script>
   // ============================================================
   // PART 1: Ask the helper for a story (this is unchanged)
@@ -101,6 +102,7 @@
   async function tellStory() {
     const place = placeInput.value.trim();
     if (!place) { placeInput.focus(); return; }
+    progressive?.prime();
 
     stopSpeaking(); // silence any story that is still being read
     moreBtn.disabled = true;
@@ -148,6 +150,7 @@
 
       resultBox.style.display = "block";
       statusBox.textContent = "";
+      startText(currentStory);
     } catch (e) {
       statusBox.textContent = "";
       errorBox.style.display = "block";
@@ -161,6 +164,7 @@
 
   moreBtn.addEventListener("click", async function () {
     if (!activePlace || !fullStory) return;
+    progressive?.prime();
     stopSpeaking();
     moreBtn.disabled = true;
     goButton.disabled = true;
@@ -227,6 +231,11 @@
   const speechMsg = document.getElementById('speechMsg');
   const audio = document.getElementById('narratorAudio');
   let request, token = 0, audioURL, voiceReady = false, state = 'idle';
+  let streaming = false;
+  const progressive = NarrationPlayer.supported ? new NarrationPlayer({ onState(next, message) {
+    if (!streaming) return;
+    setState(next); speechMsg.textContent = message;
+  } }) : null;
   function setState(next) {
     state = next;
     listenBtn.disabled = next !== 'idle' || !voiceReady;
@@ -237,6 +246,7 @@
     stopBtn.disabled = next === 'idle';
   }
   function stopSpeaking() {
+    streaming = false; progressive?.stop();
     token++; request?.abort(); request = null; audio.pause();
     audio.removeAttribute('src'); audio.load(); audio.hidden = true;
     if (audioURL) URL.revokeObjectURL(audioURL); audioURL = null;
@@ -250,6 +260,12 @@
     setState('loading');
     voiceHelp.textContent = 'Preparing your narrator…';
     speechMsg.textContent = 'Creating narration on the server…';
+    if (progressive?.prime()) {
+      clearTimeout(timer); request = null; streaming = true;
+      voiceHelp.textContent = 'Narrator: '+voiceSelect.options[voiceSelect.selectedIndex].text+'.';
+      await progressive.start(text, voiceSelect.value);
+      return;
+    }
     try {
       const response = await fetch('/speech', { method:'POST', headers:{'Content-Type':'application/json'},
         body:JSON.stringify({text,voice:voiceSelect.value}), signal:controller.signal });
@@ -272,8 +288,8 @@
   audio.addEventListener('error',()=>{if(audio.getAttribute('src')){setState('idle');voiceHelp.textContent='The audio could not play. Please try again.';}});
   previewVoice.addEventListener('click',()=>startText('Hello Mike. Welcome to Buxton.'));
   listenBtn.addEventListener('click',()=>startText(currentStory));
-  pauseBtn.addEventListener('click',()=>audio.pause());
-  resumeBtn.addEventListener('click',()=>audio.play().catch(()=>{speechMsg.textContent='Press play on the audio player above.';}));
+  pauseBtn.addEventListener('click',()=>streaming ? progressive.pause() : audio.pause());
+  resumeBtn.addEventListener('click',()=>streaming ? progressive.resume() : audio.play().catch(()=>{speechMsg.textContent='Press play on the audio player above.';}));
   stopBtn.addEventListener('click',stopSpeaking);
   voiceSelect.addEventListener('change',()=>{try{localStorage.setItem('travelStoryteller.narrator',voiceSelect.value);}catch(_){}voiceHelp.textContent='Narrator saved. Tap Try this voice to listen.';});
   setState('idle');

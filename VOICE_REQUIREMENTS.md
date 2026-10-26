@@ -38,4 +38,26 @@ For native deployment the build command is `npm ci && bash scripts/setup-voice.s
 Python 3.12+ and libseccomp.so.2 must be available. A failed offline isolation check stops synthesis.
 Do not upgrade a hosting plan. Test on a free instance and measure actual waiting time and memory.
 
+# Earlier playback (26 October 2026)
+
+The app now requests `/speech-stream`, which sends each complete WAV section as NDJSON
+as soon as it is ready. The same Python model instance generates all sections of a story,
+then exits as before. The opening section targets at most 100 characters (long sentences
+may be split at a word). The remainder is prepared while the opening is playing.
+The browser unlocks Web Audio inside the original button tap, before story lookup,
+and starts narration automatically when the written story arrives. It schedules decoded
+sections on one audio clock. Pause/Resume applies to that clock;
+Stop or a new story cancels the request and all scheduled audio. Interrupted audio
+shows an error rather than silently truncating the story. Suspended phone playback
+offers Resume. Browsers without Web Audio retain the previous full-WAV player.
+Both audio paths retain authentication, the same pinned voice and speed of 0.85.
+Completed audio is cached within one shared 16 MiB limit. The voice process retains
+its network isolation and per-request memory release.
+
+Local real-model HTTP check: first section 1.654 seconds, all five sections 2.985 seconds;
+cached complete stream 11 ms. These timings exclude story writing and sleeping-host
+startup and are not predictions for Render. Tests cover authentication, valid WAVs,
+stream ordering, cancellation, interrupted responses and playback controls. Actual
+iPhone playback and Render latency still need a production check after deployment.
+
 Hosting resources remain a practical constraint: free software is not a guarantee of free hosting.
