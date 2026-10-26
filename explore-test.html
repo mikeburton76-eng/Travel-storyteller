@@ -8,6 +8,7 @@ h1{font:700 34px Georgia,serif;margin:0 0 7px}h2{font-size:23px;margin:12px 0}
 p{line-height:1.5}.muted{color:#526573}.panel{background:#fff;border-radius:14px;padding:16px;margin:15px 0}
 .categories{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .cat{display:flex;align-items:center;gap:10px;text-align:left;min-height:70px;background:white;border:2px solid transparent;color:#23343e;border-radius:13px;padding:12px;font:600 15px system-ui;cursor:pointer}
+.category-copy{display:block}.category-copy small{display:block;font-weight:400;font-size:12px;line-height:1.4;margin-top:4px}.badge{font-size:11px;color:#526573;margin:0 0 8px}.history-link{background:none;border:0;padding:0;color:#075a79;text-align:left;font:600 13px system-ui;text-decoration:underline;cursor:pointer}.cat:focus-visible,.history-link:focus-visible{outline:3px solid #17617c;outline-offset:3px}
 .cat.active{border-color:#17617c;background:#e1f1f5}.emoji{font-size:27px}
 button.action{border:0;background:#17617c;color:white;border-radius:9px;padding:12px 15px;font:600 16px system-ui;cursor:pointer}
 input{font:16px system-ui;padding:12px;width:100%;border:1px solid #9cabb3;border-radius:8px}
@@ -27,19 +28,20 @@ a{color:#075a79;font-weight:600}
 <div class="categories" id="categories"></div>
 <p id="categoryMsg" class="muted" aria-live="polite"></p></section>
 <section class="panel"><h2>Choose a location</h2>
-<p class="muted">Start with our Buxton historic places collection, explore another town, or find places near you.</p>
+<p class="muted">Explore Buxton, search another town, or use your location. Switch between places you can see and the history around them.</p>
 <div class="actions"><button class="action" id="buxton">Explore Buxton</button><button class="action" id="gps">Use my GPS</button></div>
 <label for="town"><strong>Or search another town</strong></label>
 <input id="town" placeholder="e.g. York, Bath or Edinburgh" autocomplete="off">
 <div class="actions"><button class="action" id="townSearch">Explore this town</button></div>
-<p id="status" role="status">Showing Buxton historic places.</p>
+<p id="status" role="status">Showing places to see in Buxton.</p>
 </section>
-<section><h2 id="resultsHeading">Historic places in Buxton</h2><div class="cards" id="cards"></div></section>
+<section><h2 id="resultsHeading">Places to see in Buxton</h2><div class="cards" id="cards"></div></section>
 <p class="muted"><small>This is an experimental browsing page, separate from the working Travel Storyteller. Place listings are suggestions, not verified opening hours or access information. Searching other towns or using GPS queries Wikipedia; GPS needs permission and a secure connection. Do not operate this page while driving.</small></p>
 </main><script>
 const $=id=>document.getElementById(id);
-const categories=[["🏛️","Historic Places"],["🎟️","Things to Do"],["🍽️","Places to Eat"],["🥾","Walks"],["📷","Sightseeing"],["💎","Hidden Gems"],["🎭","Museums & Culture"],["👨‍👩‍👧","Family Activities"]];
-let selected="Historic Places";
+const categories=[["📜","History & Stories"],["📍","Places to See"],["🎟️","Things to Do"],["🍽️","Places to Eat"],["🥾","Walks"],["📷","Sightseeing"],["💎","Hidden Gems"],["🎭","Museums & Culture"],["👨‍👩‍👧","Family Activities"]];
+let selected="Places to See";
+let locationItems=null, locationLabel="Buxton", locationIsBuxton=true, searchVersion=0;
 let cardVersion=0;
 const photoCache=new Map();
 // Curated image: wide view of the cavern, rather than Wikipedia\'s close-up infobox image.
@@ -55,13 +57,38 @@ const buxton=[
 ["Roman Buxton and its springs","Explore the Roman history behind Buxton's thermal waters.","Aquae Arnemetiae","🏺"],
 ["Pavilion Gardens","Historic landscaped gardens in the centre of Buxton.","Pavilion Gardens","🌳"]
 ];
+const buxtonHistory=[
+["Roman Buxton and its springs","Discover the Roman history behind Buxton's thermal waters.","Aquae Arnemetiae","🏺",null,"past","St Ann's Well, Buxton"],
+["Mary, Queen of Scots in Buxton","Explore the Old Hall Hotel's association with Mary, Queen of Scots.","Old Hall Hotel Buxton","👑",null,"story","Old Hall Hotel, Buxton"],
+["The story of the Crescent","Explore the Georgian Crescent's place in Buxton's spa-town history.","Buxton Crescent","📜",null,"both","Buxton Crescent, Buxton"],
+["From stables to hospital","Discover the changing uses of the building now known as the Devonshire Dome.","Devonshire Dome","📜",null,"both","Devonshire Dome, Buxton"],
+["The story of Buxton Opera House","Discover the history of this Edwardian theatre and its architect, Frank Matcham.","Buxton Opera House","🎭",null,"both","Buxton Opera House, Buxton"],
+["Poole's Cavern through time","Explore the long human history associated with this natural limestone cave.","Poole's Cavern","🪨",null,"both","Poole's Cavern, Buxton"],
+["The history of St Ann's Well","Discover the story of the well and Buxton's mineral waters.","St Ann's Well Buxton","⛲",null,"both","St Ann's Well, Buxton"],
+["The story of Pavilion Gardens","Explore the history of Buxton's landscaped gardens.","Pavilion Gardens","🌳",null,"both","Pavilion Gardens, Buxton"]
+];
+function isWorkingCategory(){return selected==="History & Stories"||selected==="Places to See"}
+function renderCurrent(onlyItems,heading){
+ if(!isWorkingCategory())return;
+ const history=selected==="History & Stories";
+ const items=onlyItems||(locationIsBuxton
+  ?(history?buxtonHistory:buxton.filter(item=>item[2]!=="Aquae Arnemetiae"))
+  :(locationItems||[]).filter(item=>history?item[5]==="past"||item[5]==="both":item[5]!=="past"));
+ draw(items,heading||((history?"History & stories":"Places to see")+" near "+locationLabel));
+ $("categoryMsg").textContent=history
+  ?"Past events, people and the stories behind places. Map links show a related location."
+  :"Landmarks and attractions you can see today. Some also have a history to explore.";
+ $("status").textContent=items.length
+  ?"Showing "+items.length+" "+(history?"history and story suggestions":"place suggestions")+" near "+locationLabel+"."
+  :(history?"No historical stories identified here yet. Try Places to See or explore Buxton.":"No places found here. Try another location.");
+}
 function wiki(q){return "https://en.wikipedia.org/wiki/Special:Search?search="+encodeURIComponent(q)}
 function maps(q){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q)}
 function draw(items,title){
  const version=++cardVersion;
  $("resultsHeading").textContent=title;$("cards").replaceChildren();
  for(const item of items){
-  const [name,description,query,icon,thumb]=item;
+  const [name,description,query,icon,thumb,kind,mapQuery]=item;
   const card=document.createElement("article");card.className="card";
   const photo=document.createElement("div");photo.className="photo";photo.dataset.lookup=query||name;
   if(thumb){const img=document.createElement("img");img.src=thumb;img.alt="";img.loading="lazy";img.decoding="async";img.referrerPolicy="no-referrer";img.onerror=()=>{photo.replaceChildren(document.createTextNode(icon||"🏛️"))};photo.append(img)}
@@ -69,12 +96,22 @@ function draw(items,title){
   const body=document.createElement("div");body.className="card-body";
   const h=document.createElement("h3");h.textContent=name;
   const p=document.createElement("p");p.textContent=description||"Discover more about this place.";
+  const badge=document.createElement("p");badge.className="badge";badge.textContent=selected==="History & Stories"?(kind==="past"?"Past place & story":kind==="story"?"Historical figure & story":"History of a place"):"Place to see";
   const links=document.createElement("div");links.className="links";
-  const read=document.createElement("a");read.href=wiki(query||name);read.target="_blank";read.rel="noopener";read.textContent="Read more ↗";
-  const map=document.createElement("a");map.href=maps(name+", "+($("town").value.trim()||"Buxton"));map.target="_blank";map.rel="noopener";map.textContent="View map ↗";
-  links.append(read,map);body.append(h,p,links);card.append(photo,body);$("cards").append(card);
+  const read=document.createElement("a");read.href=wiki(query||name);read.target="_blank";read.rel="noopener";read.textContent=selected==="History & Stories"?"Read the history ↗":"About this place ↗";
+  const map=document.createElement("a");map.href=maps(mapQuery||(query||name)+(locationIsBuxton?", Buxton":locationLabel==="your location"?"":", "+locationLabel));map.target="_blank";map.rel="noopener";map.textContent=selected==="History & Stories"?"Related location ↗":"View map ↗";
+  links.append(read,map);
+  if(selected==="Places to See"){
+   const related=locationIsBuxton?buxtonHistory.filter(story=>story[2]===query):(kind==="both"?[item]:[]);
+   if(related.length){
+    const historyButton=document.createElement("button");historyButton.type="button";historyButton.className="history-link";historyButton.textContent="Explore its history";
+    historyButton.onclick=()=>{selected="History & Stories";showCategory();renderCurrent(related,"History of "+name);$("status").textContent="Showing the history linked to "+name+". Choose History & Stories above to see all nearby stories.";};
+    links.append(historyButton);
+   }
+  }
+  body.append(badge,h,p,links);card.append(photo,body);$("cards").append(card);
  }
- if(items===buxton)loadBuxtonPhotos(version);
+ if(locationIsBuxton)loadBuxtonPhotos(version);
 }
 function addPhoto(photo,url,icon){
  if(!url)return;
@@ -112,11 +149,15 @@ function showCategory(){
  for(const [emoji,name] of categories){
   const b=document.createElement("button");b.className="cat"+(name===selected?" active":"");b.type="button";
   const e=document.createElement("span");e.className="emoji";e.textContent=emoji;
-  const t=document.createElement("span");t.textContent=name;b.append(e,t);
+  const t=document.createElement("span");t.className="category-copy";t.textContent=name;
+  if(name==="History & Stories"||name==="Places to See"){
+   const hint=document.createElement("small");hint.textContent=name==="History & Stories"?"What happened here":"What you can see today";t.append(hint);
+  }
+  b.setAttribute("aria-pressed",String(name===selected));b.append(e,t);
   b.onclick=()=>{
    selected=name;showCategory();
-   if(name==="Historic Places"){$("categoryMsg").textContent="Historic Places is ready to explore.";draw(buxton,"Historic places in Buxton");$("status").textContent="Showing Buxton historic places."}
-   else {$("categoryMsg").textContent=name+" is planned for a future version. Historic Places is our first working category.";$("resultsHeading").textContent=name+" — coming later";$("cards").replaceChildren()}
+   if(isWorkingCategory())renderCurrent();
+   else {$("categoryMsg").textContent=name+" is planned for a future version. Explore History & Stories or Places to See."; $("resultsHeading").textContent=name+" — coming later";$("cards").replaceChildren();cardVersion++;}
   };
   $("categories").append(b);
  }
@@ -126,37 +167,50 @@ async function wikipedia(params){
  for(const [k,v] of Object.entries({action:"query",format:"json",origin:"*",...params}))u.searchParams.set(k,v);
  const res=await fetch(u.toString());if(!res.ok)throw Error("Wikipedia unavailable");return await res.json();
 }
-async function nearby(lat,lon,label){
- $("status").textContent="Finding historic places near "+label+"…";
- const data=await wikipedia({generator:"geosearch",ggscoord:lat+"|"+lon,ggsradius:"10000",ggslimit:"40",prop:"description|pageimages",piprop:"thumbnail",pithumbsize:"320"});
+async function nearby(lat,lon,label,version){
+ $("status").textContent="Finding places near "+label+"…";
+ const data=await wikipedia({generator:"geosearch",ggscoord:lat+"|"+lon,ggsradius:"10000",ggslimit:"40",prop:"description|pageimages|coordinates",piprop:"thumbnail",pithumbsize:"320"});
+ if(version!==searchVersion)return;
  const pages=Object.values(data.query?.pages||{}).filter(p=>p.title);
  const skip=/^List of |^Category:|^Timeline of /i;
  const filtered=pages.filter(p=>!skip.test(p.title));
- const items=filtered.slice(0,24).map(p=>[p.title,p.description||"Explore this place and its story.",p.title,"🏛️",p.thumbnail?.source]);
- draw(items,"Places near "+label);
- $("status").textContent=items.length?"Found "+items.length+" Wikipedia places near "+label+". Results may include general attractions.":"No Wikipedia places found nearby. Try another town.";
+ const items=filtered.slice(0,24).map(p=>{
+  const text=p.title+" "+(p.description||"");
+  const past=/\b(battle of|siege of|demolished|destroyed|defunct|former settlement|roman settlement)\b/i.test(text);
+  const historical=past||/\b(historic|historical|history|roman|medieval|castle|abbey|ruins|memorial|georgian|edwardian|listed building|archaeolog)/i.test(text);
+  const coord=p.coordinates?.[0];
+  return [p.title,p.description||"Explore this place and its story.",p.title,"🏛️",p.thumbnail?.source,past?"past":historical?"both":"place",coord?coord.lat+","+coord.lon:null];
+ });
+ locationItems=items;locationLabel=label;locationIsBuxton=false;
+ renderCurrent();
 }
-$("buxton").onclick=()=>{selected="Historic Places";showCategory();$("town").value="";draw(buxton,"Historic places in Buxton");$("status").textContent="Showing our Buxton historic places collection."};
+$("buxton").onclick=()=>{
+ searchVersion++;if(!isWorkingCategory())selected="Places to See";showCategory();$("town").value="";
+ locationItems=null;locationLabel="Buxton";locationIsBuxton=true;renderCurrent();
+};
 $("gps").onclick=()=>{
- selected="Historic Places";showCategory();
+ const version=++searchVersion;
+ if(!isWorkingCategory())selected="Places to See";showCategory();
  if(!navigator.geolocation){$("status").textContent="GPS is unavailable in this browser.";return}
  $("status").textContent="Waiting for GPS permission…";
  navigator.geolocation.getCurrentPosition(async p=>{
-  try{await nearby(p.coords.latitude,p.coords.longitude,"your location")}
-  catch(e){$("status").textContent="GPS worked, but Wikipedia could not provide nearby places. Please try again. "}
- },e=>{$("status").textContent="GPS could not find your location: "+e.message},{enableHighAccuracy:true,timeout:20000,maximumAge:30000});
+  if(version!==searchVersion)return;
+  try{await nearby(p.coords.latitude,p.coords.longitude,"your location",version)}
+  catch(e){if(version===searchVersion)$("status").textContent="GPS worked, but nearby places could not be loaded. Please try again."}
+ },e=>{if(version===searchVersion)$("status").textContent="GPS could not find your location: "+e.message},{enableHighAccuracy:true,timeout:20000,maximumAge:30000});
 };
 $("townSearch").onclick=async()=>{
  const town=$("town").value.trim();if(!town){$("town").focus();return}
- selected="Historic Places";showCategory();$("status").textContent="Finding "+town+"…";
+ const version=++searchVersion;
+ if(!isWorkingCategory())selected="Places to See";showCategory();$("status").textContent="Finding "+town+"…";
  try{
   const data=await wikipedia({prop:"coordinates",titles:town,redirects:"1",colimit:"1"});
+  if(version!==searchVersion)return;
   const page=Object.values(data.query?.pages||{})[0],coord=page?.coordinates?.[0];
   if(!coord)throw Error("No coordinates found for this town");
-  await nearby(coord.lat,coord.lon,town);
- }catch(e){$("status").textContent="Couldn't locate that town or load nearby places. Try the town's full name, such as York or Bath. Buxton's collection is still available."}
+  await nearby(coord.lat,coord.lon,town,version);
+ }catch(e){if(version===searchVersion)$("status").textContent="Couldn't locate that town or load nearby places. Try the town's full name. Buxton's collection is still available."}
 };
 $("town").addEventListener("keydown",e=>{if(e.key==="Enter")$("townSearch").click()});
-showCategory();$("categoryMsg").textContent="Historic Places is ready to explore.";
-draw(buxton,"Historic places in Buxton");
+showCategory();renderCurrent();
 </script></body></html>
