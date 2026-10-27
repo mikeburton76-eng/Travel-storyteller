@@ -96,6 +96,8 @@
 
   let currentStory = ""; // the most recent section to read aloud
   let fullStory = "";
+  let storyParts = [];
+  let storyComplete = false;
   let activePlace = "";
   const moreBtn = document.getElementById("moreBtn");
 
@@ -107,6 +109,8 @@
     stopSpeaking(); // silence any story that is still being read
     moreBtn.disabled = true;
     fullStory = "";
+    storyParts = [];
+    storyComplete = false;
     activePlace = place;
     errorBox.style.display = "none";
     resultBox.style.display = "none";
@@ -124,7 +128,9 @@
 
       currentStory = data.story || "";
       fullStory = currentStory;
-      moreBtn.disabled = !currentStory;
+      storyParts = currentStory ? [currentStory] : [];
+      storyComplete = !!data.complete;
+      moreBtn.disabled = !currentStory || storyComplete;
 
       // Show the story, one paragraph at a time (safe: uses textContent, not HTML)
       storyBox.innerHTML = "";
@@ -163,7 +169,7 @@
   }
 
   moreBtn.addEventListener("click", async function () {
-    if (!activePlace || !fullStory) return;
+    if (!activePlace || !fullStory || storyComplete) return;
     progressive?.prime();
     stopSpeaking();
     moreBtn.disabled = true;
@@ -174,15 +180,17 @@
       const response = await fetch(HELPER_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ place: activePlace, previousStory: fullStory })
+        body: JSON.stringify({ place: activePlace, previousStories: storyParts })
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Something went wrong.");
+      storyComplete = !!data.complete;
       const extra = (data.story || "").trim();
       if (!extra) {
         statusBox.textContent = data.note || "No further verified facts found about this place.";
         return;
       }
+      storyParts.push(extra);
       currentStory = extra;
       fullStory += "\n\n" + extra;
       const heading = document.createElement("h2");
@@ -210,7 +218,7 @@
       errorBox.textContent = e.message;
     } finally {
       goButton.disabled = false;
-      moreBtn.disabled = false;
+      moreBtn.disabled = storyComplete;
     }
   });
 
@@ -303,3 +311,4 @@
 </script>
 </body>
 </html>
+
