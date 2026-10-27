@@ -30,15 +30,16 @@ dialog.reading{border:0;border-radius:18px;width:calc(100% - 24px);max-width:650
 <div class="categories" id="categories"></div>
 <p id="categoryMsg" class="muted" aria-live="polite"></p></section>
 <section class="panel"><h2>Choose a location</h2>
+<p class="muted"><strong>Family discovery:</strong> places, nature, culture and their stories. Violent crime, sexual violence and other distressing subjects are excluded from this guide.</p>
 <p class="muted">Explore Buxton, search another town, or use your location. Switch between places you can see and the history around them.</p>
 <div class="actions"><button class="action" id="buxton">Explore Buxton</button><button class="action" id="gps">Use my GPS</button></div>
 <label for="town"><strong>Or search another town</strong></label>
-<input id="town" placeholder="e.g. York, Bath or Edinburgh" autocomplete="off">
+<input id="town" placeholder="e.g. Melbourne, Los Angeles or San Francisco" autocomplete="off">
 <div class="actions"><button class="action" id="townSearch">Explore this town</button></div>
 <p id="status" role="status">Showing places to see in Buxton.</p>
 </section>
 <section><h2 id="resultsHeading">Places to see in Buxton</h2><div class="cards" id="cards"></div></section>
-<p class="muted"><small>This is an experimental browsing page, separate from the working Travel Storyteller. Place listings are suggestions, not verified opening hours or access information. Searching other towns or using GPS queries Wikipedia; GPS needs permission and a secure connection. Do not operate this page while driving.</small></p>
+<p class="muted"><small>This is an experimental browsing page, separate from the working Travel Storyteller. Place listings are suggestions, not verified opening hours or access information. Buxton, Melbourne (Australia), Los Angeles and San Francisco have selected starter collections, with summaries checked against Wikipedia on 27 October 2026. These are not complete city guides. Other searches use a limited Wikipedia sample with conservative topic and text screening; this cannot guarantee every result’s suitability. Unreviewed discovery images are omitted. Searching other towns or using GPS queries Wikipedia; GPS needs permission and a secure connection. Do not operate this page while driving.</small></p>
 </main>
 <dialog class="reading" id="placeDialog" aria-labelledby="detailTitle">
  <div class="reading-head"><p id="detailKind" class="muted">About this place</p><button type="button" class="reading-close" id="detailClose">Close</button></div>
@@ -55,7 +56,7 @@ dialog.reading{border:0;border-radius:18px;width:calc(100% - 24px);max-width:650
 const $=id=>document.getElementById(id);
 const categories=[["📜","History & Stories"],["📍","Places to See"],["🎟️","Things to Do"],["🍽️","Places to Eat"],["🥾","Walks"],["📷","Sightseeing"],["💎","Hidden Gems"],["🎭","Museums & Culture"],["👨‍👩‍👧","Family Activities"]];
 let selected="Places to See";
-let locationItems=null, locationLabel="Buxton", locationIsBuxton=true, searchVersion=0;
+let locationItems=null, locationLabel="Buxton", locationCollection="Buxton", locationIsBuxton=true, searchVersion=0;
 let cardVersion=0;
 const photoCache=new Map();
 // Curated image: wide view of the cavern, rather than Wikipedia\'s close-up infobox image.
@@ -85,16 +86,17 @@ function isWorkingCategory(){return selected==="History & Stories"||selected==="
 function renderCurrent(onlyItems,heading){
  if(!isWorkingCategory())return;
  const history=selected==="History & Stories";
- const items=onlyItems||(locationIsBuxton
-  ?(history?buxtonHistory:buxton.filter(item=>item[2]!=="Aquae Arnemetiae"))
-  :(locationItems||[]).filter(item=>history?item[5]==="past"||item[5]==="both":item[5]!=="past"));
+ const collection=curatedCollections[locationCollection];
+ const items=(onlyItems||(collection
+  ?(history?collection.history:collection.places)
+  :(locationItems||[]).filter(item=>history?item[5]==="past"||item[5]==="both":item[5]!=="past"))).filter(item=>contentAllowed(item[0],item[1]));
  draw(items,heading||((history?"History & stories":"Places to see")+" near "+locationLabel));
  $("categoryMsg").textContent=history
-  ?"Past events, people and the stories behind places. Map links show a related location."
-  :"Landmarks and attractions you can see today. Some also have a history to explore.";
+  ?"Family-friendly stories about the origins, architecture, culture and nature of places."
+  :"Landmarks and attractions. City selections can cover a wide area; check the map and venue information before travelling.";
  $("status").textContent=items.length
   ?"Showing "+items.length+" "+(history?"history and story suggestions":"place suggestions")+" near "+locationLabel+"."
-  :(history?"No historical stories identified here yet. Try Places to See or explore Buxton.":"No places found here. Try another location.");
+  :(history?"No suitable historical stories found in this search yet. Try Places to See. This is not a complete guide to the area.":"No suitable places found in this search yet. This does not mean there are no attractions here. Try another location.");
 }
 const articleTitles={"Old Hall Hotel Buxton":"Old Hall Hotel","St Ann's Well Buxton":"St Ann's Well (Buxton)","Solomon's Temple Buxton":"Solomon's Temple, Buxton","Pavilion Gardens":"Buxton Pavilion Gardens"};
 function canonicalTitle(q){return articleTitles[q]||q}
@@ -136,6 +138,29 @@ const simpleSummaries={
   history:["Pavilion Gardens opened in 1871, following a design by Edward Milner. The park grew out of earlier riverside walks and gardens connected with Buxton Old Hall.","It expanded in 1876. The waterways, bridges and pavilion buildings helped create a place for visitors and residents to stroll and spend time together."]
  }
 };
+// Explicit exclusions apply to cards and every introduction displayed in this prototype.
+// Conservative rules are a first layer, not a guarantee of semantic or image suitability.
+const excludedContent=/\b(massacres?|shootings?|spree[ -]?kill(?:ing|er)s?|school[ -]?shoot(?:ing|er)s?|mass[ -]?murder\w*|murder\w*|homicid\w*|assassinat\w*|rap(?:e|es|ed|ist|ists)|sexual[ -]?(?:assault|abuse|violence|exploitation)|child[ -]?abuse|molest\w*|terroris\w*|genocid\w*|lynch\w*|tortur\w*|suicid\w*|executions?|atrocit\w*|porn\w*|sex[ -]?club|strip[ -]?club|brothels?|fatal[ -]?accident|serial[ -]?kill\w*|battlefields?|sieges?)\b/i;
+function contentAllowed(...texts){return !excludedContent.test(texts.join(" ").normalize("NFKC").replace(/[\u200B-\u200D\uFEFF]/g,""))}
+const visitorSubject=/\b(museum|gallery|galleries|garden|gardens|park|parks|observatory|aquarium|zoo|castle|palace|cathedral|church|abbey|temple|bridge|tower|theatre|theater|concert hall|opera house|library|libraries|market|markets|arcade|pier|beach|waterfall|cavern|cave|botanic|botanical|monument|heritage|historic|historical|landmark|archaeolog\w*|ruins|railway|funicular|sculpture|artwork)\b/i;
+function eligiblePage(page){return !!page.extract?.trim() && page.pageprops?.disambiguation===undefined && page.missing===undefined && visitorSubject.test(page.title+" "+(page.description||"")) && contentAllowed(page.title,page.description||"",page.extract)}
+const cityEditorial={"Melbourne, Australia": [["Royal Botanic Gardens Melbourne", "Royal Botanic Gardens Victoria", "🌿", "A riverside garden with a story stretching back to 1846.", ["These gardens began in 1846 on the south side of the Yarra River. Trees, lakes and lawns now form a green retreat close to the centre of Melbourne.", "The collection brings together plants from many parts of the world. This card refers to the Melbourne Gardens, rather than the separate Cranbourne site outside the city."]], ["Carlton Gardens", "Carlton Gardens", "🌳", "Victorian gardens surrounding one of Melbourne’s grandest buildings.", ["Look at the tree-lined paths and sweeping lawns: Carlton Gardens was designed as a grand setting for the Royal Exhibition Building.", "The gardens and exhibition building share World Heritage recognition. The site also contains Melbourne Museum, linking landscaped gardens with science and culture."]], ["Royal Exhibition Building", "Royal Exhibition Building", "🏛️", "A grand exhibition hall built to show Melbourne to the world.", ["This building was created for the Melbourne International Exhibition of 1880–81, when great exhibitions brought inventions, industry and culture together.", "Its surviving Great Hall is a reminder of that exhibition age. The building gained World Heritage status in 2004 and stands beside Carlton Gardens."]], ["Flinders Street Station", "Flinders Street railway station", "🚉", "A railway landmark whose station history began in 1854.", ["The station on this site opened in 1854, making it Australia’s oldest railway station. The buildings you see today came later, so the site and the present building have different ages.", "Flinders Street sits beside the Yarra River, opposite Federation Square. It is a useful landmark for understanding how Melbourne’s railway network meets the city centre."]], ["Federation Square", "Federation Square", "🎨", "An arts and culture square built above railway lines.", ["Federation Square is more than an open space: its buildings and public square sit above busy railway lines at the edge of central Melbourne.", "It brings together arts and cultural institutions, including ACMI, the Ian Potter Centre and the Koorie Heritage Trust, across the road from Flinders Street Station."]], ["State Library Victoria", "State Library Victoria", "📚", "A library founded in 1854 with a remarkable collection of Victorian stories.", ["State Library Victoria was established in 1854 as the Melbourne Public Library. Its story is part of the movement to make books and learning available to the public.", "The collection goes well beyond books, including maps, photographs, manuscripts and newspapers. These everyday records help preserve the changing story of Victoria."]], ["Queen Victoria Market", "Queen Victoria Market", "🍎", "A historic market that officially opened in 1878.", ["Queen Victoria Market grew in stages from the 1860s and officially opened in 1878. Its scale makes it a distinctive part of central Melbourne.", "The market is a link with the city’s Victorian trading history. Check the market’s own visitor information before planning a particular shopping or food visit."]], ["National Gallery of Victoria", "National Gallery of Victoria", "🖼️", "Australia’s oldest art museum, founded in 1861.", ["The National Gallery of Victoria was founded in 1861. It is Australia’s oldest art museum, with a collection shared between two Melbourne sites.", "NGV International is on St Kilda Road; the Ian Potter Centre at Federation Square houses Australian art. Check which site holds the collection you want to see."]]], "Los Angeles, USA": [["Griffith Observatory", "Griffith Observatory", "🔭", "A hillside landmark bringing astronomy to the city since 1935.", ["Griffith Observatory opened in 1935 on the slopes of Mount Hollywood. It was created to bring astronomy and science to the public.", "Its hillside setting connects two kinds of looking: out across Los Angeles and up towards space. The observatory’s telescopes and science displays are central to its story."]], ["Griffith Park", "Griffith Park", "🌳", "An urban wilderness with hills, trails and famous landmarks.", ["Griffith Park is much more rugged than a formal city garden. It stretches across part of the Santa Monica Mountains and contains the Hollywood Sign and Griffith Observatory.", "Its landscape has appeared in many films. Distances and slopes vary considerably, so choose a specific destination rather than treating the whole park as one short walk."]], ["Getty Center", "Getty Center", "🖼️", "Art, architecture and gardens above Los Angeles.", ["The Getty Center opened in 1997 on a hill above Los Angeles. Architect Richard Meier designed the campus, where buildings, terraces and gardens form part of the experience.", "The museum’s collection includes European paintings, decorative arts and photography. The Central Garden was designed by artist Robert Irwin, bringing landscape and art together."]], ["Santa Monica Pier", "Santa Monica Pier", "🎡", "A seaside pier in the wider Los Angeles area.", ["Santa Monica Pier projects into the Pacific at the foot of Colorado Avenue. It combines ocean views with a small amusement park and places to eat.", "This is in Santa Monica, west of central Los Angeles. It belongs in an area guide, but should not be mistaken for somewhere a short walk from downtown."]], ["Walt Disney Concert Hall", "Walt Disney Concert Hall", "🎵", "Frank Gehry’s distinctive concert hall, opened in 2003.", ["Architect Frank Gehry designed Walt Disney Concert Hall, which opened in 2003. Its unusual architecture makes it a striking downtown landmark.", "Lillian Disney’s initial gift helped begin the project as a tribute to Walt Disney’s interest in the arts. The hall is home to the Los Angeles Philharmonic."]], ["Bradbury Building", "Bradbury Building", "🏛️", "An 1893 building known for its light-filled interior and ironwork.", ["Behind its street frontage, the Bradbury Building is known for a skylit atrium, ornate ironwork, stairways and lifts. It was built in 1893.", "The building has appeared in films and television, giving this historic office building another life on screen. Interior access should be checked before visiting."]], ["Grand Central Market", "Grand Central Market (Los Angeles)", "🍽️", "A downtown market with roots in 1917.", ["Grand Central Market opened in 1917 inside the Homer Laughlin Building in downtown Los Angeles. Its history connects the city’s architecture with its food culture.", "Today it is known for bringing different food vendors together under one roof. Check the market’s current information for individual businesses and visiting times."]], ["Angels Flight", "Angels Flight", "🚋", "Two small railway cars on a steep downtown hillside.", ["Angels Flight is a short funicular railway: two cars, named Olivet and Sinai, move in opposite directions on a shared cable.", "The original railway operated from 1901 to 1969. Its present site opened nearby in 1996, linking Hill Street with California Plaza. Check current service before planning a ride."]]], "San Francisco, USA": [["Golden Gate Bridge", "Golden Gate Bridge", "🌉", "An engineering landmark that opened in 1937.", ["The Golden Gate Bridge opened in 1937, connecting San Francisco with Marin County across the entrance to the bay.", "At the time, it was the world’s longest and tallest suspension bridge. Its name comes from the Golden Gate strait, the stretch of water beneath it."]], ["Golden Gate Park", "Golden Gate Park", "🌳", "A huge city park created on a landscape of sand dunes.", ["Golden Gate Park opened in 1870, on land once largely covered by sand dunes. Planting trees and grasses helped transform the landscape.", "The park now brings together gardens, lakes and major cultural institutions. It extends for more than three miles, so pick a particular area when planning a visit."]], ["California Academy of Sciences", "California Academy of Sciences", "🔬", "A natural history institution with roots in 1853.", ["The California Academy of Sciences began in 1853 as a learned society. It combines museum collections with scientific research.", "Its Golden Gate Park building was completely rebuilt in 2008. The institution’s story is about studying the natural world as well as sharing discoveries with visitors."]], ["Conservatory of Flowers", "Conservatory of Flowers", "🌺", "A landmark greenhouse completed in 1879.", ["This greenhouse was completed in 1879 and is the oldest building in Golden Gate Park. It was among the first municipal conservatories built in the United States.", "Its collection centres on rare and unusual plants. The building’s wooden construction is part of what makes it an important architectural landmark."]], ["Palace of Fine Arts", "Palace of Fine Arts", "🏛️", "A grand rotunda created for the city’s 1915 exposition.", ["The Palace of Fine Arts was originally built for the 1915 Panama–Pacific International Exposition. Its design deliberately evoked the ruins of ancient Rome.", "The landmark you see today was rebuilt between 1964 and 1974. Its rotunda, columns and lagoon preserve the setting of a much earlier exhibition."]], ["Ferry Building", "San Francisco Ferry Building", "⛴️", "An 1898 waterfront terminal with a distinctive clock tower.", ["The Ferry Building was completed in 1898 as a gateway for passengers crossing San Francisco Bay. Its tall clock tower remains a waterfront landmark.", "As travel patterns changed, parts of the terminal became offices. A later restoration brought back its Great Nave and created a ground-floor marketplace."]], ["San Francisco Cable Cars", "San Francisco cable car system", "🚋", "A working transport tradition that began in the 1870s.", ["San Francisco’s cable cars belong to the world’s last manually operated cable car system. They are different from the city’s heritage electric streetcars.", "Twenty-three cable car lines were established between 1873 and 1890; three routes remain. The surviving system is both public transport and a historic landmark."]], ["Coit Tower", "Coit Tower", "🗼", "A hilltop tower built to help beautify San Francisco.", ["Coit Tower was built in 1932–33 on Telegraph Hill, using a bequest from Lillie Hitchcock Coit to beautify the city.", "The tower is known for its Art Deco design and interior murals. A popular claim that its shape was based on a fire-hose nozzle is a coincidence, rather than its design story."]]]};
+const curatedCollections={Buxton:{places:buxton.filter(item=>item[2]!=="Aquae Arnemetiae"),history:buxtonHistory}};
+for(const [city,entries] of Object.entries(cityEditorial)){
+ const places=entries.map(([name,query,icon,description,summary])=>[name,description,query,icon,null,"both",name+", "+city]);
+ const history=entries.map(([name,query,icon,description])=>["The story of "+name,description,query,icon,null,"both",name+", "+city]);
+ curatedCollections[city]={places,history};
+ for(const [name,query,icon,description,summary] of entries)simpleSummaries[query]={place:summary,history:summary};
+}
+function knownCity(value){
+ const key=value.toLowerCase().normalize("NFKC").replace(/[^a-z0-9]+/g," ").trim();
+ const aliases={"melbourne":"Melbourne, Australia","melbourne australia":"Melbourne, Australia","melbourne victoria":"Melbourne, Australia","melbourne victoria australia":"Melbourne, Australia","los angeles":"Los Angeles, USA","la":"Los Angeles, USA","l a":"Los Angeles, USA","los angeles california":"Los Angeles, USA","los angeles usa":"Los Angeles, USA","los angeles california usa":"Los Angeles, USA","san francisco":"San Francisco, USA","sf":"San Francisco, USA","san francisco california":"San Francisco, USA","san francisco usa":"San Francisco, USA","san francisco california usa":"San Francisco, USA"};
+ return aliases[key]||null;
+}
+function selectCollection(city){
+ locationCollection=city;locationIsBuxton=city==="Buxton";locationLabel=city;locationItems=null;
+ renderCurrent();
+}
 let detailVersion=0, detailController, detailItem, detailText="", detailLoading=false;
 let pageOverflow="";
 const detailCache=new Map();
@@ -153,10 +178,12 @@ function setDetailPhoto(url,title,history){
  frame.append(img,caption);
 }
 function openItem(item,mode){
+ if(!contentAllowed(item[0],item[1]))return;
  detailController?.abort();const version=++detailVersion;detailItem=item;detailText="";detailLoading=false;
  const [name,description,query,icon,thumb]=item;const history=mode==="History & Stories";
  $("detailTitle").textContent=name;$("detailKind").textContent=history?"History & Stories":"Places to See";
  const summary=simpleSummaries[query]?.[history?"history":"place"];
+ if(summary&&!contentAllowed(...summary))return;
  paragraphs($("detailSummary"),summary||[description||"Loading an introduction to this place…"]);
  $("detailSource").href=wiki(query||name);$("detailSource").textContent="Wikipedia: "+canonicalTitle(query||name);
  $("detailMore").hidden=false;$("detailMore").textContent="More detail";$("detailMore").disabled=false;$("detailMore").setAttribute("aria-expanded","false");
@@ -178,11 +205,15 @@ async function loadDetail(version,updateOverview=false){
    if(detailCache.size>=32)detailCache.delete(detailCache.keys().next().value);detailCache.set(canonicalTitle(query),page);
   }
   if(version!==detailVersion||!$("placeDialog").open)return;
+  if(!contentAllowed(page.title,page.extract)){
+   paragraphs($("detailFullText"),["The source introduction does not meet this guide’s family content rules. The selected overview remains available."]);
+   $("detailMore").hidden=true;return;
+  }
   detailText=page.extract.trim();
   if(updateOverview)paragraphs($("detailSummary"),[introSentences(detailText)]);
   paragraphs($("detailFullText"),detailText.split(/\n\s*\n/).filter(Boolean));
   $("detailSource").href=wiki(page.title);$("detailSource").textContent="Wikipedia: "+page.title;
-  if(page.thumbnail?.source&&!preferredPhotos[query])setDetailPhoto(page.thumbnail.source,page.title,$("detailKind").textContent==="History & Stories");
+  if(curatedCollections[locationCollection]&&page.thumbnail?.source&&!preferredPhotos[query])setDetailPhoto(page.thumbnail.source,page.title,$("detailKind").textContent==="History & Stories");
  }catch(error){
   if(version!==detailVersion)return;
   paragraphs($("detailFullText"),["The extra introduction could not be loaded. The overview above is still available. You can retry or open the Wikipedia source below."]);
@@ -218,7 +249,7 @@ function draw(items,title){
   const map=document.createElement("a");map.href=maps(mapQuery||(query||name)+(locationIsBuxton?", Buxton":locationLabel==="your location"?"":", "+locationLabel));map.target="_blank";map.rel="noopener";map.textContent=selected==="History & Stories"?"Related location ↗":"View map ↗";
   links.append(read,map);
   if(selected==="Places to See"){
-   const related=locationIsBuxton?buxtonHistory.filter(story=>story[2]===query):(kind==="both"?[item]:[]);
+   const related=curatedCollections[locationCollection]?curatedCollections[locationCollection].history.filter(story=>story[2]===query):(kind==="both"?[item]:[]);
    if(related.length){
     const historyButton=document.createElement("button");historyButton.type="button";historyButton.className="history-link";historyButton.textContent="Explore its history";
     historyButton.onclick=()=>{selected="History & Stories";showCategory();renderCurrent(related,"History of "+name);$("status").textContent="Showing the history linked to "+name+". Choose History & Stories above to see all nearby stories.";};
@@ -227,7 +258,7 @@ function draw(items,title){
   }
   body.append(badge,h,p,links);card.append(photo,body);$("cards").append(card);
  }
- if(locationIsBuxton)loadBuxtonPhotos(version);
+ if(curatedCollections[locationCollection])loadBuxtonPhotos(version);
 }
 function addPhoto(photo,url,icon){
  if(!url)return;
@@ -239,7 +270,9 @@ function addPhoto(photo,url,icon){
 }
 async function loadBuxtonPhotos(version){
  // Fetch only small image URLs, not image files. The browser lazily loads thumbnails when visible.
- const titles=buxton.map(item=>canonicalTitle(item[2]));
+ const collection=curatedCollections[locationCollection];
+ const entries=collection.places;
+ const titles=entries.map(item=>canonicalTitle(item[2]));
  try{
   const data=await wikipedia({titles:titles.join("|"),redirects:"1",prop:"pageimages",piprop:"thumbnail",pithumbsize:"360"});
   const normalized=new Map();
@@ -247,7 +280,7 @@ async function loadBuxtonPhotos(version){
   for(const n of data.query?.redirects||[])normalized.set(n.from,n.to);
   const images=new Map();
   for(const page of Object.values(data.query?.pages||{}))if(page.thumbnail?.source)images.set(page.title,page.thumbnail.source);
-  for(const item of buxton){
+  for(const item of entries){
    let title=canonicalTitle(item[2]);const visited=new Set();
    while(normalized.has(title)&&!visited.has(title)){visited.add(title);title=normalized.get(title)}
    const url=preferredPhotos[item[2]]||images.get(title);
@@ -285,24 +318,35 @@ async function wikipedia(params,options={}){
 }
 async function nearby(lat,lon,label,version){
  $("status").textContent="Finding places near "+label+"…";
- const data=await wikipedia({generator:"geosearch",ggscoord:lat+"|"+lon,ggsradius:"10000",ggslimit:"40",prop:"description|pageimages|coordinates",piprop:"thumbnail",pithumbsize:"320"});
+ const data=await wikipedia({generator:"geosearch",ggscoord:lat+"|"+lon,ggsradius:"10000",ggslimit:"40",prop:"description|coordinates"});
  if(version!==searchVersion)return;
  const pages=Object.values(data.query?.pages||{}).filter(p=>p.title);
  const skip=/^List of |^Category:|^Timeline of /i;
- const filtered=pages.filter(p=>!skip.test(p.title));
- const items=filtered.slice(0,24).map(p=>{
+ const candidates=pages.filter(p=>!skip.test(p.title)&&visitorSubject.test(p.title+" "+(p.description||""))&&contentAllowed(p.title,p.description||"")).slice(0,18);
+ let checked=[];
+ if(candidates.length){
+  const full=await wikipedia({titles:candidates.map(p=>p.title).join("|"),prop:"extracts|pageprops",exintro:"1",explaintext:"1",exlimit:"max"});
+  if(version!==searchVersion)return;
+  const originals=new Map(candidates.map(p=>[p.title,p]));
+  checked=Object.values(full.query?.pages||{}).map(p=>({...originals.get(p.title),...p})).filter(eligiblePage);
+ }
+ const items=checked.map(p=>{
   const text=p.title+" "+(p.description||"");
-  const past=/\b(battle of|siege of|demolished|destroyed|defunct|former settlement|roman settlement)\b/i.test(text);
-  const historical=past||/\b(historic|historical|history|roman|medieval|castle|abbey|ruins|memorial|georgian|edwardian|listed building|archaeolog)/i.test(text);
+  const past=/\b(demolished|destroyed|defunct|former settlement|roman settlement)\b/i.test(text);
+  const historical=past||/\b(historic|historical|history|roman|medieval|castle|abbey|ruins|georgian|edwardian|listed building|archaeolog)/i.test(text);
   const coord=p.coordinates?.[0];
-  return [p.title,p.description||"Explore this place and its story.",p.title,"🏛️",p.thumbnail?.source,past?"past":historical?"both":"place",coord?coord.lat+","+coord.lon:null];
+  // Keep exactly the screened introduction so opening the card cannot substitute new text.
+  if(detailCache.size>=32)detailCache.delete(detailCache.keys().next().value);
+  detailCache.set(canonicalTitle(p.title),p);
+  return [p.title,introSentences(p.extract),p.title,"🏛️",null,past?"past":historical?"both":"place",coord?coord.lat+","+coord.lon:null];
  });
+ locationCollection=null;
  locationItems=items;locationLabel=label;locationIsBuxton=false;
  renderCurrent();
 }
 $("buxton").onclick=()=>{
  searchVersion++;if(!isWorkingCategory())selected="Places to See";showCategory();$("town").value="";
- locationItems=null;locationLabel="Buxton";locationIsBuxton=true;renderCurrent();
+ selectCollection("Buxton");
 };
 $("gps").onclick=()=>{
  const version=++searchVersion;
@@ -320,13 +364,15 @@ $("townSearch").onclick=async()=>{
  const version=++searchVersion;
  if(!isWorkingCategory())selected="Places to See";showCategory();$("status").textContent="Finding "+town+"…";
  try{
-  const data=await wikipedia({prop:"coordinates",titles:town,redirects:"1",colimit:"1"});
+  const city=knownCity(town);if(city){selectCollection(city);return}
+  const data=await wikipedia({prop:"coordinates|pageprops",titles:town,redirects:"1",colimit:"1"});
   if(version!==searchVersion)return;
   const page=Object.values(data.query?.pages||{})[0],coord=page?.coordinates?.[0];
-  if(!coord)throw Error("No coordinates found for this town");
-  await nearby(coord.lat,coord.lon,town,version);
+  if(!coord||page.pageprops?.disambiguation!==undefined)throw Error("No unambiguous coordinates found for this town");
+  await nearby(coord.lat,coord.lon,page.title,version);
  }catch(e){if(version===searchVersion)$("status").textContent="Couldn't locate that town or load nearby places. Try the town's full name. Buxton's collection is still available."}
 };
 $("town").addEventListener("keydown",e=>{if(e.key==="Enter")$("townSearch").click()});
 showCategory();renderCurrent();
 </script></body></html>
+
