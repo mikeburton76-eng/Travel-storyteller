@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "enabled": true,
+  "cacheMinutes": 360,
+  "cacheEntries": 32,
+  "maxConcurrentBuilds": 2,
+  "maxAiCallsPerHour": 12,
+  "maxCandidates": 48,
+  "maxResults": 16,
+  "maxCategoriesPerPlace": 3,
+  "maxRepeatedAppearances": 4,
+  "maxOutputTokens": 3400,
+  "nearbyRadiusKm": 3,
+  "nearbyWiderRadiusKm": 10,
+  "areaRadiusKm": 40,
+  "townRadiusKm": 12,
+  "villageRadiusKm": 6,
+  "categoryLimits": {"attractions": 8, "gems": 3, "history": 3, "buildings": 4}
+}

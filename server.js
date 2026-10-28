@@ -136,6 +136,7 @@ function sendJson(res, status, obj) {
 }
 
 function readBody(req) {
+  req.setEncoding?.("utf8");
   return new Promise((resolve, reject) => {
     let body = "";
     req.on("data", chunk => {
@@ -153,9 +154,34 @@ const excludedContent=/\b(massacres?|shootings?|spree[ -]?kill(?:ing|er)s?|schoo
 function contentAllowed(...texts){return !excludedContent.test(texts.join(" ").normalize("NFKC").replace(/[\u200B-\u200D\uFEFF]/g,""))}
 
 
+let exploreService;
 const server = http.createServer(async (req, res) => {
   if (req.method === "OPTIONS") {
     return sendJson(res, 204, {});
+  }
+
+  const exploreFiles = { '/explore': ['explore.html', 'text/html; charset=utf-8'], '/explore-client.js': ['explore-client.js', 'text/javascript; charset=utf-8'] };
+  const exploreFile = exploreFiles[req.url.split('?')[0]];
+  if (req.method === 'GET' && exploreFile) {
+    res.writeHead(200, { 'Content-Type': exploreFile[1], 'Cache-Control': 'private, no-store' });
+    return res.end(fs.readFileSync(path.join(__dirname, exploreFile[0]), 'utf8'));
+  }
+  if (req.method === 'POST' && req.url === '/api/explore') {
+    try {
+      if (!String(req.headers['content-type'] || '').startsWith('application/json')) return sendJson(res, 415, { error: 'Please use the Explore page to search.' });
+      if (req.headers.origin && new URL(req.headers.origin).host !== req.headers.host) return sendJson(res, 403, { error: 'Please open Explore on Travel Storyteller.' });
+      const body = JSON.parse(await readBody(req));
+      if (!exploreService) {
+        const { createExploreService } = require(path.join(__dirname, 'explore-service'));
+        exploreService = createExploreService({ fetchImpl: fetch, readKey: readApiKey, model: MODEL });
+      }
+      const result = await exploreService.explore(body);
+      res.setHeader('Cache-Control', 'private, no-store');
+      return sendJson(res, 200, result);
+    } catch (error) {
+      return sendJson(res, error instanceof SyntaxError ? 400 : error.status || 503,
+        { error: error instanceof SyntaxError ? 'Please choose a valid location.' : error.message, ...(error.choices ? { choices: error.choices } : {}) });
+    }
   }
 
   if (req.method === "GET" && req.url === "/voices") {
@@ -383,4 +409,5 @@ server.on("request", (req, res) => {
     listener.call(server, req, res);
   }
 });
+
 
