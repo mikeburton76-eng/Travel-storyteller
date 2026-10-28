@@ -5,3 +5,13 @@ function app(fetchImpl){const nodes={},document={hidden:false,body:new Element()
 const fixture={location:{label:'Sample Town',mode:'area'},overview:'A town by a river.',coverage:{notes:[]},sources:[],checkedAt:'2026-10-28T12:00:00Z',cacheUntil:'2026-10-28T18:00:00Z',selectionMode:'ai',items:[{id:'a',name:'A garden',title:'A garden',theme:'nature',section:'attractions',reason:'<img src=x onerror=alert(1)>',background:'Source background.',coord:{lat:1,lon:2},distanceKm:1,source:{title:'Garden source',url:'https://en.wikipedia.org/wiki/Garden'},image:null}]};
 test('renders categories, candid empty sections, literal external text and accessible reading panel',()=>{const a=app();a.run('guide='+JSON.stringify(fixture)+';render()');assert.equal(a.nodes.cards.children.length,1);assert.equal(a.nodes.tabs.children.length,9);assert.equal(a.nodes.tabs.children[1].attrs['aria-pressed'],'true');assert.match(a.nodes.cards.children[0].children[1].children[2].textContent,/<img/);a.run('openItem(guide.items[0])');assert.equal(a.nodes.dialog.open,true);assert.equal(a.nodes.detailBackground.textContent,'Source background.');a.run('selected="gems";render()');assert.match(a.nodes.cards.children[0].textContent,/not filled/);});
 test('latest search wins even when an older response arrives afterwards',async()=>{const pending=[];const a=app(()=>new Promise(resolve=>pending.push(resolve)));const first=a.run('explore({place:"First"})'),second=a.run('explore({place:"Second"})');pending[1]({ok:true,json:async()=>({...fixture,location:{label:'Second',mode:'area'}})});await second;pending[0]({ok:true,json:async()=>({...fixture,location:{label:'First',mode:'area'}})});await first;assert.equal(a.nodes.locationName.textContent,'Second');assert.equal(a.nodes.searchBtn.disabled,false);});
+test('shows provisional cards before the completed guide and keeps categories usable',async()=>{
+ let requests=0;
+ const a=app(async()=>({ok:true,json:async()=>++requests===1?{...fixture,complete:false,selectionMode:'preview'}:{...fixture,complete:true,overview:'The completed guide.'}}));
+ const done=a.run('explore({place:"Sample Town"})');
+ await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(a.nodes.cards.children.length,1);
+ assert.match(a.nodes.status.textContent,/first suggestions/);
+ a.run('selected="family";render()');assert.match(a.nodes.cards.children[0].textContent,/still being prepared/);
+ await done;assert.equal(requests,2);assert.equal(a.nodes.overview.textContent,'The completed guide.');assert.equal(a.nodes.tabs.children[5].attrs['aria-pressed'],'true');
+});

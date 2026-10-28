@@ -93,3 +93,20 @@ test('Commons picture selection requires a recognised licence, credit and a trus
  const provider=createSourceProvider({fetchImpl:async()=>({ok:true,json:async()=>({query:{pages:{1:page('Garden.jpg','https://thumb.wikimedia.org/garden.jpg','Jane Photographer'),2:page('No-credit.jpg','https://upload.wikimedia.org/no-credit.jpg',''),3:page('Unknown.jpg','https://unknown.test/image.jpg','Someone')}}})})});
  const images=await provider.images([{imageFile:'Garden.jpg'},{imageFile:'No-credit.jpg'},{imageFile:'Unknown.jpg'}]);assert.equal(images.size,1);assert.equal(images.get('Garden.jpg').licenseUrl,'https://creativecommons.org/licenses/by-sa/4.0/');
 });
+
+test('progressive cards precede pictures and AI; polls share a build and final results are cached',async()=>{
+ const p=pool();let finishSources,finishImages,finishAI,builds=0,calls=0;
+ const sources=new Promise(r=>finishSources=r),images=new Promise(r=>finishImages=r),ai=new Promise(r=>finishAI=r);
+ const svc=createExploreService({provider:{resolve:async()=>p.location,collect:async(l,c,publish)=>{builds++;publish({...p,candidates:[p.candidates[0]]});await sources;return p},images:async()=>{await images;return new Map()}},aiWriter:async()=>{calls++;return ai}});
+ const first=await svc.explore({place:'Sample Town'},{progressive:true});
+ assert.equal(first.complete,false);assert.equal(first.items.length,1);assert.equal(calls,0);
+ const poll=await svc.explore({place:'Sample Town'},{progressive:true});assert.equal(poll.complete,false);assert.equal(builds,1);
+ const completed=svc.explore({place:'Sample Town'});
+ finishSources();finishImages();finishAI(answer(p));
+ const final=await completed;assert.equal(final.complete,true);assert.equal(final.selectionMode,'ai');assert.equal(calls,1);
+ const cached=await svc.explore({place:'Sample Town'},{progressive:true});assert.equal(cached.complete,true);assert.equal(cached.reused,true);assert.equal(builds,1);
+});
+test('progressive resolution errors retain actionable status and choices',async()=>{
+ const svc=createExploreService({provider:{resolve:async()=>{throw Object.assign(Error('Choose a place'),{status:409,choices:[{title:'One'}]})}}});
+ await assert.rejects(svc.explore({place:'Ambiguous'},{progressive:true}),e=>e.status===409&&e.choices[0].title==='One');
+});

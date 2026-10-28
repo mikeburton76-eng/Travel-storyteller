@@ -89,12 +89,22 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
   const text=(data.content||[]).filter(b=>b.type==='text'||b.type===undefined).map(b=>b.text||'').join('');
   const start=text.indexOf('{'),end=text.lastIndexOf('}');if(start<0||end<start)throw Error('Guide response was invalid.');return JSON.parse(text.slice(start,end+1));
  }
- async function build(input,previous) {
-  const location=await provider.resolve(input);const pool=await provider.collect(location,cfg);
+ async function build(input,previous,publish) {
+  const location=await provider.resolve(input);
+  function preview(pool){
+   const chosen=fallbackSelection(pool,cfg);
+   if(!chosen.items.length)return;
+   const byId=new Map(pool.candidates.map(c=>[c.id,c]));
+   for(const item of chosen.items)item.image=byId.get(item.id)?.image||null;
+   publish({version:cfg.version,complete:false,location:{label:location.label,mode:location.mode,lat:location.lat,lon:location.lon},...chosen,selectionMode:'preview',coverage:{radiusKm:pool.radiusKm,notes:['First source-based suggestions — the fuller selection is still being prepared.'],warnings:pool.warnings},sources:[location.source,pool.travelSource].filter(Boolean),checkedAt:new Date(now()).toISOString(),cacheUntil:new Date(now()+120000).toISOString()});
+  }
+  const pool=await provider.collect(location,cfg,preview);
+  preview(pool);
   if(pool.candidates.length>cfg.maxCandidates)pool.candidates=pool.candidates.slice(0,cfg.maxCandidates);
   // No AI-generated or user-supplied image URL is accepted. Only licensed source images.
   const images=await provider.images(pool.candidates);
   for(const c of pool.candidates)c.image=images.get(String(c.imageFile||'').replace(/^File:/,''))||null;
+  preview(pool);
   const fingerprint=createHash('sha256').update(JSON.stringify({version:cfg.version,overview:location.overview,candidates:pool.candidates.map(({readerInterest,prominence,queryFeatured,...c})=>c).sort((a,b)=>a.id.localeCompare(b.id))})).digest('hex');
   let chosen,mode='ai',aiReviewedAt=new Date(now()).toISOString();
   if(previous?.selectionMode==='ai'&&previous._fingerprint===fingerprint){chosen={overview:previous.overview,items:previous.items};aiReviewedAt=previous.aiReviewedAt;}
@@ -113,23 +123,31 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
    coverage:{radiusKm:pool.radiusKm,candidateCount:pool.candidates.length,highlightCount:highlights.length,missingHighlights,notes,warnings:pool.warnings},
    sources:[location.source,pool.travelSource].filter(Boolean),checkedAt:new Date(now()).toISOString(),cacheUntil:new Date(now()+cfg.cacheMinutes*60000).toISOString()};
  }
- async function explore(input) {
+ async function explore(input,{progressive=false}={}) {
   if(cfg.enabled===false)throw Object.assign(Error('Explore is temporarily unavailable.'),{status:503});
   if(!input||typeof input!=='object')throw Object.assign(Error('Please choose a location.'),{status:400});
   if(input.lat!==undefined&&!P.coordinate(input.lat,input.lon))throw Object.assign(Error('The location coordinates were invalid.'),{status:400});
   const safeInput=input.lat!==undefined?{lat:Number(Number(input.lat).toFixed(3)),lon:Number(Number(input.lon).toFixed(3))}:{place:String(input.place||'').trim()};
   if(safeInput.place!==undefined&&(!safeInput.place||safeInput.place.length>100))throw Object.assign(Error('Please enter a place name, up to 100 characters.'),{status:400});
   const key=keyFor(safeInput),entry=cache.get(key);
-  if(entry&&entry.expires>now()){cache.delete(key);cache.set(key,entry);return publicResult(entry.value,true);}
-  if(pending.has(key))return pending.get(key);
+  if(entry&&entry.expires>now()){cache.delete(key);cache.set(key,entry);return {...publicResult(entry.value,true),complete:true};}
+  if(pending.has(key)){const job=pending.get(key);const result=await (progressive?(job.snapshot||job.first):job.task);if(result.failure)throw result.failure;return result;}
   if(pending.size>=cfg.maxConcurrentBuilds)throw Object.assign(Error('The guide is busy preparing other places. Please try again shortly.'),{status:429});
-  const task=build(safeInput,entry?.value).then(value=>{
+  let release;
+  const job={snapshot:null,first:new Promise(resolve=>{release=resolve})};
+  pending.set(key,job);
+  const task=build(safeInput,entry?.value,value=>{job.snapshot=value;release(value)}).then(value=>{
    if(cache.size>=cfg.cacheEntries)cache.delete(cache.keys().next().value);
    // Retry temporary provider/AI outages sooner without causing a request loop.
    const ttl=value.selectionMode==='ai'?cfg.cacheMinutes*60000:120000;
-   value.cacheUntil=new Date(now()+ttl).toISOString();cache.set(key,{value,expires:now()+ttl});return publicResult(value,false);
+   value.cacheUntil=new Date(now()+ttl).toISOString();cache.set(key,{value,expires:now()+ttl});return {...publicResult(value,false),complete:true};
   }).finally(()=>pending.delete(key));
-  pending.set(key,task);return task;
+  job.task=task;
+  // Both success and failure settle initial progressive waiters; no detached rejection.
+  task.then(value=>release(value),error=>release({failure:error}));
+  const result=await (progressive?job.first:task);
+  if(result.failure)throw result.failure;
+  return result;
  }
  return {explore};
 }

@@ -37,7 +37,7 @@ function render(){
  if(selected==='summary'){$('results').hidden=true;return}
  $('sectionTitle').textContent=sections[selected][1]+' near '+guide.location.label;$('sectionHelp').textContent=categoryHelp[selected]||sections[selected][2];
  $('cards').replaceChildren();const items=guide.items.filter(x=>x.section===selected);
- if(!items.length){const p=node('p',selected==='gems'?'No sufficiently supported hidden gems found in this search. We have not filled the list with guesses.':selected==='history'?'No suitable historical stories identified in this search yet. This does not mean the place has no history.':'No sufficiently supported '+sections[selected][1].toLowerCase()+' found in this search yet. You can try another category or a nearby town.');p.className='empty';$('cards').append(p);return}
+ if(!items.length){const p=node('p',guide.complete===false?'Suggestions for this category are still being prepared.':selected==='gems'?'No sufficiently supported hidden gems found in this search. We have not filled the list with guesses.':selected==='history'?'No suitable historical stories identified in this search yet. This does not mean the place has no history.':'No sufficiently supported '+sections[selected][1].toLowerCase()+' found in this search yet. You can try another category or a nearby town.');p.className='empty';$('cards').append(p);return}
  for(const item of items){
   const card=document.createElement('article');card.className='card';const photo=node('button',icons[item.theme]||'📍');photo.className='photo';photo.type='button';photo.setAttribute('aria-label','Read about '+item.title);photo.onclick=()=>openItem(item);
   if(item.image){const img=document.createElement('img');img.src=item.image.url;img.alt=item.name;img.loading='lazy';img.referrerPolicy='no-referrer';img.onerror=()=>photo.replaceChildren(document.createTextNode(icons[item.theme]||'📍'));photo.replaceChildren(img)}
@@ -63,10 +63,14 @@ async function explore(input,{quiet=false}={}){
  $('error').hidden=true;$('choices').replaceChildren();
  const timer=setTimeout(()=>currentController.abort(),120000);
  try{
-  const response=await fetch('/api/explore',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(input),signal:currentController.signal});const data=await response.json();if(id!==requestId)return;
+  while(true){
+  const response=await fetch('/api/explore',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...input,progressive:true}),signal:currentController.signal});const data=await response.json();if(id!==requestId)return;
   if(!response.ok){if(data.choices?.length){for(const choice of data.choices){const b=node('button',choice.title+(choice.description?' — '+choice.description:''));b.className='action secondary';b.onclick=()=>{$('place').value=choice.title;explore({place:choice.title})};$('choices').append(b)}}throw Error(data.error||'The guide could not be loaded.')}
-  guide=data;render();$('status').textContent='Showing '+guide.items.length+' suggestions covering '+new Set(guide.items.map(x=>x.id)).size+' places in '+guide.location.label+'.';
- }catch(error){if(id!==requestId)return;if(!quiet){$('error').hidden=false;$('error').textContent=error.name==='AbortError'?'The guide took too long to prepare. Please try again.':error.message;$('status').textContent=guide?'The previous guide is still shown below.':'';}}
+  if(!quiet||data.complete!==false){guide=data;render();}if(data.complete===false){$('status').textContent='Here are the first suggestions. More places, photographs and categories are on their way…';await new Promise(resolve=>setTimeout(resolve,1500));if(id!==requestId)return;continue;}
+  $('status').textContent='Showing '+guide.items.length+' suggestions covering '+new Set(guide.items.map(x=>x.id)).size+' places in '+guide.location.label+'.';
+  break;
+  }
+ }catch(error){if(id!==requestId)return;if(!quiet){$('error').hidden=false;$('error').textContent=error.name==='AbortError'?guide?.complete===false?'The fuller guide took too long. The first source-based suggestions remain below; please try again.':'The guide took too long to prepare. Please try again.':error.message;$('status').textContent=guide?'The previous guide is still shown below.':'';}}
  finally{clearTimeout(timer);if(id===requestId){inFlight=false;$('searchBtn').disabled=false;$('gps').disabled=false}}
 }
 $('searchForm').addEventListener('submit',event=>{event.preventDefault();const place=$('place').value.trim();if(place)explore({place})});

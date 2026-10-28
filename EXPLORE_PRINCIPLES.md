@@ -46,3 +46,9 @@ Mam Tor was excluded by the original visitor-type filter, which omitted hills/mo
 The provider now recognises wider natural features; tries a shorter travel-guide title only after checking its coordinates against the requested location; follows named links in tourism/attraction sections; keeps supported local highlights before trimming the candidate pool; and checks whether the final must-see selection omitted any of them. The source-based fallback prioritises these highlights and allows up to twelve main sights instead of imposing a two-per-type cutoff. AI receives the must-see flags and secondary category evidence requirements.
 
 These rules are generic. Castleton is a regression fixture, not a hard-coded production place list. The direct live-source check recovered Mam Tor, Blue John Cavern, Peak Cavern, Speedwell Cavern, Treak Cliff Cavern, Winnats Pass, Cave Dale and Peveril Castle. Continued random-place testing is required; the shortlist is not guaranteed to be exhaustive.
+
+## Earlier first results
+
+The Explore client requests progressive results. A small source-screened nearby preview can appear before broader discovery completes, then fuller source cards and licensed image metadata appear before AI review finishes. These provisional cards are explicitly labelled, not presented as a ranked top list. Empty categories say they are still preparing. Regular background refreshes retain the previous complete guide until a replacement is ready.
+
+Repeated polls share the same in-memory build and AI call. Completed guides retain the existing bounded cache. Pictures load independently in the browser; failed pictures retain an icon. This does not remove free-host cold starts or guarantee a particular first-result time. The non-progressive API remains compatible.

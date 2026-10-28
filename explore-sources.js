@@ -103,7 +103,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   const coord=page.coordinates[0];
   return {lat:coord.lat,lon:coord.lon,label:page.title,title:page.title,scale:/\b(village|hamlet)\b/i.test(page.description||'')?'village':/\btown\b/i.test(page.description||'')?'town':'city',mode:'area',overview:P.cleanParagraphs(page.extract||'').slice(0,1800),source:{kind:'wikipedia',title:page.title,url:pageUrl('wikipedia',page.title)}};
  }
- async function collect(location, config) {
+ async function collect(location, config, onProgress) {
   const warnings=[],candidates=[];
   const radius=location.mode==='nearby'?config.nearbyRadiusKm:location.scale==='village'?config.villageRadiusKm:location.scale==='town'?config.townRadiusKm:config.areaRadiusKm;
   const base = async radiusKm => {
@@ -113,6 +113,16 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   let near=[];try{near=await base(radius)}catch{warnings.push('Nearby encyclopedia coverage could not be loaded.');}
   if(location.mode==='nearby'&&near.length<4){try{near=await base(config.nearbyWiderRadiusKm);warnings.push('The search includes a wider area because nearby results were limited.');}catch{}}
   const limit=location.mode==='nearby'?config.nearbyWiderRadiusKm:radius;
+  // Small, explicitly provisional cards can arrive before the broader searches.
+  const first=near.flatMap(p=>{
+   const q=p.coordinates?.[0],text=p.description||'';
+   if(!q||text.length<20||P.closed.test(text))return [];
+   const coord={lat:q.lat,lon:q.lon},distance=P.distanceKm(location,coord);
+   if(distance>limit)return [];
+   return [{id:'place-'+createHash('sha256').update(p.title+'|'+coord.lat.toFixed(3)+'|'+coord.lon.toFixed(3)).digest('hex').slice(0,12),name:p.title,text,coord,distanceKm:Number(distance.toFixed(1)),theme:P.themeOf(p.title,text),source:{kind:'wikipedia',title:p.title,url:pageUrl('wikipedia',p.title)}}];
+  }).slice(0,4);
+  if(first.length)onProgress?.({location,candidates:first,warnings:[],radiusKm:limit,travelSource:null});
+
   async function voyagePage(title) {
    const d=await api('wikivoyage',{action:'parse',page:title,prop:'wikitext',redirects:1});
    return {title:d.parse.title,text:d.parse.wikitext['*']};
