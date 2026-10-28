@@ -150,7 +150,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    }
   }catch{warnings.push('A travel guide was not available for this place.');}}
   if(location.title){
-   const terms=['tourism','walk','viewpoint','family','museum','gallery','park','beach','market','bridge'];
+   const terms=['tourism','walk','viewpoint','family','museum','gallery','park','beach','market','bridge','hiking trail','circular walk','(children OR playground OR kids)','(zoo OR aquarium OR wildlife)'];
    const searchName=location.title.replace(/,.*$/,'');
    const results=await Promise.allSettled(terms.map(terms=>api('wikipedia',{generator:'search',gsrsearch:`"${searchName.replace(/["\\]/g,'')}" ${terms}`,gsrnamespace:0,gsrlimit:12,prop:'coordinates|description|extracts|pageimages|pageprops',exintro:1,explaintext:1,exlimit:'max',piprop:'name'})));
    for(const result of results){if(result.status!=='fulfilled'){warnings.push('Some subject searches were unavailable.');continue}
@@ -224,6 +224,9 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   // Interleave themes before trimming, so a dense centre cannot consume the prompt.
   const groups=['nature','culture','experience','architecture','history'].map(theme=>[...unique.values()].filter(c=>c.theme===theme).sort((a,b)=>b.prominence-a.prominence||Number(b.guideListed)-Number(a.guideListed)||a.distanceKm-b.distanceKm));
   const balanced=[...unique.values()].filter(c=>c.mustSee).sort((a,b)=>b.prominence-a.prominence||a.distanceKm-b.distanceKm).slice(0,config.maxCandidates);
+  // Reserve a few evidenced category candidates before dense-city trimming.
+  const lenses=[/\b(family[ -]friendly|families|for children|children[’']s|kids|playground|all ages)\b/i,/\b(circular walk|walking trail|footpath|hiking trail)\b/i];
+  for(const lens of lenses)for(const c of [...unique.values()].filter(c=>!c.historyOnly&&lens.test(c.text)).slice(0,4))if(!balanced.includes(c)&&balanced.length<config.maxCandidates)balanced.push(c);
   for(const g of groups)for(let i=g.length-1;i>=0;i--)if(balanced.includes(g[i]))g.splice(i,1);
   while(groups.some(g=>g.length)&&balanced.length<config.maxCandidates)for(const g of groups)if(g.length&&balanced.length<config.maxCandidates)balanced.push(g.shift());
   balanced.forEach(c=>c.id='place-'+createHash('sha256').update(c.name+'|'+c.coord.lat.toFixed(3)+'|'+c.coord.lon.toFixed(3)).digest('hex').slice(0,12));

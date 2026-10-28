@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "enabled": true,
   "cacheMinutes": 360,
   "cacheEntries": 32,
@@ -15,5 +15,18 @@
   "areaRadiusKm": 40,
   "townRadiusKm": 12,
   "villageRadiusKm": 6,
-  "categoryLimits": {"attractions": 12, "gems": 3, "history": 3, "buildings": 4, "walks": 8, "photos": 8, "family": 8, "museums": 8}
+  "categoryLimits": {
+    "attractions": 12,
+    "gems": 3,
+    "history": 3,
+    "buildings": 4,
+    "walks": 8,
+    "photos": 8,
+    "family": 8,
+    "museums": 8
+  },
+  "specialistTrialEnabled": true,
+  "specialistMaxCandidates": 16,
+  "specialistMaxOutputTokens": 1800,
+  "specialistMaxResults": 28
 }

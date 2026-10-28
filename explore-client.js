@@ -58,6 +58,7 @@ function openItem(item){
 $('close').onclick=()=>$('dialog').close();$('dialog').addEventListener('close',()=>document.body.style.overflow='');
 $('report').onclick=()=>{const p=$('reportText');p.hidden=false;p.textContent=`Please send Mike this feedback in ChatGPT: ${guide.location.label} — ${activeItem.title} — what was unsuitable, missing or incorrect. This button does not send a report automatically.`};
 async function explore(input,{quiet=false}={}){
+ if(!quiet)input={...input,specialists:!!$('specialists').checked};
  const id=++requestId;controller?.abort();controller=new AbortController();const currentController=controller;lastInput=input;inFlight=true;
  if(!quiet){$('status').textContent='Finding a varied selection and checking the source material. The first guide may take a little while…';$('searchBtn').disabled=true;$('gps').disabled=true;}
  $('error').hidden=true;$('choices').replaceChildren();

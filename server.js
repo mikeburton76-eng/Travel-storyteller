@@ -175,7 +175,7 @@ const server = http.createServer(async (req, res) => {
         const { createExploreService } = require(path.join(__dirname, 'explore-service'));
         exploreService = createExploreService({ fetchImpl: fetch, readKey: readApiKey, model: MODEL });
       }
-      const result = await exploreService.explore(body, { progressive: body.progressive === true });
+      const result = await exploreService.explore(body, { progressive: body.progressive === true, specialists: body.specialists === true });
       res.setHeader('Cache-Control', 'private, no-store');
       return sendJson(res, 200, result);
     } catch (error) {

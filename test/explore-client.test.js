@@ -15,3 +15,8 @@ test('shows provisional cards before the completed guide and keeps categories us
  a.run('selected="family";render()');assert.match(a.nodes.cards.children[0].textContent,/still being prepared/);
  await done;assert.equal(requests,2);assert.equal(a.nodes.overview.textContent,'The completed guide.');assert.equal(a.nodes.tabs.children[5].attrs['aria-pressed'],'true');
 });
+test('specialist trial is explicitly selected and carried with the search request',async()=>{
+ let input;const a=app(async(url,options)=>{input=JSON.parse(options.body);return {ok:true,json:async()=>({...fixture,complete:true})}});
+ a.nodes.specialists ??= new Element();a.nodes.specialists.checked=true;
+ await a.run('explore({place:"Sample Town"})');assert.equal(input.specialists,true);assert.equal(input.progressive,true);
+});
