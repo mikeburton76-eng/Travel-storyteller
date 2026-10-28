@@ -1,19 +1,19 @@
 {
-  "version": 1,
+  "version": 2,
   "enabled": true,
   "cacheMinutes": 360,
   "cacheEntries": 32,
   "maxConcurrentBuilds": 2,
   "maxAiCallsPerHour": 12,
   "maxCandidates": 48,
-  "maxResults": 16,
-  "maxCategoriesPerPlace": 3,
-  "maxRepeatedAppearances": 4,
-  "maxOutputTokens": 3400,
+  "maxResults": 20,
+  "maxCategoriesPerPlace": 4,
+  "maxRepeatedAppearances": 10,
+  "maxOutputTokens": 5200,
   "nearbyRadiusKm": 3,
   "nearbyWiderRadiusKm": 10,
   "areaRadiusKm": 40,
   "townRadiusKm": 12,
   "villageRadiusKm": 6,
-  "categoryLimits": {"attractions": 8, "gems": 3, "history": 3, "buildings": 4}
+  "categoryLimits": {"attractions": 12, "gems": 3, "history": 3, "buildings": 4, "walks": 8, "photos": 8, "family": 8, "museums": 8}
 }

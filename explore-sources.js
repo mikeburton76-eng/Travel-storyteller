@@ -60,6 +60,24 @@ function districtTitles(wikitext,title) {
  for(const f of found)add(f);
  return chosen.slice(0,4).map(x=>x.title);
 }
+// Follow attractions explicitly named by the place's tourism section, not just
+// whichever articles happen to be closest to its central coordinate.
+function tourismHighlights(wikitext,title) {
+ const headings=[...wikitext.matchAll(/^(={2,6})\s*(.*?)\s*\1\s*$/gm)],found=new Map();
+ for(let i=0;i<headings.length;i++){
+  const heading=headings[i];if(!/\b(tourism|tourist attractions|visitor attractions|places of interest|sightseeing|landmarks|recreation)\b/i.test(heading[2]))continue;
+  let end=wikitext.length;for(let j=i+1;j<headings.length;j++)if(headings[j][1].length<=heading[1].length){end=headings[j].index;break}
+  const body=wikitext.slice(heading.index+heading[0].length,end).replace(/<ref\b[^>]*>[\s\S]*?<\/ref>/gi,'').replace(/<ref\b[^>]*\/\s*>/gi,'');
+  for(const match of body.matchAll(/\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|([^\]]+))?\]\]/g)){
+   const target=match[1].trim();if(/^(?:File|Image|Category|Template|Help):/i.test(target)||target.includes(':')||!P.allowed(target))continue;
+   const start=body.lastIndexOf('\n',match.index)+1,stop=body.indexOf('\n',match.index);const paragraph=stripWiki(body.slice(start,stop<0?body.length:stop));const label=stripWiki(match[2]||target);
+   const context=(paragraph.split(/(?<=[.!?])\s+/).find(sentence=>sentence.includes(label)||sentence.includes(target))||paragraph).slice(0,1000);
+   if(!P.allowed(context)||context.length<35)continue;
+   found.set(target,{title:target,name:stripWiki(match[2]||target),context,source:{kind:'wikipedia',title: title+' — '+heading[2],url:pageUrl('wikipedia',title)+'#'+encodeURIComponent(heading[2].replace(/ /g,'_'))}});
+  }
+ }
+ return [...found.values()].slice(0,48);
+}
 function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
  async function api(kind,params) {
   const url=new URL(endpoint[kind]);for(const [k,v] of Object.entries({action:'query',format:'json',...params}))url.searchParams.set(k,v);
@@ -99,9 +117,18 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    const d=await api('wikivoyage',{action:'parse',page:title,prop:'wikitext',redirects:1});
    return {title:d.parse.title,text:d.parse.wikitext['*']};
   }
-  let travelRoot=null;
+  let travelRoot=null,highlights=[];
   if(location.title){try{
-   travelRoot=await voyagePage(location.title);candidates.push(...parseListings(travelRoot.text,travelRoot.title));
+   try{travelRoot=await voyagePage(location.title)}catch(error){
+    const short=location.title.replace(/,.*$/,'').replace(/\s*\([^)]*\)\s*$/,'').trim();
+    if(short===location.title)throw error;
+    const alternative=await voyagePage(short),geo=templates(alternative.text).find(t=>/^geo\s*\|/i.test(t.text));
+    const fields=geo?splitFields(geo.text):[],coord=P.coordinate(fields[1],fields[2]);
+    if(!coord||P.distanceKm(location,coord)>Math.max(10,radius))throw error;
+    travelRoot=alternative;
+   }
+   const rootListings=parseListings(travelRoot.text,travelRoot.title);
+   candidates.push(...rootListings.map(c=>({...c,mustSee:rootListings.length<=12})));
    const districts=districtTitles(travelRoot.text,travelRoot.title);
    const results=await Promise.allSettled(districts.map(voyagePage));
    for(const r of results)if(r.status==='fulfilled'){
@@ -113,8 +140,9 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    }
   }catch{warnings.push('A travel guide was not available for this place.');}}
   if(location.title){
-   const terms=['park','beach','museum','market','bridge','tourism'];
-   const results=await Promise.allSettled(terms.map(terms=>api('wikipedia',{generator:'search',gsrsearch:`"${location.title.replace(/["\\]/g,'')}" ${terms}`,gsrnamespace:0,gsrlimit:12,prop:'coordinates|description|extracts|pageimages|pageprops',exintro:1,explaintext:1,exlimit:'max',piprop:'name'})));
+   const terms=['tourism','walk','viewpoint','family','museum','gallery','park','beach','market','bridge'];
+   const searchName=location.title.replace(/,.*$/,'');
+   const results=await Promise.allSettled(terms.map(terms=>api('wikipedia',{generator:'search',gsrsearch:`"${searchName.replace(/["\\]/g,'')}" ${terms}`,gsrnamespace:0,gsrlimit:12,prop:'coordinates|description|extracts|pageimages|pageprops',exintro:1,explaintext:1,exlimit:'max',piprop:'name'})));
    for(const result of results){if(result.status!=='fulfilled'){warnings.push('Some subject searches were unavailable.');continue}
     const found=pages(result.value).sort((a,b)=>(a.index||0)-(b.index||0));
     for(const [rank,p] of found.entries()){
@@ -123,6 +151,10 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
     }
    }
   }
+  if(location.title){try{
+   const data=await api('wikipedia',{action:'parse',page:location.title,prop:'wikitext',redirects:1});
+   highlights=tourismHighlights(data.parse.wikitext['*'],data.parse.title);
+  }catch{warnings.push('The local tourism highlights could not be checked.');}}
   // Resolve travel listings lacking coordinates or an article name through their Wikidata sitelinks.
   const ids=[...new Set(candidates.filter(c=>c.wikidata&&(!c.coord||!c.wikipedia)).map(c=>c.wikidata))].slice(0,50);
   if(ids.length){try{
@@ -141,6 +173,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    const topics=[['Inventions and connections',/\b(invent\w*|discover\w*|engineer\w*|railway|canal|transport|scientist)\b/i],['Traditions and everyday life',/\b(tradition\w*|festival|craft|market|indigenous|language|cultural)\b/i],['How the place grew',/\b(settlement|settled|grew|founded|harbour|harbor|port|industry|industrial)\b/i]];
    const used=new Set();for(const [name,re]of topics){const text=paragraphs.filter(p=>re.test(p)&&!used.has(p)).slice(0,2);text.forEach(p=>used.add(p));if(text.length)candidates.push({name:`${location.label}: ${name.toLowerCase()}`,text:text.join('\n\n').slice(0,1800),coord:{lat:location.lat,lon:location.lon},source:location.source,historyOnly:true,guideListed:false});}
   }catch{warnings.push('Broader historical background could not be loaded.');}}
+  if(travelRoot){const lead=stripWiki(travelRoot.text.split(/\n==/)[0]).slice(0,1200);if(P.allowed(lead))location.overview=(location.overview+'\n\n'+lead).slice(0,3000);}
   // Fetch concise encyclopedia evidence in batches, not full pages per card.
   const guideNames=[],guideImageNames=new Set();
   if(travelRoot)for(const match of travelRoot.text.matchAll(/\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|([^\]]+))?\]\]/g)){
@@ -150,7 +183,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   }
   guideNames.sort((a,b)=>Number(guideImageNames.has(b))-Number(guideImageNames.has(a))||Number(P.visitor.test(b))-Number(P.visitor.test(a)));
   guideNames.splice(60);
-  const titles=[...new Set([...guideNames,...candidates.map(c=>c.wikipedia||(c.source?.kind==='wikipedia'?c.source.title:null)).filter(Boolean),...near.map(p=>p.title)])].slice(0,140);
+  const titles=[...new Set([...highlights.map(h=>h.title),...guideNames,...candidates.map(c=>c.wikipedia||(c.source?.kind==='wikipedia'?c.source.title:null)).filter(Boolean),...near.map(p=>p.title)])].slice(0,140);
   const articles=new Map();
   for(let start=0;start<titles.length;start+=20){try{
    const d=await api('wikipedia',{titles:titles.slice(start,start+20).join('|'),redirects:1,prop:'extracts|coordinates|pageimages|pageprops|info|description',exintro:1,explaintext:1,exlimit:'max',inprop:'url',piprop:'name'});
@@ -158,6 +191,10 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    for(const p of pages(d))if(p.missing===undefined&&p.pageprops?.disambiguation===undefined)articles.set(p.title,p);
    for(const [from,to]of aliases)if(articles.has(to))articles.set(from,articles.get(to));
   }catch{warnings.push('Some source descriptions could not be loaded.');}}
+  for(const highlight of highlights){const p=articles.get(highlight.title),q=p?.coordinates?.[0];
+   if(!q||!p.extract||p.title===location.title||!P.allowed(p.title,p.extract)||P.closed.test(p.extract)||!visitorPage(p))continue;
+   candidates.push({name:p.title,text:p.extract.slice(0,1300)+'\n\nLocal tourism context: '+highlight.context.slice(0,1000),coord:{lat:q.lat,lon:q.lon},imageFile:p.pageimage,wikidata:p.pageprops?.wikibase_item,guideListed:true,queryFeatured:true,mustSee:true,supportingSources:[highlight.source],source:{kind:'wikipedia',title:p.title,url:pageUrl('wikipedia',p.title)}});
+  }
   for(const name of guideNames){const p=articles.get(name),q=p?.coordinates?.[0];
    if(!q||!p.extract||p.title===location.title||!P.allowed(p.title,p.extract)||P.closed.test(p.extract)||!visitorPage(p))continue;
    candidates.push({name:p.title,text:p.extract.slice(0,1400),coord:{lat:q.lat,lon:q.lon},imageFile:p.pageimage,wikidata:p.pageprops?.wikibase_item,guideListed:true,queryFeatured:true,source:{kind:'wikipedia',title:p.title,url:pageUrl('wikipedia',p.title)}});
@@ -170,13 +207,15 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    if(!c.coord||!P.allowed(c.name,c.text)||P.closed.test(c.text))continue;
    const distance=P.distanceKm(location,c.coord);if(distance>limit)continue;
    const key=(c.wikidata||c.wikipedia||c.name).toLowerCase().replace(/[^\p{L}\p{N}]+/gu,'');
-   if(unique.has(key)){const old=unique.get(key);if(c.queryFeatured&&!old.queryFeatured){old.queryFeatured=true;old.prominence+=2;}continue;}
+   if(unique.has(key)){const old=unique.get(key);if(c.mustSee){old.mustSee=true;old.supportingSources=c.supportingSources||old.supportingSources;if(c.text.includes('Local tourism context:'))old.text=c.text;}if(c.queryFeatured&&!old.queryFeatured){old.queryFeatured=true;old.prominence+=2;}continue;}
    const old=[...unique.values()].find(x=>(x.name.toLowerCase()===c.name.toLowerCase()&&P.distanceKm(c.coord,x.coord)<2)||P.distanceKm(c.coord,x.coord)<.15&&(x.name.toLowerCase().includes(c.name.toLowerCase())||c.name.toLowerCase().includes(x.name.toLowerCase())));if(old)continue;
    unique.set(key,{...c,distanceKm:Number(distance.toFixed(1)),theme:c.historyOnly?'history':P.themeOf(c.name,c.text),prominence:(/\b(iconic|famous|major attraction|must-see|most popular|renowned)\b/i.test(c.text)?2:0)+(travelRoot?.text.includes(c.name)?2:0)+(c.queryFeatured?2:0)});
   }
   // Interleave themes before trimming, so a dense centre cannot consume the prompt.
   const groups=['nature','culture','experience','architecture','history'].map(theme=>[...unique.values()].filter(c=>c.theme===theme).sort((a,b)=>b.prominence-a.prominence||Number(b.guideListed)-Number(a.guideListed)||a.distanceKm-b.distanceKm));
-  const balanced=[];while(groups.some(g=>g.length)&&balanced.length<config.maxCandidates)for(const g of groups)if(g.length&&balanced.length<config.maxCandidates)balanced.push(g.shift());
+  const balanced=[...unique.values()].filter(c=>c.mustSee).sort((a,b)=>b.prominence-a.prominence||a.distanceKm-b.distanceKm).slice(0,config.maxCandidates);
+  for(const g of groups)for(let i=g.length-1;i>=0;i--)if(balanced.includes(g[i]))g.splice(i,1);
+  while(groups.some(g=>g.length)&&balanced.length<config.maxCandidates)for(const g of groups)if(g.length&&balanced.length<config.maxCandidates)balanced.push(g.shift());
   balanced.forEach(c=>c.id='place-'+createHash('sha256').update(c.name+'|'+c.coord.lat.toFixed(3)+'|'+c.coord.lon.toFixed(3)).digest('hex').slice(0,12));
   return {location,candidates:balanced,warnings:[...new Set(warnings)],radiusKm:limit,travelSource:travelRoot?{kind:'wikivoyage',title:travelRoot.title,url:pageUrl('wikivoyage',travelRoot.title)}:null};
  }
@@ -199,4 +238,4 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
  }
  return {resolve,collect,images};
 }
-module.exports={createSourceProvider,parseListings,districtTitles,stripWiki};
+module.exports={createSourceProvider,parseListings,districtTitles,stripWiki,tourismHighlights};

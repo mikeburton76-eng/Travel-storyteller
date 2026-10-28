@@ -1,6 +1,27 @@
 'use strict';
 const $=id=>document.getElementById(id);
-const sections={attractions:['🌍','Main attractions','A varied selection of sights and experiences. A town search can cover the wider area.'],gems:['💎','Hidden gems','Less obvious places, included only when sources support that description.'],history:['📜','Historic stories','People, discoveries, traditions and how places changed. A map may show a related area rather than an exact event site.'],buildings:['🏛️','Buildings & architecture','Architecture with a story worth noticing.']};
+const sections={
+ summary:['📖','Summary of the place','Get a feel for the place'],
+ attractions:['📍','Must-see sights','The main things to see and do'],
+ gems:['💎','Hidden gems','Less obvious places worth finding'],
+ walks:['🥾','Walks','Explore on foot'],
+ photos:['📷','Photo opportunities','Find a great view'],
+ family:['👨‍👩‍👧','Family activities','Enjoy a day out together'],
+ museums:['🖼️','Museums & galleries','Discover art and culture'],
+ history:['📜','History & stories','What happened here'],
+ buildings:['🏛️','Buildings & architecture','Notice the details']
+};
+const categoryHelp={walks:'Places and routes mentioned for walking. Check the route, terrain and conditions; map distances are to the place, not the length of a walk.',photos:'Views and subjects supported by the source descriptions. Stay on permitted paths and check access before visiting.',family:'Ideas with source information relevant to families. Check age guidance, steps, access and current visitor information.',museums:'Places to explore collections, art and local culture.',history:'People, discoveries, traditions and how places changed. Map links may show a related area.',attractions:'Main visitor highlights from the available sources. A town search includes the surrounding area.',gems:'Lesser-known suggestions need supporting source evidence.',buildings:'Buildings worth noticing for their architecture or story.'};
+function renderCategories(){
+ $('tabs').replaceChildren();
+ for(const[key,[icon,name,hint]]of Object.entries(sections)){
+  const b=document.createElement('button');b.type='button';b.className='tab';b.setAttribute('aria-pressed',String(selected===key));
+  const symbol=node('span',icon);symbol.className='category-icon';symbol.setAttribute('aria-hidden','true');
+  const copy=document.createElement('span');copy.className='category-copy';copy.append(node('strong',name),node('small',hint));
+  b.append(symbol,copy);b.onclick=()=>{selected=key;renderCategories();if(guide){render();if(key==='summary')$('introduction').scrollIntoView?.({behavior:'smooth',block:'start'})}else $('categoryMsg').textContent='Choose a location below to explore '+name.toLowerCase()+'.'};$('tabs').append(b);
+ }
+ $('categoryMsg').textContent=guide?(selected==='summary'?'A short introduction to help you get your bearings.':categoryHelp[selected]):'Choose what interests you, then search a place or use your location.';
+}
 const icons={nature:'🌿',culture:'🎨',experience:'🎟️',architecture:'🏛️',history:'📜'};
 let guide=null,selected='attractions',requestId=0,lastInput=null,controller=null,activeItem=null,inFlight=false;
 function link(text,url){const a=document.createElement('a');a.textContent=text;a.href=url;a.target='_blank';a.rel='noopener';return a}
@@ -12,17 +33,11 @@ function render(){
  $('coverage').replaceChildren(...guide.coverage.notes.map(text=>node('p',text)));
  $('checked').textContent='Sources checked '+new Date(guide.checkedAt).toLocaleString('en-GB')+'. Next source check when in use after '+new Date(guide.cacheUntil).toLocaleString('en-GB')+'.';
  $('areaSources').replaceChildren();for(const source of guide.sources){$('areaSources').append(link(source.kind==='wikivoyage'?'Travel guide ↗':'Place background ↗',source.url),document.createTextNode(' '))}
- if(selected==='buildings'&&!guide.items.some(x=>x.section===selected))selected='attractions';
- $('tabs').replaceChildren();
- for(const[key,[icon,name]]of Object.entries(sections)){
-  const count=guide.items.filter(x=>x.section===key).length;
-  // Optional architecture category appears only when there are supported entries.
-  if(key==='buildings'&&!count)continue;
-  const b=node('button',`${icon} ${name} (${count})`);b.className='tab';b.type='button';b.setAttribute('aria-pressed',String(selected===key));b.onclick=()=>{selected=key;render()};$('tabs').append(b);
- }
- $('sectionTitle').textContent=selected==='attractions'&&guide.selectionMode!=='ai'?'Places to explore':sections[selected][1];$('sectionHelp').textContent=sections[selected][2];
+ renderCategories();
+ if(selected==='summary'){$('results').hidden=true;return}
+ $('sectionTitle').textContent=sections[selected][1];$('sectionHelp').textContent=categoryHelp[selected]||sections[selected][2];
  $('cards').replaceChildren();const items=guide.items.filter(x=>x.section===selected);
- if(!items.length){const p=node('p',selected==='gems'?'No sufficiently supported hidden gems found in this search. We have not filled the list with guesses.':selected==='history'?'No suitable historical stories identified in this search yet. This does not mean the place has no history.':'No suitable suggestions found in this search yet. Try a nearby town or add the region and country.');p.className='empty';$('cards').append(p);return}
+ if(!items.length){const p=node('p',selected==='gems'?'No sufficiently supported hidden gems found in this search. We have not filled the list with guesses.':selected==='history'?'No suitable historical stories identified in this search yet. This does not mean the place has no history.':'No sufficiently supported '+sections[selected][1].toLowerCase()+' found in this search yet. You can try another category or a nearby town.');p.className='empty';$('cards').append(p);return}
  for(const item of items){
   const card=document.createElement('article');card.className='card';const photo=node('button',icons[item.theme]||'📍');photo.className='photo';photo.type='button';photo.setAttribute('aria-label','Read about '+item.title);photo.onclick=()=>openItem(item);
   if(item.image){const img=document.createElement('img');img.src=item.image.url;img.alt=item.name;img.loading='lazy';img.referrerPolicy='no-referrer';img.onerror=()=>photo.replaceChildren(document.createTextNode(icons[item.theme]||'📍'));photo.replaceChildren(img)}
@@ -37,6 +52,7 @@ function openItem(item){
  const image=$('detailImage');image.replaceChildren();image.hidden=!item.image;
  if(item.image){const img=document.createElement('img');img.src=item.image.url;img.alt=item.name;img.referrerPolicy='no-referrer';img.onerror=()=>{image.hidden=true};const credit=document.createElement('figcaption');credit.append(node('small',item.image.creator+' · '+item.image.license+' '),link('Photo and licence ↗',item.image.sourceUrl));image.append(img,credit)}
  $('detailLinks').replaceChildren(link('Source: '+item.source.title+' ↗',item.source.url),link(item.historyOnly?'Related area ↗':'View map ↗',mapUrl(item)));
+ for(const source of item.supportingSources||[])$('detailLinks').append(link('Local guide: '+source.title+' ↗',source.url));
  $('reportText').hidden=true;document.body.style.overflow='hidden';$('dialog').showModal();$('dialog').scrollTop=0;
 }
 $('close').onclick=()=>$('dialog').close();$('dialog').addEventListener('close',()=>document.body.style.overflow='');
@@ -57,3 +73,5 @@ $('searchForm').addEventListener('submit',event=>{event.preventDefault();const p
 $('gps').onclick=()=>{if(!navigator.geolocation){$('error').hidden=false;$('error').textContent='GPS is unavailable. Please search a town instead.';return}$('status').textContent='Waiting for your location permission…';navigator.geolocation.getCurrentPosition(p=>explore({lat:Number(p.coords.latitude.toFixed(3)),lon:Number(p.coords.longitude.toFixed(3))}),()=>{$('status').textContent='Location could not be found. You can search a town instead.'},{enableHighAccuracy:false,timeout:15000,maximumAge:60000})};
 function refreshIfDue(){if(guide&&lastInput&&!inFlight&&!document.hidden&&Date.now()>=Date.parse(guide.cacheUntil))explore(lastInput,{quiet:true})}
 setInterval(refreshIfDue,600000);document.addEventListener('visibilitychange',refreshIfDue);
+
+renderCategories();
