@@ -35,15 +35,15 @@ function render(){
  $('areaSources').replaceChildren();for(const source of guide.sources){$('areaSources').append(link(source.kind==='wikivoyage'?'Travel guide ↗':'Place background ↗',source.url),document.createTextNode(' '))}
  renderCategories();
  if(selected==='summary'){$('results').hidden=true;return}
- $('sectionTitle').textContent=sections[selected][1];$('sectionHelp').textContent=categoryHelp[selected]||sections[selected][2];
+ $('sectionTitle').textContent=sections[selected][1]+' near '+guide.location.label;$('sectionHelp').textContent=categoryHelp[selected]||sections[selected][2];
  $('cards').replaceChildren();const items=guide.items.filter(x=>x.section===selected);
  if(!items.length){const p=node('p',selected==='gems'?'No sufficiently supported hidden gems found in this search. We have not filled the list with guesses.':selected==='history'?'No suitable historical stories identified in this search yet. This does not mean the place has no history.':'No sufficiently supported '+sections[selected][1].toLowerCase()+' found in this search yet. You can try another category or a nearby town.');p.className='empty';$('cards').append(p);return}
  for(const item of items){
   const card=document.createElement('article');card.className='card';const photo=node('button',icons[item.theme]||'📍');photo.className='photo';photo.type='button';photo.setAttribute('aria-label','Read about '+item.title);photo.onclick=()=>openItem(item);
   if(item.image){const img=document.createElement('img');img.src=item.image.url;img.alt=item.name;img.loading='lazy';img.referrerPolicy='no-referrer';img.onerror=()=>photo.replaceChildren(document.createTextNode(icons[item.theme]||'📍'));photo.replaceChildren(img)}
-  const body=document.createElement('div');body.className='body';body.append(node('small',item.historyOnly?'Related to this area':item.distanceKm+' km from '+(guide.location.mode==='nearby'?'your search location':'the area’s reference point')));
-  const h=document.createElement('h3'),title=node('button',item.title);title.className='title';title.onclick=()=>openItem(item);h.append(title);body.append(h,node('p',item.reason));
-  const links=document.createElement('div');links.className='links';const read=node('button','Read about it');read.className='textbutton';read.onclick=()=>openItem(item);links.append(read,link(item.historyOnly?'Related area ↗':'View map ↗',mapUrl(item)));body.append(links);card.append(photo,body);$('cards').append(card);
+  const body=document.createElement('div');body.className='body';const kind=node('small',selected==='attractions'?'Place to see':sections[selected][1]);kind.className='kind';body.append(kind);
+  const h=document.createElement('h3'),title=node('button',item.title);title.className='title';title.onclick=()=>openItem(item);h.append(title);body.append(h,node('p',item.reason));const distance=node('small',item.historyOnly?'Related to this area':item.distanceKm+' km from '+(guide.location.mode==='nearby'?'your search location':'the area’s reference point'));distance.className='distance';body.append(distance);
+  const links=document.createElement('div');links.className='links';const read=node('button','Read about this place');read.className='textbutton';read.onclick=()=>openItem(item);links.append(read,link(item.historyOnly?'Related area ↗':'View map ↗',mapUrl(item)));body.append(links);card.append(photo,body);$('cards').append(card);
  }
 }
 function openItem(item){
