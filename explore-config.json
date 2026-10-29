@@ -1,5 +1,5 @@
 {
-  "version": 8,
+  "version": 9,
   "enabled": true,
   "cacheMinutes": 360,
   "cacheEntries": 32,
@@ -9,7 +9,7 @@
   "maxResults": 20,
   "maxCategoriesPerPlace": 4,
   "maxRepeatedAppearances": 10,
-  "maxOutputTokens": 5200,
+  "maxOutputTokens": 8000,
   "nearbyRadiusKm": 3,
   "nearbyWiderRadiusKm": 10,
   "areaRadiusKm": 40,
@@ -28,6 +28,6 @@
   },
   "specialistTrialEnabled": true,
   "specialistMaxCandidates": 16,
-  "specialistMaxOutputTokens": 1800,
+  "specialistMaxOutputTokens": 2600,
   "specialistMaxResults": 28
 }

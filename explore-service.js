@@ -12,8 +12,8 @@ Sections: attractions = defining visitor sights/experiences; gems = source-suppo
 Events go in events, covering festivals, Wakes Weeks, well dressings, arts, fringe and music events. Never infer this year’s dates from annual recurrence or claim an event is happening now. All exact date display is controlled by separately verified organiser data. Do not assume every performance suits children; refer readers to individual show age guidance.
 Exclude massacres, shootings, rape, sexual abuse, violent crime, suicide, torture, terrorism, graphic/distressing material, adult venues and sites whose main appeal is those subjects. Do not erase a harmful event by rewriting its name into a cheerful attraction; omit the subject. familySuitable must be true only after reviewing the whole provided record.
 Write a warm 2–3 sentence overview from the area evidence, with no invented personal visit, superlatives, promises of access or opening times. If evidence is insufficient, return an empty overview. Supply a short literal evidence quote from that area evidence.
-For secondary browsing, optionally add extraCategories entries for walks, photos, family or museums. Each needs its own short reason and a literal quote from the candidate supporting this specific use. Do not assume a hill is an easy walk or that a venue suits children without evidence. No invented routes, distances, opening hours or accessibility promises. Across the whole response add at most eight extra-category entries.
-For each chosen candidate, write a concise reason why it is interesting (maximum 45 words) based on its text, and a literal evidence quote (20–220 characters) from the same record. For history also give an engaging storyTitle and a storyFocus of people, discovery, tradition, engineering, everyday-life or change. Gems require a quote evidencing lesser-known/local-favourite status or a distinctive specialist shop experience, such as second-hand books, bookbinding, local crafts, antiques or unusual collections. Ordinary retail and chain shops do not qualify merely by selling things. Select imageId only from that candidate's image record, and only if its metadata suggests a relevant, family-suitable view of this exact subject. Otherwise null; an icon is fine. Metadata cannot prove pixel-level suitability; be conservative.
+For secondary browsing, optionally add extraCategories entries for walks, photos, family or museums. Each needs its own informative description and a literal quote from the candidate supporting this specific use. Do not assume a hill is an easy walk or that a venue suits children without evidence. No invented routes, distances, opening hours or accessibility promises. Across the whole response add at most eight extra-category entries.
+For each chosen candidate, write an informative 3–5 sentence description, aiming for 60–90 words when the supplied evidence supports it. Explain what it is, what makes it interesting and what a visitor can see or do; for history explain the people, event or change and why it matters. Apply the same depth to all sections and extraCategories reasons. Use fewer words when the source is thin: never pad, repeat claims, invent visitor facilities, or imply verified access, opening times, prices, route difficulty or suitability. The description must be based only on the candidate text, and a literal evidence quote (20–220 characters) from the same record. For history also give an engaging storyTitle and a storyFocus of people, discovery, tradition, engineering, everyday-life or change. Gems require a quote evidencing lesser-known/local-favourite status or a distinctive specialist shop experience, such as second-hand books, bookbinding, local crafts, antiques or unusual collections. Ordinary retail and chain shops do not qualify merely by selling things. Select imageId only from that candidate's image record, and only if its metadata suggests a relevant, family-suitable view of this exact subject. Otherwise null; an icon is fine. Metadata cannot prove pixel-level suitability; be conservative.
 Return ONLY JSON: {"overview":"...","overviewEvidence":"literal quote","choices":[{"id":"place-1","section":"attractions","reason":"...","evidence":"literal quote","familySuitable":true,"confidence":0.9,"visitorValue":5,"storyTitle":"","storyFocus":"","gemEvidence":"","imageId":null,"extraCategories":[{"section":"walks","reason":"a different, supported angle","evidence":"literal quote"}]}]}. Order choices by visitor value within each section. At most 16 choices total; fewer is welcome. No markdown.`;
 const norm=s=>P.plain(s).toLocaleLowerCase('en').replace(/\s+/g,' ').trim();
 function evidenceIn(quote,text,min=20){return typeof quote==='string'&&quote.length>=min&&quote.length<=240&&norm(text).includes(norm(quote))}
@@ -24,7 +24,7 @@ function validateSelection(answer,pool,config) {
  for(const choice of [...priority,...raw]){
   const c=byId.get(choice.id);
   if(!c||!P.visitorSuitable(c.name,c.text,c.historyOnly)||seen.has(c.id+'|'+choice.section)||!SECTIONS.includes(choice.section)||choice.familySuitable!==true||typeof choice.confidence!=='number'||choice.confidence<.75||choice.confidence>1||!Number.isInteger(choice.visitorValue)||choice.visitorValue<3||choice.visitorValue>5)continue;
-  if(typeof choice.reason!=='string'||choice.reason.length<25||choice.reason.length>400||(!P.allowed(c.name,c.text,choice.reason,choice.storyTitle||'')||P.sourceMarkup.test(choice.reason+' '+(choice.storyTitle||'')))||!evidenceIn(choice.evidence,c.text))continue;
+  if(typeof choice.reason!=='string'||choice.reason.length<25||choice.reason.length>1000||(!P.allowed(c.name,c.text,choice.reason,choice.storyTitle||'')||P.sourceMarkup.test(choice.reason+' '+(choice.storyTitle||'')))||!evidenceIn(choice.evidence,c.text))continue;
   if((c.historyOnly&&choice.section!=='history')||c.walkOnly)continue;
   if(choice.section==='events'&&!c.eventArea&&!P.eventPlace(c.name,c.text))continue;
   if((c.eventArea||P.eventPlace(c.name,c.text))&&/\b(today|tonight|tomorrow|this week|this weekend|happening now|tickets available|20[0-9]{2}|January|February|March|April|May|June|July|August|September|October|November|December)\b/i.test(choice.reason))continue;
@@ -54,7 +54,7 @@ function validateSelection(answer,pool,config) {
  for(const {candidate:c,choice,base}of extras){
   const rule=EXTRA_RULES[choice.section],key=c.id+'|'+choice.section;
   if(!rule||seen.has(key)||extraCount>=8||selected.length>=config.maxResults||(selected.some(x=>x.id===c.id)&&selected.length-new Set(selected.map(x=>x.id)).size>=config.maxRepeatedAppearances)||selected.filter(x=>x.id===c.id).length>=config.maxCategoriesPerPlace)continue;
-  if(typeof choice.reason!=='string'||choice.reason.length<20||choice.reason.length>320||(!P.allowed(choice.reason)||P.sourceMarkup.test(choice.reason))||!evidenceIn(choice.evidence,c.text)||!rule.test(choice.evidence))continue;
+  if(typeof choice.reason!=='string'||choice.reason.length<20||choice.reason.length>1000||(!P.allowed(choice.reason)||P.sourceMarkup.test(choice.reason))||!evidenceIn(choice.evidence,c.text)||!rule.test(choice.evidence))continue;
   if(selected.filter(x=>x.section===choice.section).length>=config.categoryLimits[choice.section])continue;
   selected.push({...base,title:c.name,section:choice.section,reason:choice.reason});seen.add(key);extraCount++;
  }
@@ -62,13 +62,30 @@ function validateSelection(answer,pool,config) {
  if(typeof answer?.overview==='string'&&answer.overview.length<=650&&P.allowed(answer.overview)&&!P.sourceMarkup.test(answer.overview)&&evidenceIn(answer.overviewEvidence,pool.location.overview))overview=answer.overview;
  return {overview,items:selected};
 }
+// Fuller literal excerpts for provisional and non-AI descriptions; never invent details.
+function sourceDescription(value,focus='',events=false){
+ const sentences=P.plain(value).match(/[^.!?\n]+(?:[.!?](?=\s|$)|$)/g)||[];
+ const safe=sentence=>P.allowed(sentence)&&!P.sourceMarkup.test(sentence)&&(!events||!/\b(today|tonight|tomorrow|this week|this weekend|happening now|tickets available|20[0-9]{2}|January|February|March|April|May|June|July|August|September|October|November|December)\b/i.test(sentence));
+ const start=Math.max(0,sentences.findIndex(sentence=>sentence.trim()===focus.trim()));
+ const selected=[];
+ for(const sentence of sentences.slice(start)){
+  const part=sentence.trim();if(!part||!safe(part))continue;
+  const next=[...selected,part].join(' ');
+  if(next.length>1000||next.split(/\s+/).length>100){
+   if(!selected.length){const words=part.split(/\s+/).slice(0,100);while(words.join(' ').length>995)words.pop();if(words.length)selected.push(words.join(' ')+(words.length<part.split(/\s+/).length?'…':''));}
+   break;
+  }
+  selected.push(part);if(selected.length>=4)break;
+ }
+ return selected.join(' ');
+}
 function fallbackSelection(pool,config){
  const seenTheme=new Map(),items=[];
  const ordered=[...pool.candidates].sort((a,b)=>Number(!!b.mustSee)-Number(!!a.mustSee));
  for(const c of ordered){
   if(c.historyOnly||c.walkOnly||c.eventArea||P.eventPlace(c.name,c.text)||c.shop||P.shopGem(c.name,c.text)||!P.visitorSuitable(c.name,c.text))continue;
   const n=seenTheme.get(c.theme)||0;if(!c.mustSee&&n>=3)continue;seenTheme.set(c.theme,n+1);
-  const short=c.text.match(/^.{1,260}?[.!?](?:\s|$)/)?.[0]||c.text.slice(0,220);
+  const short=sourceDescription(c.text);if(!short)continue;
   items.push({id:c.id,name:c.name,title:c.name,section:'attractions',theme:c.theme,reason:short,background:c.text,source:c.source,supportingSources:c.supportingSources||[],mustSee:!!c.mustSee,coord:c.coord,distanceKm:c.distanceKm,image:c.image||null,selectionBasis:'source'});
   if(items.length>=config.categoryLimits.attractions)break;
  }
@@ -80,6 +97,7 @@ function sourceCategories(chosen,pool,config){
  const add=(c,section,reason)=>{
   if(items.length>=config.maxResults||items.some(x=>x.id===c.id&&x.section===section)||items.filter(x=>x.section===section).length>=config.categoryLimits[section])return;
   const prior=items.filter(x=>x.id===c.id);
+  reason=sourceDescription(c.text,reason,section==='events');if(!reason)return;
   if(prior.length>=config.maxCategoriesPerPlace||(prior.length&&items.length-new Set(items.map(x=>x.id)).size>=config.maxRepeatedAppearances))return;
   items.push({id:c.id,name:c.name,title:c.name,section,theme:c.theme,reason,background:c.text,source:c.source,supportingSources:c.supportingSources||[],mustSee:!!c.mustSee,coord:c.coord,distanceKm:c.distanceKm,image:c.image||null,historyOnly:!!c.historyOnly,eventArea:!!c.eventArea||P.eventPlace(c.name,c.text),eventTiming:c.eventTiming||null,selectionBasis:'source'});
  };
@@ -103,7 +121,7 @@ function sourceCategories(chosen,pool,config){
 }
 
 function specialistPrompt(role){
- return SYSTEM+`\nYou are the ${role==='family'?'family activities':'walking'} specialist. Return at most four choices, ONLY with section "${role}". Select independently of the main attraction list. Each evidence quote must explicitly support this use. ${role==='family'?"Family ownership or a person's family history is not evidence of a family activity. Look for activities for children, families, playgrounds or age guidance.":"Select established walking routes or places explicitly described for walking. A hill, viewpoint or roadside landmark alone is insufficient. Do not infer route length, difficulty, accessibility or safety."} Keep reasons to two short sentences. No overview is needed. Select only the supplied matching image ID when relevant; never invent a photograph.`;
+ return SYSTEM+`\nYou are the ${role==='family'?'family activities':'walking'} specialist. Return at most four choices, ONLY with section "${role}". Select independently of the main attraction list. Each evidence quote must explicitly support this use. ${role==='family'?"Family ownership or a person's family history is not evidence of a family activity. Look for activities for children, families, playgrounds or age guidance.":"Select established walking routes or places explicitly described for walking. A hill, viewpoint or roadside landmark alone is insufficient. Do not infer route length, difficulty, accessibility or safety."} Aim for 3–5 informative sentences and 60–90 words when supported by the source. Shorter is better than padding thin evidence. No overview is needed. Select only the supplied matching image ID when relevant; never invent a photograph.`;
 }
 function mergeSpecialists(chosen,answers,pool,cfg){
  const items=[...chosen.items],byId=new Map(pool.candidates.map(c=>[c.id,c]));
@@ -219,4 +237,4 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
  }
  return {explore};
 }
-module.exports={createExploreService,validateSelection,fallbackSelection,sourceCategories,mergeSpecialists,specialistPrompt,SYSTEM};
+module.exports={createExploreService,validateSelection,fallbackSelection,sourceCategories,sourceDescription,mergeSpecialists,specialistPrompt,SYSTEM};
