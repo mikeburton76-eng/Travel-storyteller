@@ -2,6 +2,7 @@
 const P = require('./explore-policy');
 const {createHash}=require('node:crypto');
 const {nearbyWalks,walkingParagraphs}=require('./explore-walks');
+const {nearbyEvents}=require('./explore-events');
 const UA = 'TravelStoryteller/1.0 (https://github.com/mikeburton76-eng/Travel-storyteller)';
 const endpoint = { wikipedia:'https://en.wikipedia.org/w/api.php', wikivoyage:'https://en.wikivoyage.org/w/api.php', commons:'https://commons.wikimedia.org/w/api.php' };
 const pageUrl = (kind, title) => `https://en.${kind}.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`;
@@ -120,6 +121,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   if(location.mode==='nearby'&&near.length<4){try{near=await base(config.nearbyWiderRadiusKm);warnings.push('The search includes a wider area because nearby results were limited.');}catch{}}
   const limit=location.mode==='nearby'?config.nearbyWiderRadiusKm:radius;
   candidates.push(...nearbyWalks(location,limit));
+  const eventTask=nearbyEvents(location,limit,{fetchImpl}).catch(()=>[]);
   // Small, explicitly provisional cards can arrive before the broader searches.
   const first=near.flatMap(p=>{
    const q=p.coordinates?.[0],text=p.description||'';
@@ -157,7 +159,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    }
   }catch{warnings.push('A travel guide was not available for this place.');}}
   if(location.title){
-   const terms=['tourism','walk','viewpoint','family','museum','gallery','park','beach','market','bridge','tourist information','visitor centre','(bookshop OR bookstore OR bookbinding)','(antiques OR artisan OR \"record shop\")','hiking trail','circular walk','(children OR playground OR kids)','(zoo OR aquarium OR wildlife)'];
+   const terms=['tourism','walk','viewpoint','family','museum','gallery','park','beach','market','bridge','tourist information','visitor centre','(festival OR fringe OR jazz)','(\"wakes week\" OR \"well dressing\" OR carnival)','(bookshop OR bookstore OR bookbinding)','(antiques OR artisan OR \"record shop\")','hiking trail','circular walk','(children OR playground OR kids)','(zoo OR aquarium OR wildlife)'];
    const searchName=location.title.replace(/,.*$/,'');
    const results=await Promise.allSettled(terms.map(terms=>api('wikipedia',{generator:'search',gsrsearch:`"${searchName.replace(/["\\]/g,'')}" ${terms}`,gsrnamespace:0,gsrlimit:12,prop:'coordinates|description|extracts|pageimages|pageprops',exintro:1,explaintext:1,exlimit:'max',piprop:'name'})));
    for(const result of results){if(result.status!=='fulfilled'){warnings.push('Some subject searches were unavailable.');continue}
@@ -188,6 +190,10 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    const d=await api('wikipedia',{titles:location.title,redirects:1,prop:'extracts',explaintext:1});const page=pages(d)[0];
    const paragraphs=(page?.extract||'').slice(0,65000).split(/\n\s*\n/).filter(p=>p.length>110&&p.length<1600&&P.allowed(p)&&/\b(1[0-9]{3}|20[0-2][0-9]|century|centuries|ancient|historic|traditional)\b/i.test(p));
    const topics=[['Inventions and connections',/\b(invent\w*|discover\w*|engineer\w*|railway|canal|transport|scientist)\b/i],['Traditions and everyday life',/\b(tradition\w*|festival|craft|market|indigenous|language|cultural)\b/i],['How the place grew',/\b(settlement|settled|grew|founded|harbour|harbor|port|industry|industrial)\b/i]];
+   if(location.scale!=='city')for(const [label,re]of [['Wakes Week',/\bwakes? week\b/i],['Well dressing',/\bwell[ -]dressing\b/i]]){
+    const paragraph=paragraphs.find(p=>re.test(p));
+    if(paragraph)candidates.push({name:location.label+' — '+label,text:paragraph.slice(0,1200),coord:{lat:location.lat,lon:location.lon},source:location.source,eventArea:true,eventTiming:null,theme:'culture'});
+   }
    const used=new Set();for(const [name,re]of topics){const text=paragraphs.filter(p=>re.test(p)&&!used.has(p)).slice(0,2);text.forEach(p=>used.add(p));if(text.length)candidates.push({name:`${location.label}: ${name.toLowerCase()}`,text:text.join('\n\n').slice(0,1800),coord:{lat:location.lat,lon:location.lon},source:location.source,historyOnly:true,guideListed:false});}
   }catch{warnings.push('Broader historical background could not be loaded.');}}
   if(travelRoot){const lead=stripWiki(travelRoot.text.split(/\n==/)[0]).slice(0,1200);if(P.allowed(lead))location.overview=(location.overview+'\n\n'+lead).slice(0,3000);}
@@ -227,6 +233,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
     for(const c of candidates)if(c.source?.kind==='wikipedia'&&c.source.title===page.title){c.walkingContext=context;c.text=c.text.slice(0,900)+'\n\nWalking context: '+context;}
    }
   }catch{warnings.push('Some walking descriptions could not be checked.');}
+  candidates.unshift(...await eventTask);
   const unique=new Map();
   for(const c of candidates){
    if(!c.coord||!P.visitorSuitable(c.name,c.text,c.historyOnly))continue;
@@ -234,11 +241,12 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    const key=(c.wikidata||c.wikipedia||c.name).toLowerCase().replace(/[^\p{L}\p{N}]+/gu,'');
    if(unique.has(key)){const old=unique.get(key);if(c.mustSee){old.mustSee=true;old.supportingSources=c.supportingSources||old.supportingSources;if(c.text.includes('Local tourism context:'))old.text=c.text;}if(c.queryFeatured&&!old.queryFeatured){old.queryFeatured=true;old.prominence+=2;}continue;}
    const old=[...unique.values()].find(x=>(x.name.toLowerCase()===c.name.toLowerCase()&&P.distanceKm(c.coord,x.coord)<2)||P.distanceKm(c.coord,x.coord)<.15&&(x.name.toLowerCase().includes(c.name.toLowerCase())||c.name.toLowerCase().includes(x.name.toLowerCase())));if(old)continue;
-   unique.set(key,{...c,distanceKm:Number(distance.toFixed(1)),theme:c.historyOnly?'history':c.walkOnly?'nature':P.themeOf(c.name,c.text),prominence:(/\b(iconic|famous|major attraction|must-see|most popular|renowned)\b/i.test(c.text)?2:0)+(travelRoot?.text.includes(c.name)?2:0)+(c.queryFeatured?2:0)});
+   unique.set(key,{...c,eventArea:!!c.eventArea||P.eventPlace(c.name,c.text),distanceKm:Number(distance.toFixed(1)),theme:c.historyOnly?'history':c.walkOnly?'nature':(c.eventArea||P.eventPlace(c.name,c.text))?'culture':P.themeOf(c.name,c.text),prominence:(/\b(iconic|famous|major attraction|must-see|most popular|renowned)\b/i.test(c.text)?2:0)+(travelRoot?.text.includes(c.name)?2:0)+(c.queryFeatured?2:0)});
   }
   // Interleave themes before trimming, so a dense centre cannot consume the prompt.
   const groups=['nature','culture','experience','architecture','history'].map(theme=>[...unique.values()].filter(c=>c.theme===theme).sort((a,b)=>b.prominence-a.prominence||Number(b.guideListed)-Number(a.guideListed)||a.distanceKm-b.distanceKm));
   const balanced=[...unique.values()].filter(c=>c.mustSee||c.walkOnly).sort((a,b)=>b.prominence-a.prominence||a.distanceKm-b.distanceKm).slice(0,config.maxCandidates);
+  for(const c of [...unique.values()].filter(c=>c.eventArea).slice(0,4))if(!balanced.includes(c)&&balanced.length<config.maxCandidates)balanced.push(c);
   // Reserve a few evidenced category candidates before dense-city trimming.
   const lenses=[/\b(family[ -]friendly|families|for children|children[’']s|kids|playground|all ages)\b/i,/\b(circular walk|walking trail|footpath|hiking trail)\b/i];
   for(const lens of lenses)for(const c of [...unique.values()].filter(c=>!c.historyOnly&&lens.test(c.text)).slice(0,4))if(!balanced.includes(c)&&balanced.length<config.maxCandidates)balanced.push(c);

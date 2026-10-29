@@ -1,7 +1,7 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs'),path=require('node:path');
 class Element {constructor(){this.children=[];this.style={};this.attrs={};this.events={};this.hidden=false;this.value='';this.textContent='';this.open=false}replaceChildren(...c){this.children=c}append(...c){this.children.push(...c)}setAttribute(k,v){this.attrs[k]=v}addEventListener(k,fn){this.events[k]=fn}showModal(){this.open=true}close(){this.open=false;this.events.close?.()}}
-function app(fetchImpl){const nodes={},document={hidden:false,body:new Element(),getElementById:id=>nodes[id]??=new Element(),createElement:()=>new Element(),createTextNode:text=>({textContent:text}),addEventListener(){}};const context=vm.createContext({document,navigator:{},console,Date,setInterval(){},setTimeout,clearTimeout,AbortController,fetch:fetchImpl});vm.runInContext(fs.readFileSync(path.join(__dirname,'../explore-client.js'),'utf8'),context);return{nodes,run:source=>vm.runInContext(source,context)}}
+function app(fetchImpl,search=''){const nodes={},document={hidden:false,body:new Element(),getElementById:id=>nodes[id]??=new Element(),createElement:()=>new Element(),createTextNode:text=>({textContent:text}),addEventListener(){}};const context=vm.createContext({document,navigator:{},console,Date,setInterval(){},setTimeout,clearTimeout,AbortController,URLSearchParams,location:{search},fetch:fetchImpl});vm.runInContext(fs.readFileSync(path.join(__dirname,'../explore-client.js'),'utf8'),context);return{nodes,run:source=>vm.runInContext(source,context)}}
 const fixture={location:{label:'Sample Town',mode:'area'},overview:'A town by a river.',coverage:{notes:[]},sources:[],checkedAt:'2026-10-28T12:00:00Z',cacheUntil:'2026-10-28T18:00:00Z',selectionMode:'ai',items:[{id:'a',name:'A garden',title:'A garden',theme:'nature',section:'attractions',reason:'<img src=x onerror=alert(1)>',background:'Source background.',coord:{lat:1,lon:2},distanceKm:1,source:{title:'Garden source',url:'https://en.wikipedia.org/wiki/Garden'},image:null}]};
 test('renders categories, candid empty sections, literal external text and accessible reading panel',()=>{const a=app();a.run('guide='+JSON.stringify(fixture)+';render()');assert.equal(a.nodes.cards.children.length,1);assert.equal(a.nodes.tabs.children.length,2);assert.equal(a.nodes.tabs.children[0].attrs['aria-pressed'],'true');assert.match(a.nodes.cards.children[0].children[1].children[2].textContent,/<img/);a.run('openItem(guide.items[0])');assert.equal(a.nodes.dialog.open,true);assert.equal(a.nodes.detailBackground.textContent,'Source background.');a.run('selected="gems";render()');assert.equal(a.nodes.tabs.children[0].attrs['aria-pressed'],'true');assert.equal(a.nodes.cards.children.length,1);});
 test('latest search wins even when an older response arrives afterwards',async()=>{const pending=[];const a=app(()=>new Promise(resolve=>pending.push(resolve)));const first=a.run('explore({place:"First"})'),second=a.run('explore({place:"Second"})');pending[1]({ok:true,json:async()=>({...fixture,location:{label:'Second',mode:'area'}})});await second;pending[0]({ok:true,json:async()=>({...fixture,location:{label:'First',mode:'area'}})});await first;assert.equal(a.nodes.locationName.textContent,'Second');assert.equal(a.nodes.searchBtn.disabled,false);});
@@ -16,7 +16,7 @@ test('shows provisional cards before the completed guide and keeps categories us
  await done;assert.equal(requests,2);assert.equal(a.nodes.overview.textContent,'The completed guide.');assert.equal(a.nodes.tabs.children[0].attrs['aria-pressed'],'true');
 });
 test('specialist trial is explicitly selected and carried with the search request',async()=>{
- let input;const a=app(async(url,options)=>{input=JSON.parse(options.body);return {ok:true,json:async()=>({...fixture,complete:true})}});
+ let input;const a=app(async(url,options)=>{input=JSON.parse(options.body);return {ok:true,json:async()=>({...fixture,complete:true})}},'?research=1');
  a.nodes.specialists ??= new Element();a.nodes.specialists.checked=true;
  await a.run('explore({place:"Sample Town"})');assert.equal(input.specialists,true);assert.equal(input.progressive,true);
 });
@@ -31,11 +31,20 @@ test('five categories fold legacy sections without duplicate cards and retain ph
 });
 
 test('empty categories are hidden only when complete and an empty guide has no dead-end buttons',()=>{
- const a=app();a.run('guide='+JSON.stringify({...fixture,complete:false})+';render()');assert.equal(a.nodes.tabs.children.length,5);
+ const a=app();a.run('guide='+JSON.stringify({...fixture,complete:false})+';render()');assert.equal(a.nodes.tabs.children.length,6);
  a.run('guide.complete=true;selected="family";render()');assert.equal(a.nodes.tabs.children.length,2);assert.equal(a.nodes.tabs.children[0].attrs['aria-pressed'],'true');
  a.run('guide.items=[];render()');assert.equal(a.nodes.tabs.children.length,0);assert.equal(a.nodes.results.hidden,true);assert.match(a.nodes.categoryMsg.textContent,/No supported suggestions/);
 });
 test('visitor information appears separately from attraction categories with its source and map',()=>{
  const a=app();a.run('guide='+JSON.stringify({...fixture,visitorInformation:[{name:'Test Visitor Centre',description:'Visitor information in the town.',mapQuery:'Test town visitor centre',website:'https://example.org/visitors',source:{title:'Operator',url:'https://example.org/visitors'}}]})+';render()');assert.equal(a.nodes.visitorInformation.hidden,false);assert.equal(a.nodes.visitorInfoList.children.length,1);
  a.run('guide.visitorInformation=[];render()');assert.equal(a.nodes.visitorInformation.hidden,true);
+});
+test('normal app hides research controls and cannot accidentally enable extra AI reviews',async()=>{
+ let input;const a=app(async(url,options)=>{input=JSON.parse(options.body);return {ok:true,json:async()=>({...fixture,complete:true})}});assert.equal(a.nodes.researchOptions.hidden,true);a.nodes.specialists??=new Element();a.nodes.specialists.checked=true;
+ await a.run('explore({place:"Sample Town"})');assert.equal(input.specialists,false);
+});
+test('What’s on displays organiser-verified years or an explicit unconfirmed date label',()=>{
+ const a=app();const event={...fixture.items[0],id:'festival',name:'Town Festival',title:'Town Festival',section:'events',theme:'culture',eventArea:true,eventTiming:{start:'2027-07-07',end:'2027-07-25',sourceUrl:'https://example.org/festival'}};
+ a.run('guide='+JSON.stringify({...fixture,items:[event],complete:true})+';selected="events";render()');assert.equal(a.nodes.tabs.children.length,1);assert.ok(a.nodes.cards.children[0].children[1].children.some(c=>c.textContent.includes('2027')));
+ a.run('guide.items[0].eventTiming=null;render()');assert.ok(a.nodes.cards.children[0].children[1].children.some(c=>c.textContent.includes('Dates to be confirmed')));
 });
