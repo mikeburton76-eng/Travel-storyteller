@@ -11,7 +11,7 @@ test('Explore routes retain authentication and reject invalid or cross-site requ
  const script=await fetch(base+'/explore-client.js',{headers:{authorization:auth}});assert.equal(script.status,200);assert.match(await script.text(),/refreshIfDue/);
  for(const route of ['/', '/explore', '/voice-test']){
   const response=await fetch(base+route,{headers:{authorization:auth}});assert.equal(response.status,200);
-  const html=await response.text();assert.match(html,/aria-label="Main navigation"/);assert.match(html,/href="\/navigation.css"/);assert.match(html,/id="app-menu-toggle"/);assert.match(html,/Try the voice/);
+  const html=await response.text();assert.match(html,/aria-label="Main navigation"/);assert.match(html,/href="\/navigation.css"/);assert.match(html,/id="app-menu-toggle"/);assert.doesNotMatch(html,/Try the voice/);
  }
  for(const route of ['/navigation.css','/navigation.js']){
   assert.equal((await fetch(base+route)).status,401);const response=await fetch(base+route,{headers:{authorization:auth}});assert.equal(response.status,200);assert.match(response.headers.get('cache-control'),/no-store/);

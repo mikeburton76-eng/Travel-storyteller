@@ -115,7 +115,7 @@ The local source-based test using live Tideswell retrieval returned five walking
 
 ## Shared bottom navigation — 29 October 2026
 
-The owner chose the Bottom tabs proposal. Listen (`/`), Explore (`/explore`) and Menu now remain at the bottom of all three current app pages. Menu links to Listen to stories, Explore nearby and Try the voice (`/voice-test`). Try the voice is the existing narrator sample/test, not another story mode. Links remain same-origin and in the same window; no browser close control is used for navigation.
+The owner chose the Bottom tabs proposal. Listen (`/`), Explore (`/explore`) and Menu now remain at the bottom of all three current app pages. Menu links to Listen to stories and Explore nearby. The owner requested that the narrator test be kept out of customer navigation. Its existing `/voice-test` page is retained for direct-link testing when changing voices; it is not a customer story mode or a separately privileged admin area. Links remain same-origin and in the same window; no browser close control is used for navigation.
 
 Shared navigation CSS includes space for the bar and iPhone safe-area inset. A native modal menu has a clear “Back to the page” button, restores focus/scrolling on close and supports native Escape dismissal. Active-page links are marked. Shared assets retain authentication and no-store behavior. This change does not remove the browser's own cross; opening the site as a Home Screen web app remains a separate user option.
 
