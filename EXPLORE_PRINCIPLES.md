@@ -74,3 +74,15 @@ Trial source checks (no paid AI calls): Castleton retrieval returned 23 candidat
 ## Five-category presentation trial — 29 October 2026
 
 Explore now presents five customer choices: Must-see sights, Hidden gems, Walks & outdoors, Family activities, History & culture. The place introduction remains above the category choices once a guide arrives. Existing research sections remain intact and reversible: buildings feed sights and heritage; museums/galleries feed culture; evidenced outdoor nature places join documented walks with a distinct card label. Photo opportunities become a Photo spot badge on matching cards. Duplicate IDs appear only once within each displayed category; justified overlap between categories remains. No new AI calls are introduced by this presentation change. Photo cards, reading panels and maps remain available.
+
+## Buxton station and empty-category correction — 29 October 2026
+
+The broad visitor filter admitted ordinary railway stations and depots; the source-only backup then placed every entry in attractions. This can explain a station-heavy main list and empty remaining categories, although the user's exact live selection mode was not captured.
+
+A shared visitor suitability check now excludes ordinary stations/depots unless their source explicitly describes a visitor attraction such as a heritage railway or railway museum. The check applies to source candidates, early cards, fallback and AI-approved choices. It does not ban railway history stories.
+
+Source-only backup and category supplementation can now independently publish literal, screened source descriptions for walking, explicit family activities, named museums/galleries, genuine historical topics and explicitly evidenced hidden gems. They respect existing result/category/overlap limits and are labelled as source-based. No invented family suitability or hidden-gem filler is added. An empty/invalid AI selection falls back candidly rather than showing an empty guide. These changes do not add AI calls.
+
+Image matching normalises underscores to spaces, addressing Wikimedia filenames that previously failed to attach their already-licensed image metadata. Backup cards retain these matching credited images.
+
+Live Buxton source retrieval followed by local source-based selection returned no station cards, walking suggestions, museum/history entries and ten cards with matched photographs. Family and hidden-gem evidence remained insufficient in this retrieval. This is not a live AI-output or current-opening-status verification. 49 automated checks passed; two unchanged voice integration checks remained skipped.

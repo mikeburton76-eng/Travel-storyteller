@@ -116,7 +116,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   // Small, explicitly provisional cards can arrive before the broader searches.
   const first=near.flatMap(p=>{
    const q=p.coordinates?.[0],text=p.description||'';
-   if(!q||text.length<20||P.closed.test(text))return [];
+   if(!q||text.length<20||!P.visitorSuitable(p.title,text))return [];
    const coord={lat:q.lat,lon:q.lon},distance=P.distanceKm(location,coord);
    if(distance>limit)return [];
    return [{id:'place-'+createHash('sha256').update(p.title+'|'+coord.lat.toFixed(3)+'|'+coord.lon.toFixed(3)).digest('hex').slice(0,12),name:p.title,text,coord,distanceKm:Number(distance.toFixed(1)),theme:P.themeOf(p.title,text),source:{kind:'wikipedia',title:p.title,url:pageUrl('wikipedia',p.title)}}];
@@ -214,7 +214,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    const q=p.coordinates?.[0]||nearPage.coordinates?.[0];candidates.push({name:p.title,text:p.extract.slice(0,1400),coord:q?{lat:q.lat,lon:q.lon}:null,imageFile:p.pageimage,source:{kind:'wikipedia',title:p.title,url:pageUrl('wikipedia',p.title)},guideListed:false,wikidata:p.pageprops?.wikibase_item});}
   const unique=new Map();
   for(const c of candidates){
-   if(!c.coord||!P.allowed(c.name,c.text)||P.closed.test(c.text))continue;
+   if(!c.coord||!P.visitorSuitable(c.name,c.text,c.historyOnly))continue;
    const distance=P.distanceKm(location,c.coord);if(distance>limit)continue;
    const key=(c.wikidata||c.wikipedia||c.name).toLowerCase().replace(/[^\p{L}\p{N}]+/gu,'');
    if(unique.has(key)){const old=unique.get(key);if(c.mustSee){old.mustSee=true;old.supportingSources=c.supportingSources||old.supportingSources;if(c.text.includes('Local tourism context:'))old.text=c.text;}if(c.queryFeatured&&!old.queryFeatured){old.queryFeatured=true;old.prominence+=2;}continue;}

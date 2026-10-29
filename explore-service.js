@@ -22,7 +22,7 @@ function validateSelection(answer,pool,config) {
  const priority=raw.filter(x=>byId.get(x.id)?.mustSee).map(x=>({...x,section:"attractions"}));
  for(const choice of [...priority,...raw]){
   const c=byId.get(choice.id);
-  if(!c||seen.has(c.id+'|'+choice.section)||!SECTIONS.includes(choice.section)||choice.familySuitable!==true||typeof choice.confidence!=='number'||choice.confidence<.75||choice.confidence>1||!Number.isInteger(choice.visitorValue)||choice.visitorValue<3||choice.visitorValue>5)continue;
+  if(!c||!P.visitorSuitable(c.name,c.text,c.historyOnly)||seen.has(c.id+'|'+choice.section)||!SECTIONS.includes(choice.section)||choice.familySuitable!==true||typeof choice.confidence!=='number'||choice.confidence<.75||choice.confidence>1||!Number.isInteger(choice.visitorValue)||choice.visitorValue<3||choice.visitorValue>5)continue;
   if(typeof choice.reason!=='string'||choice.reason.length<25||choice.reason.length>400||!P.allowed(c.name,c.text,choice.reason,choice.storyTitle||'')||!evidenceIn(choice.evidence,c.text))continue;
   if(c.historyOnly&&choice.section!=='history')continue;
   if(choice.section==='gems'&&(!evidenceIn(choice.gemEvidence,c.text)||!P.hidden.test(choice.gemEvidence)))continue;
@@ -63,13 +63,38 @@ function fallbackSelection(pool,config){
  const seenTheme=new Map(),items=[];
  const ordered=[...pool.candidates].sort((a,b)=>Number(!!b.mustSee)-Number(!!a.mustSee));
  for(const c of ordered){
-  if(c.historyOnly||!P.allowed(c.name,c.text))continue;
+  if(c.historyOnly||!P.visitorSuitable(c.name,c.text))continue;
   const n=seenTheme.get(c.theme)||0;if(!c.mustSee&&n>=3)continue;seenTheme.set(c.theme,n+1);
   const short=c.text.match(/^.{1,260}?[.!?](?:\s|$)/)?.[0]||c.text.slice(0,220);
-  items.push({id:c.id,name:c.name,title:c.name,section:'attractions',theme:c.theme,reason:short,background:c.text,source:c.source,supportingSources:c.supportingSources||[],mustSee:!!c.mustSee,coord:c.coord,distanceKm:c.distanceKm,image:null});
+  items.push({id:c.id,name:c.name,title:c.name,section:'attractions',theme:c.theme,reason:short,background:c.text,source:c.source,supportingSources:c.supportingSources||[],mustSee:!!c.mustSee,coord:c.coord,distanceKm:c.distanceKm,image:c.image||null,selectionBasis:'source'});
   if(items.length>=config.categoryLimits.attractions)break;
  }
- return {overview:'',items};
+ return sourceCategories({overview:'',items},pool,config);
+}
+
+function sourceCategories(chosen,pool,config){
+ const items=[...chosen.items];
+ const add=(c,section,reason)=>{
+  if(items.length>=config.maxResults||items.some(x=>x.id===c.id&&x.section===section)||items.filter(x=>x.section===section).length>=config.categoryLimits[section])return;
+  const prior=items.filter(x=>x.id===c.id);
+  if(prior.length>=config.maxCategoriesPerPlace||(prior.length&&items.length-new Set(items.map(x=>x.id)).size>=config.maxRepeatedAppearances))return;
+  items.push({id:c.id,name:c.name,title:c.name,section,theme:c.theme,reason,background:c.text,source:c.source,supportingSources:c.supportingSources||[],mustSee:!!c.mustSee,coord:c.coord,distanceKm:c.distanceKm,image:c.image||null,historyOnly:!!c.historyOnly,selectionBasis:'source'});
+ };
+ // Read literal descriptive sentences, without manufacturing an AI endorsement.
+ for(const c of pool.candidates){
+  if(!P.visitorSuitable(c.name,c.text,c.historyOnly))continue;
+  const sentences=c.text.match(/[^.!?\n]+(?:[.!?](?=\s|$)|$)/g)||[c.text];
+  const evidence=re=>sentences.map(s=>s.trim()).find(s=>s.length>=25&&s.length<=400&&re.test(s)&&P.allowed(s));
+  if(c.historyOnly){const reason=evidence(/\b(invent\w*|discover\w*|tradition\w*|engineer\w*|settlement|settled|grew|founded|festival|craft|community|industry|industrial|changed|transformed|develop\w*)\b/i);if(reason)add(c,'history',reason);continue;}
+  for(const section of ['walks','family','museums','gems']){
+   const rule=section==='gems'?P.hidden:EXTRA_RULES[section];
+   if(section==='museums'&&!/\b(museum|galler(?:y|ies))\b/i.test(c.name))continue;
+   const reason=evidence(rule);
+   if(!reason||(section==='walks'&&/walking distance|walked past|walk to (?:the )?station/i.test(reason)))continue;
+   add(c,section,reason);
+  }
+ }
+ return {...chosen,items};
 }
 
 function specialistPrompt(role){
@@ -124,7 +149,7 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
   if(pool.candidates.length>cfg.maxCandidates)pool.candidates=pool.candidates.slice(0,cfg.maxCandidates);
   // No AI-generated or user-supplied image URL is accepted. Only licensed source images.
   const images=await provider.images(pool.candidates);
-  for(const c of pool.candidates)c.image=images.get(String(c.imageFile||'').replace(/^File:/,''))||null;
+  for(const c of pool.candidates)c.image=images.get(String(c.imageFile||'').replace(/^File:/,'').replace(/_/g,' '))||null;
   preview(pool);
   const fingerprint=createHash('sha256').update(JSON.stringify({version:cfg.version,specialists,overview:location.overview,candidates:pool.candidates.map(({readerInterest,prominence,queryFeatured,...c})=>c).sort((a,b)=>a.id.localeCompare(b.id))})).digest('hex');
   let specialistStatus=previous?.specialistStatus||null;
@@ -136,7 +161,7 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
    const roles=specialists?['main','family','walks']:['main'];
    const results=await Promise.allSettled(roles.map(role=>ask(pool,role)));
    const answer=results[0].status==='fulfilled'?results[0].value:null;
-   if(answer)chosen=validateSelection(answer,pool,cfg);else mode='sources';
+   if(answer){chosen=validateSelection(answer,pool,cfg);if(!chosen.items.length){chosen=null;mode='sources';}}else mode='sources';
    if(specialists){
     const extras=roles.slice(1).map((role,i)=>({role,answer:results[i+1].status==='fulfilled'?results[i+1].value:null}));
     specialistStatus=Object.fromEntries(extras.map(x=>[x.role,x.answer?'reviewed':'unavailable']));
@@ -144,13 +169,15 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
    }
   }
   if(!chosen)chosen=fallbackSelection(pool,cfg);
+  chosen=sourceCategories(chosen,pool,cfg);
   const notes=[];
+  if(mode==='ai'&&chosen.items.some(x=>x.selectionBasis==='source'))notes.push('Some category suggestions use direct source descriptions rather than an AI-written summary.');
   const highlights=pool.candidates.filter(c=>c.mustSee),shown=new Set(chosen.items.filter(c=>c.section==='attractions').map(c=>c.id));
   const missingHighlights=highlights.filter(c=>!shown.has(c.id)).length;
   if(missingHighlights)notes.push('Some locally listed highlights are not included in this selection yet. The local source below can help you explore further.');
   if(specialists)notes.push('Family and walking specialist trial: '+(Object.values(specialistStatus||{}).includes('unavailable')?'one or more specialist reviews were unavailable.':'separate reviews completed; suggestions still depend on source coverage.'));
   if(mode==='sources')notes.push('The fuller guide is not available just now. These are a few source-based suggestions, rather than a ranked top list.');
-  if(chosen.items.length<4)notes.push('There are only a few supported suggestions in this search. This is not a complete list of what the area offers.');
+  if(new Set(chosen.items.map(x=>x.id)).size<4)notes.push('There are only a few supported suggestions in this search. This is not a complete list of what the area offers.');
   if(pool.warnings.length)notes.push('Some source coverage is incomplete.');
   return {_fingerprint:fingerprint,specialistStatus,aiReviewedAt:mode==='ai'?aiReviewedAt:null,version:cfg.version,location:{label:location.label,mode:location.mode,lat:location.lat,lon:location.lon},...chosen,selectionMode:mode,
    coverage:{radiusKm:pool.radiusKm,candidateCount:pool.candidates.length,highlightCount:highlights.length,missingHighlights,notes,warnings:pool.warnings},
@@ -185,4 +212,4 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
  }
  return {explore};
 }
-module.exports={createExploreService,validateSelection,fallbackSelection,mergeSpecialists,specialistPrompt,SYSTEM};
+module.exports={createExploreService,validateSelection,fallbackSelection,sourceCategories,mergeSpecialists,specialistPrompt,SYSTEM};

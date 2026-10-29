@@ -8,6 +8,13 @@ const hidden = /\b(lesser[ -]known|less[ -]visited|off the beaten (?:track|path)
 function plain(s) { return String(s || '').normalize('NFKC').replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/[\u2010-\u2015]/g, '-').replace(/<[^>]*>/g, '').trim(); }
 function allowed(...texts) { return !excluded.test(plain(texts.join(' '))); }
 function cleanParagraphs(s) { return plain(s).split(/\n\s*\n/).filter(p => allowed(p)).join('\n\n'); }
+// Transport infrastructure needs an explicit visitor attraction reason.
+function visitorSuitable(name,text,historyOnly=false){
+ if(!allowed(name,text)||closed.test(text))return false;
+ if(historyOnly)return true;
+ if(/\b(station|stations|depot|TMD|railway shed)\b/i.test(name)&&!/\b(heritage railway|steam railway|scenic railway|tourist railway|railway museum|transport museum|visitor attraction|tourist attraction|architectural landmark|UNESCO World Heritage)\b/i.test(text))return false;
+ return true;
+}
 function themeOf(name, text) {
  if(/\b(barracks|government house|town hall|office building|bank building|church|cathedral|temple|bridge|tower|streetscapes?)\b/i.test(name))return 'architecture';
  const checks=[
@@ -31,4 +38,4 @@ function coordinate(lat, lon) {
  lat = Number(lat); lon = Number(lon);
  return Number.isFinite(lat)&&Number.isFinite(lon)&&Math.abs(lat)<=90&&Math.abs(lon)<=180 ? {lat,lon} : null;
 }
-module.exports = { allowed, cleanParagraphs, plain, visitor, hidden, closed, themeOf, distanceKm, coordinate };
+module.exports = { allowed, cleanParagraphs, plain, visitor, hidden, closed, visitorSuitable, themeOf, distanceKm, coordinate };

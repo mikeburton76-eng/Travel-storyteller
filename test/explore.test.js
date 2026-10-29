@@ -43,7 +43,7 @@ test('a warm overview requires supplied area evidence',()=>{
  const p=pool(),a=answer(p);a.overviewEvidence='An invented description that does not occur in the source';assert.equal(validateSelection(a,p,defaults).overview,'');
 });
 test('small places are never padded; fallback is candid and has no invented gems',async()=>{
- const f=fixtures();const r=await f.svc.explore({place:'Tiny village'});assert.equal(r.selectionMode,'sources');assert.equal(r.items.length,2);assert.ok(r.coverage.notes.some(s=>s.includes('few')));assert.ok(r.items.every(c=>c.section==='attractions'));
+ const f=fixtures();const r=await f.svc.explore({place:'Tiny village'});assert.equal(r.selectionMode,'sources');assert.equal(r.items.filter(x=>x.section==='attractions').length,2);assert.ok(r.coverage.notes.some(s=>s.includes('few')));assert.ok(r.items.some(c=>c.section==='museums'));assert.ok(r.items.filter(c=>c.section==='gems').every(c=>P.hidden.test(c.reason)));
 });
 test('repeated and concurrent requests share a build and one AI review',async()=>{
  const f=fixtures({writer:()=>answer(pool())});const [a,b]=await Promise.all([f.svc.explore({place:'Town'}),f.svc.explore({place:' town '})]);assert.equal(f.builds,1);assert.equal(f.calls,1);assert.deepEqual(a.items,b.items);
@@ -109,4 +109,20 @@ test('progressive cards precede pictures and AI; polls share a build and final r
 test('progressive resolution errors retain actionable status and choices',async()=>{
  const svc=createExploreService({provider:{resolve:async()=>{throw Object.assign(Error('Choose a place'),{status:409,choices:[{title:'One'}]})}}});
  await assert.rejects(svc.explore({place:'Ambiguous'},{progressive:true}),e=>e.status===409&&e.choices[0].title==='One');
+});
+
+test('ordinary railway stations never become visitor recommendations; evidenced heritage attractions can',()=>{
+ for(const name of ['Buxton railway station','Hindlow railway station','Whaley Bridge railway station','Buxton TMD'])assert.equal(P.visitorSuitable(name,'A railway station serving the town, opened in 1863 and Grade II listed.'),false);
+ assert.equal(P.visitorSuitable('Heritage Station','A railway museum and visitor attraction offering steam railway rides.'),true);
+ const p=pool();p.candidates.push({...p.candidates[0],id:'station',name:'Buxton railway station',text:'A Grade II listed railway station serving Buxton since 1863.'});
+ assert.ok(!validateSelection({choices:[pick(p.candidates.at(-1))]},p,defaults).items.length);
+});
+test('source-only guide independently populates evidenced categories with credited candidate images',async()=>{
+ const p=pool();p.candidates[0].imageFile='Garden_view.jpg';const image={id:'File:Garden view.jpg',url:'https://upload.wikimedia.org/garden.jpg',creator:'Test Photographer',license:'CC BY 4.0',sourceUrl:'https://commons.wikimedia.org/wiki/File:Garden_view.jpg'};p.candidates.push({...p.candidates[0],id:'walk',name:'Valley Trail',text:'A circular walking trail follows the river valley for visitors.'});
+ p.candidates.push({...p.candidates[0],id:'family',name:'Discovery Park',text:'The park has a playground and activities for children and families.'});
+ const svc=createExploreService({readKey:()=>'',provider:{resolve:async()=>p.location,collect:async()=>p,images:async()=>new Map([['Garden view.jpg',image]])}});
+ const r=await svc.explore({place:'Test Town'});
+ for(const section of ['walks','family','museums','history'])assert.ok(r.items.some(x=>x.section===section),section);
+ assert.equal(r.selectionMode,'sources');assert.ok(r.items.every(x=>x.selectionBasis==='source'));assert.equal(r.items.find(x=>x.id==='a').image.creator,'Test Photographer');
+ assert.ok(!r.items.some(x=>x.section==='gems'&&!P.hidden.test(x.reason)));
 });

@@ -20,7 +20,7 @@ test('trial makes three bounded reviews in parallel, caches separately and toler
  const svc=createExploreService({provider:{resolve:async()=>p.location,collect:async()=>pool(),images:async()=>new Map([['Play.jpg',image]])},aiWriter:async compact=>{calls.push(compact.role);if(compact.role==='main')return {choices:[]};await gate;if(compact.role==='walks')throw Error('timeout');return {choices:[pick(p.candidates[0],'family')]}}});
  const pending=svc.explore({place:'Test Town'},{specialists:true});
  await new Promise(r=>setImmediate(r));assert.deepEqual(calls,['main','family','walks']);release();
- const result=await pending;assert.equal(result.items[0].section,'family');assert.equal(result.specialistStatus.walks,'unavailable');
+ const result=await pending;assert.ok(result.items.some(x=>x.section==='family'));assert.equal(result.specialistStatus.walks,'unavailable');
  await svc.explore({place:'Test Town'},{specialists:true});assert.equal(calls.length,3);
  await svc.explore({place:'Test Town'});assert.equal(calls.length,4);
 });
