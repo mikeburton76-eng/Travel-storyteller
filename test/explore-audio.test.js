@@ -30,3 +30,7 @@ test('switching cards ignores an older More response and resets stop pending wor
  assert.equal(a.nodes.storyName.textContent,'Museum');assert.equal(a.nodes.storyText.children.length,1);assert.ok(!a.calls.some(c=>c.url==='audio'&&c.text.includes('Old result')));
  a.run('ExploreNarration.reset()');assert.equal(a.nodes.storyPlayer.hidden,true);
 });
+
+test('phone narrator uses the selected device voice without calling the Piper endpoint',async()=>{
+ const a=setup(()=>{throw Error('No paid request expected')});a.run(`globalThis.DiscoverNarrator={ready:async()=>{},get:()=>({provider:'phone',uri:'phone-test'})};globalThis.SpeechSynthesisUtterance=class{constructor(text){this.text=text}};globalThis.speechSynthesis={getVoices:()=>[{voiceURI:'phone-test',lang:'en-GB',name:'Test voice'}],speak:u=>{globalThis.lastPhoneUtterance=u;u.onstart()},cancel:()=>{},pause:()=>{},resume:()=>{}};ExploreNarration.listen(${JSON.stringify(item)},{label:'Sample Town'})`);await tick();assert.equal(a.run('lastPhoneUtterance.text'),item.reason);assert.equal(a.run('lastPhoneUtterance.voice.voiceURI'),'phone-test');assert.ok(!a.calls.some(c=>c.url==='audio'));a.nodes.storyPause.events.click();assert.equal(a.nodes.storyResume.disabled,false);a.nodes.storyResume.events.click();assert.equal(a.nodes.storyPause.disabled,false);a.run('lastPhoneUtterance.onend()');assert.equal(a.nodes.storyReplay.disabled,false);
+});

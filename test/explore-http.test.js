@@ -7,13 +7,13 @@ test('Explore routes retain authentication and reject invalid or cross-site requ
  await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Server did not start')),5000);child.once('error',reject);child.once('exit',code=>reject(Error('Server exited '+code)));child.stdout.on('data',chunk=>{if(String(chunk).includes('is running')){clearTimeout(timer);resolve()}})});
  const base='http://127.0.0.1:'+port,auth='Basic '+Buffer.from('traveller:explore-fixture').toString('base64');
  assert.equal((await fetch(base+'/explore')).status,401);
- const page=await fetch(base+'/explore',{headers:{authorization:auth}});assert.equal(page.status,200);assert.match(await page.text(),/Discover nearby places/);
+ const page=await fetch(base+'/explore',{headers:{authorization:auth}});assert.equal(page.status,200);assert.match(await page.text(),/Discover Places/);
  const script=await fetch(base+'/explore-client.js',{headers:{authorization:auth}});assert.equal(script.status,200);assert.match(await script.text(),/refreshIfDue/);
  for(const route of ['/', '/explore', '/voice-test', '/listen']){
   const response=await fetch(base+route,{headers:{authorization:auth}});assert.equal(response.status,200);
-  const html=await response.text();assert.match(html,/aria-label="Main navigation"/);assert.match(html,/href="\/navigation.css"/);assert.match(html,/id="app-menu-toggle"/);assert.doesNotMatch(html,/Try the voice/);
+  const html=await response.text();assert.match(html,/aria-label="Main navigation"/);assert.match(html,/href="\/navigation.css"/);if(route==='/'||route==='/explore'){assert.match(html,/id="modeGo"/);assert.match(html,/id="modeHome"/)}else assert.match(html,/id="app-menu-toggle"/);assert.doesNotMatch(html,/Try the voice/);
  }
- for(const route of ['/navigation.css','/navigation.js','/explore-audio.js']){
+ for(const route of ['/navigation.css','/navigation.js','/explore-audio.js','/discover-design.css','/narrator-settings.js']){
   assert.equal((await fetch(base+route)).status,401);const response=await fetch(base+route,{headers:{authorization:auth}});assert.equal(response.status,200);assert.match(response.headers.get('cache-control'),/no-store/);
  }
  const landing=await(await fetch(base+'/',{headers:{authorization:auth}})).text();assert.match(landing,/id="storyPlayer"/);assert.match(landing,/id="backToCategories"/);

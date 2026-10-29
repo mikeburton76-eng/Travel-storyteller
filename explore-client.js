@@ -60,9 +60,9 @@ function render(){
  $('introduction').hidden=false;$('results').hidden=false;$('locationName').textContent=guide.location.label;
  $('overview').textContent=guide.overview||'Choose a suggestion below to start exploring. We have kept the selection to what the available sources can support.';
  $('coverage').replaceChildren(...guide.coverage.notes.map(text=>node('p',text)));
- $('checked').textContent='Sources checked '+new Date(guide.checkedAt).toLocaleString('en-GB')+'. Next source check when in use after '+new Date(guide.cacheUntil).toLocaleString('en-GB')+'.';
+ $('checked').textContent='Sources retrieved '+new Date(guide.checkedAt).toLocaleString('en-GB')+'. Next refresh when in use after '+new Date(guide.cacheUntil).toLocaleString('en-GB')+'.';
  $('areaSources').replaceChildren();for(const source of guide.sources){$('areaSources').append(link(source.kind==='wikivoyage'?'Travel guide ↗':'Place background ↗',source.url),document.createTextNode(' '))}
- renderCategories();renderVisitorInformation();
+ renderCategories();renderVisitorInformation();if($('listenNearby'))$('listenNearby').disabled=!guide.items.length;
  if(!Object.keys(sections).some(key=>itemsForCategory(guide.items,key).length)&&guide.complete!==false){$('results').hidden=true;return;}
  $('sectionTitle').textContent=sections[selected][1]+' near '+guide.location.label;$('sectionHelp').textContent=categoryHelp[selected]||sections[selected][2];
  $('cards').replaceChildren();const items=itemsForCategory(guide.items,selected);
@@ -72,7 +72,7 @@ function render(){
   if(item.image){const img=document.createElement('img');img.src=item.image.url;img.alt=item.name;img.loading='lazy';img.referrerPolicy='no-referrer';img.onerror=()=>photo.replaceChildren(document.createTextNode(icons[item.theme]||'📍'));photo.replaceChildren(img)}
   const body=document.createElement('div');body.className='body';const kind=node('small',originalNames[item.section]||'Place to visit');kind.className='kind';body.append(kind);
   const h=document.createElement('h3'),title=node('button',item.title);title.className='title';title.onclick=()=>openItem(item);h.append(title);body.append(h,node('p',item.reason));if(item.eventArea){const dates=node('small',eventDateLabel(item));dates.className='event-dates';body.append(dates);}if(guide.items.some(x=>x.id===item.id&&x.section==='photos')){const badge=node('small','📷 Photo spot');badge.className='photo-badge';body.append(badge);}const distance=node('small',item.eventArea?item.distanceKm+' km to the festival area':item.historyOnly?'Related to this area':item.distanceKm+' km from '+(guide.location.mode==='nearby'?'your search location':'the area’s reference point'));distance.className='distance';body.append(distance);
-  const links=document.createElement('div');links.className='links';const listen=node('button','🎧 Listen');listen.className='textbutton';listen.onclick=()=>listenToItem(item);const read=node('button','Read about this place');read.className='textbutton';read.onclick=()=>openItem(item);links.append(read,listen,link(item.eventArea?'Festival area ↗':item.historyOnly?'Related area ↗':'View map ↗',mapUrl(item)));body.append(links);card.append(photo,body);$('cards').append(card);
+  const links=document.createElement('div');links.className='links';const listen=node('button','▶ Listen to this place');listen.className='textbutton';listen.onclick=()=>listenToItem(item);const read=node('button','Read about this place');read.className='textbutton';read.onclick=()=>openItem(item);links.append(read,listen,link(item.eventArea?'Festival area ↗':item.historyOnly?'Related area ↗':'View map ↗',mapUrl(item)));body.append(links);card.append(photo,body);$('cards').append(card);
  }
 }
 function openItem(item){
@@ -123,4 +123,13 @@ if(typeof IntersectionObserver!=='undefined'){
  new IntersectionObserver(entries=>{const entry=entries[0];backCategories.hidden=!$('tabs').children.length||entry.isIntersecting||entry.boundingClientRect.top>0;},{threshold:0}).observe($('categories'));
 }else if(typeof window!=='undefined'){
  const update=()=>{backCategories.hidden=!$('tabs').children.length||$('categories').getBoundingClientRect().bottom>=0};window.addEventListener('scroll',update,{passive:true});update();
+}
+
+// UI modes reuse the original AI discovery and narration endpoints.
+if($('modeGo')&&$('modeHome')){
+ let pageMode='home';
+ const setMode=mode=>{pageMode=mode;globalThis.ExploreNarration?.stop();const controls=$('locationControls'),form=$('searchForm');if(mode==='go'){form.before(controls);$('locationHeading').textContent='Discover around you';$('modeHelp').textContent='Use your location, then choose a nearby place to read or hear.';$('listenNearby').hidden=false;$('place').placeholder='Or explore somewhere else';}else{form.after(controls);$('locationHeading').textContent='Where would you like to explore?';$('modeHelp').textContent='Search a place and choose what you would like to read or hear.';$('listenNearby').hidden=true;$('place').placeholder='Town, village or landmark — add a country';}for(const [id,on]of [['modeGo',mode==='go'],['modeHome',mode==='home']]){if(on)$(id).setAttribute('aria-current','page');else $(id).removeAttribute('aria-current')}globalThis.window?.scrollTo?.({top:0,behavior:'smooth'});};
+ $('modeGo').onclick=()=>setMode('go');$('modeHome').onclick=()=>setMode('home');
+ $('listenNearby').onclick=()=>{if(!guide?.items.length)return;const items=itemsForCategory(guide.items,selected);const item=(items.length?items:guide.items).slice().sort((a,b)=>(a.distanceKm??Infinity)-(b.distanceKm??Infinity))[0];if(item)listenToItem(item);};
+ setMode('home');
 }

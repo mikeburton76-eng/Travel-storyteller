@@ -11,7 +11,7 @@ test('shared menu opens and closes with focus and expanded state restored',()=>{
  button.events.click();menu.close();assert.equal(button.attrs['aria-expanded'],'false');assert.equal(body.style.overflow,'auto');
 });
 test('all pages have current-page links and use same-window paths in their shared navigation',()=>{
- for(const [file,href]of [['index.html','/explore'],['explore.html','/explore'],['voice-test.html',null]]){
+ for(const [file,href]of [['index.html','/explore'],['explore.html',null],['voice-test.html',null]]){
   const html=fs.readFileSync(path.join(__dirname,'..',file),'utf8');const menu=html.slice(html.indexOf('<nav class="app-nav"'));
   if(href)assert.ok(menu.includes('href="'+href+'" aria-current="page"'));
   for(const page of ['/explore', '/explore#categories'])assert.ok(menu.includes('href="'+page+'"'));
