@@ -86,3 +86,13 @@ Source-only backup and category supplementation can now independently publish li
 Image matching normalises underscores to spaces, addressing Wikimedia filenames that previously failed to attach their already-licensed image metadata. Backup cards retain these matching credited images.
 
 Live Buxton source retrieval followed by local source-based selection returned no station cards, walking suggestions, museum/history entries and ten cards with matched photographs. Family and hidden-gem evidence remained insufficient in this retrieval. This is not a live AI-output or current-opening-status verification. 49 automated checks passed; two unchanged voice integration checks remained skipped.
+
+## Empty categories and visitor information — 29 October 2026
+
+Before searching and during progressive preparation, all five category choices remain visible. Once a guide is complete, only categories with displayable cards are shown. If the current category becomes empty, the first populated category is selected. A guide with no attractions has no empty category buttons and retains any visitor information panel.
+
+Visitor information now has a separate practical panel independent of AI attraction ranking. A bounded OpenStreetMap Overpass query looks for tourism=information with information=office/visitor_centre/visitor_center, excludes boards, remote/private/explicitly closed records, deduplicates nearby offices, and shows at most three entries. It runs alongside source discovery, with a nine-second failure limit; it adds no AI calls. Website fields become HTTPS links only and are never fetched by this module. OpenStreetMap attribution and source links are displayed. Public service availability and mapped status are not guaranteed.
+
+Buxton's operator confirms the visitor centre is the Pump Room, opposite the Crescent: https://buxtoncrescentexperience.com/visitor-information/ and https://buxtoncrescentexperience.com/contact/ (checked 29 October 2026). A small source-verified visitor-service supplement retains this entry even when the public map lookup fails. Its address-based map search avoids inventing precise office coordinates. This maintained supplement is explicitly separate from the generic attraction ranking and may be extended after verifying other visitor centres. Opening hours are not stored or promised.
+
+The live public map request timed out during development, so general lookup behavior is covered by controlled responses rather than claimed live coverage. 54 automated checks passed, including hiding empty categories, selection recovery, visitor information without attractions, office filtering and Buxton fallback under outage. Two unchanged voice integration checks remained skipped.

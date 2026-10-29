@@ -150,7 +150,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    }
   }catch{warnings.push('A travel guide was not available for this place.');}}
   if(location.title){
-   const terms=['tourism','walk','viewpoint','family','museum','gallery','park','beach','market','bridge','hiking trail','circular walk','(children OR playground OR kids)','(zoo OR aquarium OR wildlife)'];
+   const terms=['tourism','walk','viewpoint','family','museum','gallery','park','beach','market','bridge','tourist information','visitor centre','hiking trail','circular walk','(children OR playground OR kids)','(zoo OR aquarium OR wildlife)'];
    const searchName=location.title.replace(/,.*$/,'');
    const results=await Promise.allSettled(terms.map(terms=>api('wikipedia',{generator:'search',gsrsearch:`"${searchName.replace(/["\\]/g,'')}" ${terms}`,gsrnamespace:0,gsrlimit:12,prop:'coordinates|description|extracts|pageimages|pageprops',exintro:1,explaintext:1,exlimit:'max',piprop:'name'})));
    for(const result of results){if(result.status!=='fulfilled'){warnings.push('Some subject searches were unavailable.');continue}
@@ -249,6 +249,6 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   }catch{/* An icon is preferable to an uncredited or uncertain picture. */}}
   return result;
  }
- return {resolve,collect,images};
+ return {resolve,collect,images,visitorInformation:location=>require('./explore-visitor-info').visitorInformation(location,{fetchImpl})};
 }
 module.exports={createSourceProvider,parseListings,districtTitles,stripWiki,tourismHighlights};

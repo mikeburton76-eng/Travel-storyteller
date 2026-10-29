@@ -19,27 +19,42 @@ function itemsForCategory(items,category){
  return [...unique.values()];
 }
 function renderCategories(){
+ const visible=Object.keys(sections).filter(key=>!guide||guide.complete===false||itemsForCategory(guide.items,key).length);
+ if(!visible.includes(selected))selected=visible[0]||'attractions';
  $('tabs').replaceChildren();
  for(const[key,[icon,name,hint]]of Object.entries(sections)){
+  if(!visible.includes(key))continue;
   const b=document.createElement('button');b.type='button';b.className='tab';b.setAttribute('aria-pressed',String(selected===key));
   const symbol=node('span',icon);symbol.className='category-icon';symbol.setAttribute('aria-hidden','true');
   const copy=document.createElement('span');copy.className='category-copy';copy.append(node('strong',name),node('small',hint));
   b.append(symbol,copy);b.onclick=()=>{selected=key;renderCategories();if(guide){render()}else $('categoryMsg').textContent='Choose a location below to explore '+name.toLowerCase()+'.'};$('tabs').append(b);
  }
- $('categoryMsg').textContent=guide?categoryHelp[selected]:'Choose what interests you, then search a place or use your location.';
+ $('categoryMsg').textContent=guide?(visible.length?categoryHelp[selected]:'No supported suggestions found for this search yet. Try a nearby town.'):'Choose what interests you, then search a place or use your location.';
 }
 const icons={nature:'🌿',culture:'🎨',experience:'🎟️',architecture:'🏛️',history:'📜'};
 let guide=null,selected='attractions',requestId=0,lastInput=null,controller=null,activeItem=null,inFlight=false;
 function link(text,url){const a=document.createElement('a');a.textContent=text;a.href=url;a.target='_blank';a.rel='noopener';return a}
 function node(tag,text){const e=document.createElement(tag);e.textContent=text;return e}
 function mapUrl(item){return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(item.coord.lat+','+item.coord.lon)}
+function renderVisitorInformation(){
+ const panel=$('visitorInformation'),list=$('visitorInfoList');list.replaceChildren();
+ const items=guide.visitorInformation||[];panel.hidden=!items.length;
+ for(const info of items){
+  const article=document.createElement('article');article.append(node('h3',info.name),node('p',info.description));
+  const links=document.createElement('p');links.className='links';
+  if(info.website)links.append(link('Visitor website ↗',info.website));
+  const query=info.mapQuery||(info.coord.lat+','+info.coord.lon);
+  links.append(link('View map ↗','https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(query)),link('Source: '+info.source.title+' ↗',info.source.url));article.append(links);list.append(article);
+ }
+}
 function render(){
  $('introduction').hidden=false;$('results').hidden=false;$('locationName').textContent=guide.location.label;
  $('overview').textContent=guide.overview||'Choose a suggestion below to start exploring. We have kept the selection to what the available sources can support.';
  $('coverage').replaceChildren(...guide.coverage.notes.map(text=>node('p',text)));
  $('checked').textContent='Sources checked '+new Date(guide.checkedAt).toLocaleString('en-GB')+'. Next source check when in use after '+new Date(guide.cacheUntil).toLocaleString('en-GB')+'.';
  $('areaSources').replaceChildren();for(const source of guide.sources){$('areaSources').append(link(source.kind==='wikivoyage'?'Travel guide ↗':'Place background ↗',source.url),document.createTextNode(' '))}
- renderCategories();
+ renderCategories();renderVisitorInformation();
+ if(!Object.keys(sections).some(key=>itemsForCategory(guide.items,key).length)&&guide.complete!==false){$('results').hidden=true;return;}
  $('sectionTitle').textContent=sections[selected][1]+' near '+guide.location.label;$('sectionHelp').textContent=categoryHelp[selected]||sections[selected][2];
  $('cards').replaceChildren();const items=itemsForCategory(guide.items,selected);
  if(!items.length){const p=node('p',guide.complete===false?'Suggestions for this category are still being prepared.':selected==='gems'?'No sufficiently supported hidden gems found in this search. We have not filled the list with guesses.':selected==='history'?'No supported history or cultural suggestions found in this search yet. This does not mean the place has no history or culture.':'No sufficiently supported '+sections[selected][1].toLowerCase()+' found in this search yet. You can try another category or a nearby town.');p.className='empty';$('cards').append(p);return}

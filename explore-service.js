@@ -137,6 +137,7 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
  }
  async function build(input,previous,publish,specialists) {
   const location=await provider.resolve(input);
+  const infoTask=provider.visitorInformation?Promise.resolve().then(()=>provider.visitorInformation(location)).catch(()=>({items:[],unavailable:true})):Promise.resolve({items:[],unavailable:false});
   function preview(pool){
    const chosen=fallbackSelection(pool,cfg);
    if(!chosen.items.length)return;
@@ -170,6 +171,7 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
   }
   if(!chosen)chosen=fallbackSelection(pool,cfg);
   chosen=sourceCategories(chosen,pool,cfg);
+  const visitorInfo=await infoTask;
   const notes=[];
   if(mode==='ai'&&chosen.items.some(x=>x.selectionBasis==='source'))notes.push('Some category suggestions use direct source descriptions rather than an AI-written summary.');
   const highlights=pool.candidates.filter(c=>c.mustSee),shown=new Set(chosen.items.filter(c=>c.section==='attractions').map(c=>c.id));
@@ -179,7 +181,7 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
   if(mode==='sources')notes.push('The fuller guide is not available just now. These are a few source-based suggestions, rather than a ranked top list.');
   if(new Set(chosen.items.map(x=>x.id)).size<4)notes.push('There are only a few supported suggestions in this search. This is not a complete list of what the area offers.');
   if(pool.warnings.length)notes.push('Some source coverage is incomplete.');
-  return {_fingerprint:fingerprint,specialistStatus,aiReviewedAt:mode==='ai'?aiReviewedAt:null,version:cfg.version,location:{label:location.label,mode:location.mode,lat:location.lat,lon:location.lon},...chosen,selectionMode:mode,
+  return {_fingerprint:fingerprint,visitorInformation:visitorInfo.items,visitorInformationUnavailable:visitorInfo.unavailable,specialistStatus,aiReviewedAt:mode==='ai'?aiReviewedAt:null,version:cfg.version,location:{label:location.label,mode:location.mode,lat:location.lat,lon:location.lon},...chosen,selectionMode:mode,
    coverage:{radiusKm:pool.radiusKm,candidateCount:pool.candidates.length,highlightCount:highlights.length,missingHighlights,notes,warnings:pool.warnings},
    sources:[location.source,pool.travelSource].filter(Boolean),checkedAt:new Date(now()).toISOString(),cacheUntil:new Date(now()+cfg.cacheMinutes*60000).toISOString()};
  }
