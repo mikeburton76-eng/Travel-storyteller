@@ -24,7 +24,7 @@ function validateSelection(answer,pool,config) {
   const c=byId.get(choice.id);
   if(!c||!P.visitorSuitable(c.name,c.text,c.historyOnly)||seen.has(c.id+'|'+choice.section)||!SECTIONS.includes(choice.section)||choice.familySuitable!==true||typeof choice.confidence!=='number'||choice.confidence<.75||choice.confidence>1||!Number.isInteger(choice.visitorValue)||choice.visitorValue<3||choice.visitorValue>5)continue;
   if(typeof choice.reason!=='string'||choice.reason.length<25||choice.reason.length>400||(!P.allowed(c.name,c.text,choice.reason,choice.storyTitle||'')||P.sourceMarkup.test(choice.reason+' '+(choice.storyTitle||'')))||!evidenceIn(choice.evidence,c.text))continue;
-  if(c.historyOnly&&choice.section!=='history')continue;
+  if((c.historyOnly&&choice.section!=='history')||c.walkOnly)continue;
   if(choice.section==='gems'&&(!evidenceIn(choice.gemEvidence,c.text)||!P.gemEvidence(choice.gemEvidence,c.name)))continue;
   if(choice.section==='history'){
    if(!['people','discovery','tradition','engineering','everyday-life','change'].includes(choice.storyFocus)||typeof choice.storyTitle!=='string'||choice.storyTitle.length<12||choice.storyTitle.length>140)continue;
@@ -63,7 +63,7 @@ function fallbackSelection(pool,config){
  const seenTheme=new Map(),items=[];
  const ordered=[...pool.candidates].sort((a,b)=>Number(!!b.mustSee)-Number(!!a.mustSee));
  for(const c of ordered){
-  if(c.historyOnly||c.shop||P.shopGem(c.name,c.text)||!P.visitorSuitable(c.name,c.text))continue;
+  if(c.historyOnly||c.walkOnly||c.shop||P.shopGem(c.name,c.text)||!P.visitorSuitable(c.name,c.text))continue;
   const n=seenTheme.get(c.theme)||0;if(!c.mustSee&&n>=3)continue;seenTheme.set(c.theme,n+1);
   const short=c.text.match(/^.{1,260}?[.!?](?:\s|$)/)?.[0]||c.text.slice(0,220);
   items.push({id:c.id,name:c.name,title:c.name,section:'attractions',theme:c.theme,reason:short,background:c.text,source:c.source,supportingSources:c.supportingSources||[],mustSee:!!c.mustSee,coord:c.coord,distanceKm:c.distanceKm,image:c.image||null,selectionBasis:'source'});
@@ -87,6 +87,7 @@ function sourceCategories(chosen,pool,config){
   const evidence=re=>sentences.map(s=>s.trim()).find(s=>s.length>=25&&s.length<=400&&re.test(s)&&P.allowed(s));
   if(c.historyOnly){const reason=evidence(/\b(invent\w*|discover\w*|tradition\w*|engineer\w*|settlement|settled|grew|founded|festival|craft|community|industry|industrial|changed|transformed|develop\w*)\b/i);if(reason)add(c,'history',reason);continue;}
   for(const section of ['walks','family','museums','gems']){
+   if(c.walkOnly&&section!=='walks')continue;
    const rule=section==='gems'?{test:text=>P.gemEvidence(text,c.name)}:EXTRA_RULES[section];
    if(section==='museums'&&!/\b(museum|galler(?:y|ies))\b/i.test(c.name))continue;
    const reason=evidence(rule);
@@ -127,7 +128,7 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
   if(!pool.candidates.length)return null;
   aiCalls.push(now());
   const system=role==='main'?SYSTEM:specialistPrompt(role);
-  const compact={role,location:{name:pool.location.label,mode:pool.location.mode,radiusKm:pool.radiusKm,evidence:pool.location.overview},candidates:pool.candidates.map(c=>({id:c.id,name:c.name,text:c.text.includes('Local tourism context:')?c.text.slice(0,800)+'\nLocal tourism context: '+c.text.split('Local tourism context:')[1].slice(0,700):c.text.slice(0,1200),theme:c.theme,mustSee:!!c.mustSee,historyOnly:!!c.historyOnly,guideListed:c.guideListed,distanceKm:c.distanceKm,image:c.image?{id:c.image.id,caption:c.image.caption,license:c.image.license}:null}))};
+  const compact={role,location:{name:pool.location.label,mode:pool.location.mode,radiusKm:pool.radiusKm,evidence:pool.location.overview},candidates:pool.candidates.map(c=>({id:c.id,name:c.name,text:(c.text.includes('Local tourism context:')?c.text.slice(0,800)+'\nLocal tourism context: '+c.text.split('Local tourism context:')[1].slice(0,700):c.text.slice(0,1200))+(c.walkingContext?'\nWalking context: '+c.walkingContext.slice(0,600):''),theme:c.theme,mustSee:!!c.mustSee,historyOnly:!!c.historyOnly,guideListed:c.guideListed,distanceKm:c.distanceKm,image:c.image?{id:c.image.id,caption:c.image.caption,license:c.image.license}:null}))};
   if(aiWriter)return aiWriter(compact,system);
   const response=await fetchImpl('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},signal:AbortSignal.timeout(45000),body:JSON.stringify({model,max_tokens:role==='main'?cfg.maxOutputTokens:cfg.specialistMaxOutputTokens,system,messages:[{role:'user',content:JSON.stringify(compact)}]})});
   if(!response.ok)throw Error('The fuller guide could not be prepared.');
