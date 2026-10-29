@@ -1,26 +1,32 @@
 'use strict';
 const $=id=>document.getElementById(id);
 const sections={
- summary:['📖','Summary of the place','Get a feel for the place'],
  attractions:['📍','Must-see sights','The main things to see and do'],
  gems:['💎','Hidden gems','Less obvious places worth finding'],
- walks:['🥾','Walks','Explore on foot'],
- photos:['📷','Photo opportunities','Find a great view'],
+ walks:['🥾','Walks & outdoors','Walks, gardens, parks and countryside'],
  family:['👨‍👩‍👧','Family activities','Enjoy a day out together'],
- museums:['🖼️','Museums & galleries','Discover art and culture'],
- history:['📜','History & stories','What happened here'],
- buildings:['🏛️','Buildings & architecture','Notice the details']
+ history:['📜','History & culture','Stories, museums, galleries and heritage']
 };
-const categoryHelp={walks:'Places and routes mentioned for walking. Check the route, terrain and conditions; map distances are to the place, not the length of a walk.',photos:'Views and subjects supported by the source descriptions. Stay on permitted paths and check access before visiting.',family:'Ideas with source information relevant to families. Check age guidance, steps, access and current visitor information.',museums:'Places to explore collections, art and local culture.',history:'People, discoveries, traditions and how places changed. Map links may show a related area.',attractions:'Main visitor highlights from the available sources. A town search includes the surrounding area.',gems:'Lesser-known suggestions need supporting source evidence.',buildings:'Buildings worth noticing for their architecture or story.'};
+const categoryHelp={walks:'Walks and outdoor places. Each card distinguishes a documented walk from a place to visit. Check routes, terrain and access; map distances are not walk lengths.',family:'Ideas with source information relevant to families. Check age guidance, steps, access and current visitor information.',history:'Discover local stories, museums, galleries and heritage. Map links for stories may show a related area.',attractions:'Main visitor highlights, landmarks and buildings from the available sources. A town search includes the surrounding area.',gems:'Less obvious places with a source-supported reason to visit.'};
+const originalNames={attractions:'Place to see',gems:'Hidden gem',walks:'Walk',photos:'Photo spot',family:'Family activity',museums:'Museum or gallery',history:'History & stories',buildings:'Building & architecture'};
+function outdoorPlace(item){return item.theme==='nature'&&/\b(park|gardens?|woodland|forest|hill|mountain|ridge|valley|beach|coast|lake|reservoir|nature reserve|countryside)\b/i.test(item.name+' '+item.background)}
+function itemsForCategory(items,category){
+ const groups={attractions:['attractions','buildings'],gems:['gems'],walks:['walks'],family:['family'],history:['history','museums','buildings']};
+ const matched=items.filter(x=>groups[category].includes(x.section)||(category==='walks'&&outdoorPlace(x)&&!x.historyOnly)||(x.section==='photos'&&category===(outdoorPlace(x)?'walks':'attractions')));
+ const rank=x=>groups[category].indexOf(x.section)<0?99:groups[category].indexOf(x.section);
+ matched.sort((a,b)=>rank(a)-rank(b));
+ const unique=new Map();for(const item of matched)if(!unique.has(item.id))unique.set(item.id,item);
+ return [...unique.values()];
+}
 function renderCategories(){
  $('tabs').replaceChildren();
  for(const[key,[icon,name,hint]]of Object.entries(sections)){
   const b=document.createElement('button');b.type='button';b.className='tab';b.setAttribute('aria-pressed',String(selected===key));
   const symbol=node('span',icon);symbol.className='category-icon';symbol.setAttribute('aria-hidden','true');
   const copy=document.createElement('span');copy.className='category-copy';copy.append(node('strong',name),node('small',hint));
-  b.append(symbol,copy);b.onclick=()=>{selected=key;renderCategories();if(guide){render();if(key==='summary')$('introduction').scrollIntoView?.({behavior:'smooth',block:'start'})}else $('categoryMsg').textContent='Choose a location below to explore '+name.toLowerCase()+'.'};$('tabs').append(b);
+  b.append(symbol,copy);b.onclick=()=>{selected=key;renderCategories();if(guide){render()}else $('categoryMsg').textContent='Choose a location below to explore '+name.toLowerCase()+'.'};$('tabs').append(b);
  }
- $('categoryMsg').textContent=guide?(selected==='summary'?'A short introduction to help you get your bearings.':categoryHelp[selected]):'Choose what interests you, then search a place or use your location.';
+ $('categoryMsg').textContent=guide?categoryHelp[selected]:'Choose what interests you, then search a place or use your location.';
 }
 const icons={nature:'🌿',culture:'🎨',experience:'🎟️',architecture:'🏛️',history:'📜'};
 let guide=null,selected='attractions',requestId=0,lastInput=null,controller=null,activeItem=null,inFlight=false;
@@ -34,20 +40,19 @@ function render(){
  $('checked').textContent='Sources checked '+new Date(guide.checkedAt).toLocaleString('en-GB')+'. Next source check when in use after '+new Date(guide.cacheUntil).toLocaleString('en-GB')+'.';
  $('areaSources').replaceChildren();for(const source of guide.sources){$('areaSources').append(link(source.kind==='wikivoyage'?'Travel guide ↗':'Place background ↗',source.url),document.createTextNode(' '))}
  renderCategories();
- if(selected==='summary'){$('results').hidden=true;return}
  $('sectionTitle').textContent=sections[selected][1]+' near '+guide.location.label;$('sectionHelp').textContent=categoryHelp[selected]||sections[selected][2];
- $('cards').replaceChildren();const items=guide.items.filter(x=>x.section===selected);
- if(!items.length){const p=node('p',guide.complete===false?'Suggestions for this category are still being prepared.':selected==='gems'?'No sufficiently supported hidden gems found in this search. We have not filled the list with guesses.':selected==='history'?'No suitable historical stories identified in this search yet. This does not mean the place has no history.':'No sufficiently supported '+sections[selected][1].toLowerCase()+' found in this search yet. You can try another category or a nearby town.');p.className='empty';$('cards').append(p);return}
+ $('cards').replaceChildren();const items=itemsForCategory(guide.items,selected);
+ if(!items.length){const p=node('p',guide.complete===false?'Suggestions for this category are still being prepared.':selected==='gems'?'No sufficiently supported hidden gems found in this search. We have not filled the list with guesses.':selected==='history'?'No supported history or cultural suggestions found in this search yet. This does not mean the place has no history or culture.':'No sufficiently supported '+sections[selected][1].toLowerCase()+' found in this search yet. You can try another category or a nearby town.');p.className='empty';$('cards').append(p);return}
  for(const item of items){
   const card=document.createElement('article');card.className='card';const photo=node('button',icons[item.theme]||'📍');photo.className='photo';photo.type='button';photo.setAttribute('aria-label','Read about '+item.title);photo.onclick=()=>openItem(item);
   if(item.image){const img=document.createElement('img');img.src=item.image.url;img.alt=item.name;img.loading='lazy';img.referrerPolicy='no-referrer';img.onerror=()=>photo.replaceChildren(document.createTextNode(icons[item.theme]||'📍'));photo.replaceChildren(img)}
-  const body=document.createElement('div');body.className='body';const kind=node('small',selected==='attractions'?'Place to see':sections[selected][1]);kind.className='kind';body.append(kind);
-  const h=document.createElement('h3'),title=node('button',item.title);title.className='title';title.onclick=()=>openItem(item);h.append(title);body.append(h,node('p',item.reason));const distance=node('small',item.historyOnly?'Related to this area':item.distanceKm+' km from '+(guide.location.mode==='nearby'?'your search location':'the area’s reference point'));distance.className='distance';body.append(distance);
+  const body=document.createElement('div');body.className='body';const kind=node('small',originalNames[item.section]||'Place to visit');kind.className='kind';body.append(kind);
+  const h=document.createElement('h3'),title=node('button',item.title);title.className='title';title.onclick=()=>openItem(item);h.append(title);body.append(h,node('p',item.reason));if(guide.items.some(x=>x.id===item.id&&x.section==='photos')){const badge=node('small','📷 Photo spot');badge.className='photo-badge';body.append(badge);}const distance=node('small',item.historyOnly?'Related to this area':item.distanceKm+' km from '+(guide.location.mode==='nearby'?'your search location':'the area’s reference point'));distance.className='distance';body.append(distance);
   const links=document.createElement('div');links.className='links';const read=node('button','Read about this place');read.className='textbutton';read.onclick=()=>openItem(item);links.append(read,link(item.historyOnly?'Related area ↗':'View map ↗',mapUrl(item)));body.append(links);card.append(photo,body);$('cards').append(card);
  }
 }
 function openItem(item){
- activeItem=item;$('detailTitle').textContent=item.title;$('detailKind').textContent=sections[item.section][1];$('detailReason').textContent=item.reason;$('detailBackground').textContent=item.background;$('background').open=false;
+ activeItem=item;$('detailTitle').textContent=item.title;$('detailKind').textContent=originalNames[item.section]||'Place to visit';$('detailReason').textContent=item.reason;$('detailBackground').textContent=item.background;$('background').open=false;
  $('detailDistance').textContent=item.historyOnly?'This story is associated with the area shown on the map.':item.distanceKm+' km in a straight line from the search reference point. Check a suitable route and current access before travelling.';
  const image=$('detailImage');image.replaceChildren();image.hidden=!item.image;
  if(item.image){const img=document.createElement('img');img.src=item.image.url;img.alt=item.name;img.referrerPolicy='no-referrer';img.onerror=()=>{image.hidden=true};const credit=document.createElement('figcaption');credit.append(node('small',item.image.creator+' · '+item.image.license+' '),link('Photo and licence ↗',item.image.sourceUrl));image.append(img,credit)}
