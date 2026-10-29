@@ -160,7 +160,7 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 204, {});
   }
 
-  const exploreFiles = { '/explore': ['explore.html', 'text/html; charset=utf-8'], '/explore-client.js': ['explore-client.js', 'text/javascript; charset=utf-8'] };
+  const exploreFiles = { '/navigation.css': ['navigation.css', 'text/css; charset=utf-8'], '/navigation.js': ['navigation.js', 'text/javascript; charset=utf-8'], '/explore': ['explore.html', 'text/html; charset=utf-8'], '/explore-client.js': ['explore-client.js', 'text/javascript; charset=utf-8'] };
   const exploreFile = exploreFiles[req.url.split('?')[0]];
   if (req.method === 'GET' && exploreFile) {
     res.writeHead(200, { 'Content-Type': exploreFile[1], 'Cache-Control': 'private, no-store' });

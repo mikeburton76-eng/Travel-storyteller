@@ -32,6 +32,8 @@
   #sources h2 { font-size: 1rem; margin: 0 0 8px; }
   #sources ul { margin: 0; padding-left: 20px; }
 </style>
+<link rel="stylesheet" href="/navigation.css">
+<script src="/navigation.js" defer></script>
 </head>
 <body>
 <main>
@@ -310,6 +312,16 @@
   }).catch(error=>{voiceHelp.textContent=error.message;});
   window.addEventListener('pagehide',stopSpeaking);
 </script>
+<nav class="app-nav" aria-label="Main navigation">
+<a href="/" aria-current="page"><span class="app-nav-icon" aria-hidden="true">🎧</span><span>Listen</span></a>
+<a href="/explore"><span class="app-nav-icon" aria-hidden="true">📍</span><span>Explore</span></a>
+<button type="button" id="app-menu-toggle" aria-haspopup="dialog" aria-controls="app-menu" aria-expanded="false"><span class="app-nav-icon" aria-hidden="true">☰</span><span>Menu</span></button>
+</nav>
+<dialog id="app-menu" aria-labelledby="app-menu-title"><h2 id="app-menu-title">Travel Storyteller</h2><nav aria-label="All pages">
+<a href="/" aria-current="page">🎧 Listen to stories</a>
+<a href="/explore">📍 Explore nearby</a>
+<a href="/voice-test">🔊 Try the voice</a>
+</nav><button type="button" id="app-menu-close">Back to the page</button></dialog>
 </body>
 </html>
 

@@ -1,0 +1,12 @@
+/* Shared navigation for all Travel Storyteller pages. */
+body{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px));scroll-padding-bottom:110px}
+.app-nav{position:fixed;z-index:100;bottom:0;left:0;right:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;max-width:700px;margin:auto;padding:8px 12px calc(8px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid #c9dbe2;box-shadow:0 -3px 14px #23343e12;color:#23343e;font:16px/1.3 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.app-nav a,.app-nav button{box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:58px;min-width:0;margin:0;padding:8px 5px;border:0;border-radius:10px;background:transparent;color:#23343e;text-decoration:none;font:inherit;font-weight:600;cursor:pointer}
+.app-nav [aria-current=page],.app-nav button[aria-expanded=true]{background:#e1f1f5;color:#075a79}
+.app-nav .app-nav-icon{font-size:22px;line-height:1.15}
+#app-menu{position:fixed;inset:auto 12px calc(92px + env(safe-area-inset-bottom,0px));box-sizing:border-box;width:calc(100% - 24px);max-width:460px;max-height:calc(100dvh - 125px);margin:0 auto;padding:20px;border:1px solid #c9dbe2;border-radius:18px;background:#fff;color:#23343e;overflow:auto;font:16px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+#app-menu::backdrop{background:#142a3866}#app-menu h2{margin:0 0 12px;font:700 25px/1.3 Georgia,serif}
+#app-menu nav{display:grid;gap:8px}#app-menu a,#app-menu button{display:block;box-sizing:border-box;width:100%;min-height:48px;margin:0;padding:12px 14px;border:0;border-radius:9px;text-align:left;background:#edf3f5;color:#075a79;font:inherit;text-decoration:none;cursor:pointer}
+#app-menu [aria-current=page]{background:#e1f1f5;font-weight:700}#app-menu button{margin-top:14px;background:#17617c;color:#fff;text-align:center}
+.app-nav a:focus-visible,.app-nav button:focus-visible,#app-menu a:focus-visible,#app-menu button:focus-visible{outline:3px solid #e0a100;outline-offset:2px}
+@media(min-width:724px){.app-nav{border-radius:16px 16px 0 0;border:1px solid #c9dbe2;border-bottom:0}}

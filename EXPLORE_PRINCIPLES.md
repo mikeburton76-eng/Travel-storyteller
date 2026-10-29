@@ -112,3 +112,11 @@ The Tideswell retrieval found surrounding dales but often no route-level evidenc
 A small reviewed-route adapter supplies a National Park-sourced Tideswell Dale entry where the encyclopedia has no adequate standalone record. See `explore-walks.js` for its publisher links, reviewed date and source-derived starting point. Route supplements are selected geographically, reserved before trimming, and appear only under walking, not automatically as main attractions. The adapter is extensible but currently contains one reviewed entry; it is not worldwide route coverage or a live route-status service. No copyrighted publisher photographs are copied.
 
 The local source-based test using live Tideswell retrieval returned five walking entries, including the picnic-site route, Miller's Dale, Peter Dale, Taddington Moor and Hay Dale. This is not proof of real AI ranking. A complete route through Litton Mill and Cressbrook has not been added or inferred from adjacent landmarks; it needs suitable checked route evidence. Full traversal distance and straight-line distance to the start remain separate. 59 automated checks passed; two unchanged real voice integrations remain skipped.
+
+## Shared bottom navigation — 29 October 2026
+
+The owner chose the Bottom tabs proposal. Listen (`/`), Explore (`/explore`) and Menu now remain at the bottom of all three current app pages. Menu links to Listen to stories, Explore nearby and Try the voice (`/voice-test`). Try the voice is the existing narrator sample/test, not another story mode. Links remain same-origin and in the same window; no browser close control is used for navigation.
+
+Shared navigation CSS includes space for the bar and iPhone safe-area inset. A native modal menu has a clear “Back to the page” button, restores focus/scrolling on close and supports native Escape dismissal. Active-page links are marked. Shared assets retain authentication and no-store behavior. This change does not remove the browser's own cross; opening the site as a Home Screen web app remains a separate user option.
+
+61 automated checks passed, including all-page navigation/assets over authenticated HTTP, same-window links, active-page markers and menu open/close/focus behavior. Two unchanged real voice integrations remain skipped. Actual phone appearance and deployment still need confirmation.

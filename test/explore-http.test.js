@@ -9,6 +9,13 @@ test('Explore routes retain authentication and reject invalid or cross-site requ
  assert.equal((await fetch(base+'/explore')).status,401);
  const page=await fetch(base+'/explore',{headers:{authorization:auth}});assert.equal(page.status,200);assert.match(await page.text(),/Explore Nearby/);
  const script=await fetch(base+'/explore-client.js',{headers:{authorization:auth}});assert.equal(script.status,200);assert.match(await script.text(),/refreshIfDue/);
+ for(const route of ['/', '/explore', '/voice-test']){
+  const response=await fetch(base+route,{headers:{authorization:auth}});assert.equal(response.status,200);
+  const html=await response.text();assert.match(html,/aria-label="Main navigation"/);assert.match(html,/href="\/navigation.css"/);assert.match(html,/id="app-menu-toggle"/);assert.match(html,/Try the voice/);
+ }
+ for(const route of ['/navigation.css','/navigation.js']){
+  assert.equal((await fetch(base+route)).status,401);const response=await fetch(base+route,{headers:{authorization:auth}});assert.equal(response.status,200);assert.match(response.headers.get('cache-control'),/no-store/);
+ }
  const post=(body,extra={})=>fetch(base+'/api/explore',{method:'POST',headers:{authorization:auth,'content-type':'application/json',...extra},body:JSON.stringify(body)});
  assert.equal((await post({place:'Sydney'},{origin:'https://unrelated.test'})).status,403);
  assert.equal((await post({place:'Sydney'},{'content-type':'text/plain'})).status,415);
