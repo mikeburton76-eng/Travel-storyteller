@@ -12,7 +12,7 @@ Sections: attractions = defining visitor sights/experiences; gems = source-suppo
 Exclude massacres, shootings, rape, sexual abuse, violent crime, suicide, torture, terrorism, graphic/distressing material, adult venues and sites whose main appeal is those subjects. Do not erase a harmful event by rewriting its name into a cheerful attraction; omit the subject. familySuitable must be true only after reviewing the whole provided record.
 Write a warm 2–3 sentence overview from the area evidence, with no invented personal visit, superlatives, promises of access or opening times. If evidence is insufficient, return an empty overview. Supply a short literal evidence quote from that area evidence.
 For secondary browsing, optionally add extraCategories entries for walks, photos, family or museums. Each needs its own short reason and a literal quote from the candidate supporting this specific use. Do not assume a hill is an easy walk or that a venue suits children without evidence. No invented routes, distances, opening hours or accessibility promises. Across the whole response add at most eight extra-category entries.
-For each chosen candidate, write a concise reason why it is interesting (maximum 45 words) based on its text, and a literal evidence quote (20–220 characters) from the same record. For history also give an engaging storyTitle and a storyFocus of people, discovery, tradition, engineering, everyday-life or change. Gems require a quote explicitly evidencing lesser-known/local-favourite status. Select imageId only from that candidate's image record, and only if its metadata suggests a relevant, family-suitable view of this exact subject. Otherwise null; an icon is fine. Metadata cannot prove pixel-level suitability; be conservative.
+For each chosen candidate, write a concise reason why it is interesting (maximum 45 words) based on its text, and a literal evidence quote (20–220 characters) from the same record. For history also give an engaging storyTitle and a storyFocus of people, discovery, tradition, engineering, everyday-life or change. Gems require a quote evidencing lesser-known/local-favourite status or a distinctive specialist shop experience, such as second-hand books, bookbinding, local crafts, antiques or unusual collections. Ordinary retail and chain shops do not qualify merely by selling things. Select imageId only from that candidate's image record, and only if its metadata suggests a relevant, family-suitable view of this exact subject. Otherwise null; an icon is fine. Metadata cannot prove pixel-level suitability; be conservative.
 Return ONLY JSON: {"overview":"...","overviewEvidence":"literal quote","choices":[{"id":"place-1","section":"attractions","reason":"...","evidence":"literal quote","familySuitable":true,"confidence":0.9,"visitorValue":5,"storyTitle":"","storyFocus":"","gemEvidence":"","imageId":null,"extraCategories":[{"section":"walks","reason":"a different, supported angle","evidence":"literal quote"}]}]}. Order choices by visitor value within each section. At most 16 choices total; fewer is welcome. No markdown.`;
 const norm=s=>P.plain(s).toLocaleLowerCase('en').replace(/\s+/g,' ').trim();
 function evidenceIn(quote,text,min=20){return typeof quote==='string'&&quote.length>=min&&quote.length<=240&&norm(text).includes(norm(quote))}
@@ -23,9 +23,9 @@ function validateSelection(answer,pool,config) {
  for(const choice of [...priority,...raw]){
   const c=byId.get(choice.id);
   if(!c||!P.visitorSuitable(c.name,c.text,c.historyOnly)||seen.has(c.id+'|'+choice.section)||!SECTIONS.includes(choice.section)||choice.familySuitable!==true||typeof choice.confidence!=='number'||choice.confidence<.75||choice.confidence>1||!Number.isInteger(choice.visitorValue)||choice.visitorValue<3||choice.visitorValue>5)continue;
-  if(typeof choice.reason!=='string'||choice.reason.length<25||choice.reason.length>400||!P.allowed(c.name,c.text,choice.reason,choice.storyTitle||'')||!evidenceIn(choice.evidence,c.text))continue;
+  if(typeof choice.reason!=='string'||choice.reason.length<25||choice.reason.length>400||(!P.allowed(c.name,c.text,choice.reason,choice.storyTitle||'')||P.sourceMarkup.test(choice.reason+' '+(choice.storyTitle||'')))||!evidenceIn(choice.evidence,c.text))continue;
   if(c.historyOnly&&choice.section!=='history')continue;
-  if(choice.section==='gems'&&(!evidenceIn(choice.gemEvidence,c.text)||!P.hidden.test(choice.gemEvidence)))continue;
+  if(choice.section==='gems'&&(!evidenceIn(choice.gemEvidence,c.text)||!P.gemEvidence(choice.gemEvidence,c.name)))continue;
   if(choice.section==='history'){
    if(!['people','discovery','tradition','engineering','everyday-life','change'].includes(choice.storyFocus)||typeof choice.storyTitle!=='string'||choice.storyTitle.length<12||choice.storyTitle.length>140)continue;
    if(!/\b(invent\w*|discover\w*|tradition\w*|engineer\w*|settlement|settled|grew|founded|festival|craft|market|people|community|transport|industry|industrial|changed|transformed|develop\w*|scientist)\b/i.test(c.text))continue;
@@ -51,19 +51,19 @@ function validateSelection(answer,pool,config) {
  for(const {candidate:c,choice,base}of extras){
   const rule=EXTRA_RULES[choice.section],key=c.id+'|'+choice.section;
   if(!rule||seen.has(key)||extraCount>=8||selected.length>=config.maxResults||(selected.some(x=>x.id===c.id)&&selected.length-new Set(selected.map(x=>x.id)).size>=config.maxRepeatedAppearances)||selected.filter(x=>x.id===c.id).length>=config.maxCategoriesPerPlace)continue;
-  if(typeof choice.reason!=='string'||choice.reason.length<20||choice.reason.length>320||!P.allowed(choice.reason)||!evidenceIn(choice.evidence,c.text)||!rule.test(choice.evidence))continue;
+  if(typeof choice.reason!=='string'||choice.reason.length<20||choice.reason.length>320||(!P.allowed(choice.reason)||P.sourceMarkup.test(choice.reason))||!evidenceIn(choice.evidence,c.text)||!rule.test(choice.evidence))continue;
   if(selected.filter(x=>x.section===choice.section).length>=config.categoryLimits[choice.section])continue;
   selected.push({...base,title:c.name,section:choice.section,reason:choice.reason});seen.add(key);extraCount++;
  }
  let overview='';
- if(typeof answer?.overview==='string'&&answer.overview.length<=650&&P.allowed(answer.overview)&&evidenceIn(answer.overviewEvidence,pool.location.overview))overview=answer.overview;
+ if(typeof answer?.overview==='string'&&answer.overview.length<=650&&P.allowed(answer.overview)&&!P.sourceMarkup.test(answer.overview)&&evidenceIn(answer.overviewEvidence,pool.location.overview))overview=answer.overview;
  return {overview,items:selected};
 }
 function fallbackSelection(pool,config){
  const seenTheme=new Map(),items=[];
  const ordered=[...pool.candidates].sort((a,b)=>Number(!!b.mustSee)-Number(!!a.mustSee));
  for(const c of ordered){
-  if(c.historyOnly||!P.visitorSuitable(c.name,c.text))continue;
+  if(c.historyOnly||c.shop||P.shopGem(c.name,c.text)||!P.visitorSuitable(c.name,c.text))continue;
   const n=seenTheme.get(c.theme)||0;if(!c.mustSee&&n>=3)continue;seenTheme.set(c.theme,n+1);
   const short=c.text.match(/^.{1,260}?[.!?](?:\s|$)/)?.[0]||c.text.slice(0,220);
   items.push({id:c.id,name:c.name,title:c.name,section:'attractions',theme:c.theme,reason:short,background:c.text,source:c.source,supportingSources:c.supportingSources||[],mustSee:!!c.mustSee,coord:c.coord,distanceKm:c.distanceKm,image:c.image||null,selectionBasis:'source'});
@@ -87,7 +87,7 @@ function sourceCategories(chosen,pool,config){
   const evidence=re=>sentences.map(s=>s.trim()).find(s=>s.length>=25&&s.length<=400&&re.test(s)&&P.allowed(s));
   if(c.historyOnly){const reason=evidence(/\b(invent\w*|discover\w*|tradition\w*|engineer\w*|settlement|settled|grew|founded|festival|craft|community|industry|industrial|changed|transformed|develop\w*)\b/i);if(reason)add(c,'history',reason);continue;}
   for(const section of ['walks','family','museums','gems']){
-   const rule=section==='gems'?P.hidden:EXTRA_RULES[section];
+   const rule=section==='gems'?{test:text=>P.gemEvidence(text,c.name)}:EXTRA_RULES[section];
    if(section==='museums'&&!/\b(museum|galler(?:y|ies))\b/i.test(c.name))continue;
    const reason=evidence(rule);
    if(!reason||(section==='walks'&&/walking distance|walked past|walk to (?:the )?station/i.test(reason)))continue;

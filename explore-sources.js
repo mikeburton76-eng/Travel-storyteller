@@ -15,10 +15,15 @@ function splitFields(s) {
  out.push(s.slice(start));return out;
 }
 function stripWiki(s) {
- return P.plain(String(s||'').replace(/<!--[^]*?-->/g,'').replace(/\[\[(?:File|Image):[^]*?\]\]/gi,'')
+ let text=String(s||'').replace(/<!--[^]*?-->/g,'');
+ // Remove complete templates by their balanced boundaries, never a cut-out from neighbours.
+ for(const t of templates(text).reverse())text=text.slice(0,t.start)+text.slice(t.end);
+ text=text.replace(/\[\[(?:File|Image):[^]*?\]\]/gi,'')
   .replace(/\[\[([^\]|]*\|)?([^\]]+)\]\]/g,'$2').replace(/\[https?:\/\/[^\s\]]+\s*([^\]]*)\]/g,'$1')
-  .replace(/\{\{[^{}]*\}\}/g,'').replace(/'{2,5}/g,'').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&'));
+  .replace(/'{2,5}/g,'').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#(?:0*39|x0*27);/gi,"'");
+ return P.plain(text);
 }
+
 function templates(s) {
  const out=[];let depth=0,start=0;
  for(let i=0;i<s.length-1;i++){
@@ -31,16 +36,16 @@ function parseListings(wikitext, title) {
  const items=[];
  for(const t of templates(wikitext)){
   const fields=splitFields(t.text);const type=fields.shift().trim().toLowerCase();
-  if(!['see','do','marker','listing'].includes(type))continue;
+  if(!['see','do','buy','marker','listing'].includes(type))continue;
   const f={};for(const field of fields){const at=field.indexOf('=');if(at>0)f[field.slice(0,at).trim().toLowerCase()]=field.slice(at+1).trim()}
-  const group=(f.type||type).toLowerCase();if(!['see','do'].includes(group))continue;
+  const group=(f.type||type).toLowerCase();if(!['see','do','buy'].includes(group))continue;
   const name=stripWiki(f.name||'').slice(0,140);if(!name)continue;
-  const context=wikitext.slice(Math.max(0,t.start-220), Math.min(wikitext.length,t.end+500));
-  const text=stripWiki(f.content||context).slice(0,1400);
-  if(text.length<35||!P.allowed(name,text)||P.closed.test(text))continue;
+  const text=stripWiki(f.content||'').slice(0,1400);
+  if(text.length<35||!P.visitorSuitable(name,text))continue;
+  if(group==='buy'&&!P.shopGem(name,text))continue;
   const coord=P.coordinate(f.lat,f.long);
   items.push({name,text,coord,wikidata:/^Q\d+$/.test(f.wikidata||'')?f.wikidata:null,wikipedia:f.wikipedia||null,imageFile:f.image||null,
-   source:{kind:'wikivoyage',title,url:pageUrl('wikivoyage',title)},guideListed:true, listingType:group});
+   source:{kind:'wikivoyage',title,url:pageUrl('wikivoyage',title)},guideListed:true, shop:group==='buy', listingType:group});
  }
  return items;
 }
@@ -86,7 +91,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   const data=await response.json();if(data.error)throw Error(`${kind} could not complete this search.`);return data;
  }
  const pages = data => Object.values(data.query?.pages||{});
- const visitorPage=p=>P.visitor.test(p.title+' '+(p.description||''))&&!/^(?:(?:capital )?(?:village|town|city|suburb|county|municipality|district|neighbourhood) (?:in|of|and|on|near)|local government area|government agency|rail depot)\b/i.test(p.description||'')&&!/^(?:List of |Timeline of |Parks and gardens of |Tourism in |Transport in )/i.test(p.title);
+ const visitorPage=p=>(P.visitor.test(p.title+' '+(p.description||''))||P.shopGem(p.title,p.extract||p.description||''))&&!/^(?:(?:capital )?(?:village|town|city|suburb|county|municipality|district|neighbourhood) (?:in|of|and|on|near)|local government area|government agency|rail depot)\b/i.test(p.description||'')&&!/^(?:List of |Timeline of |Parks and gardens of |Tourism in |Transport in )/i.test(p.title);
  async function resolve(input) {
   if(input.lat!==undefined){const coord=P.coordinate(input.lat,input.lon);if(!coord)throw Object.assign(Error('Please try your location again.'),{status:400});return {...coord,label:'your location',title:null,mode:'nearby',overview:'',source:null};}
   const query=String(input.place||'').trim();if(!query||query.length>100||!P.allowed(query))throw Object.assign(Error('Please enter a town or city, including its country where needed.'),{status:400});
@@ -138,7 +143,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
     travelRoot=alternative;
    }
    const rootListings=parseListings(travelRoot.text,travelRoot.title);
-   candidates.push(...rootListings.map(c=>({...c,mustSee:rootListings.length<=12})));
+   candidates.push(...rootListings.map(c=>({...c,mustSee:c.listingType!=='buy'&&rootListings.filter(x=>x.listingType!=='buy').length<=12})));
    const districts=districtTitles(travelRoot.text,travelRoot.title);
    const results=await Promise.allSettled(districts.map(voyagePage));
    for(const r of results)if(r.status==='fulfilled'){
@@ -150,7 +155,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    }
   }catch{warnings.push('A travel guide was not available for this place.');}}
   if(location.title){
-   const terms=['tourism','walk','viewpoint','family','museum','gallery','park','beach','market','bridge','tourist information','visitor centre','hiking trail','circular walk','(children OR playground OR kids)','(zoo OR aquarium OR wildlife)'];
+   const terms=['tourism','walk','viewpoint','family','museum','gallery','park','beach','market','bridge','tourist information','visitor centre','(bookshop OR bookstore OR bookbinding)','(antiques OR artisan OR \"record shop\")','hiking trail','circular walk','(children OR playground OR kids)','(zoo OR aquarium OR wildlife)'];
    const searchName=location.title.replace(/,.*$/,'');
    const results=await Promise.allSettled(terms.map(terms=>api('wikipedia',{generator:'search',gsrsearch:`"${searchName.replace(/["\\]/g,'')}" ${terms}`,gsrnamespace:0,gsrlimit:12,prop:'coordinates|description|extracts|pageimages|pageprops',exintro:1,explaintext:1,exlimit:'max',piprop:'name'})));
    for(const result of results){if(result.status!=='fulfilled'){warnings.push('Some subject searches were unavailable.');continue}
