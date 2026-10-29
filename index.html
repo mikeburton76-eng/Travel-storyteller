@@ -312,15 +312,11 @@
   }).catch(error=>{voiceHelp.textContent=error.message;});
   window.addEventListener('pagehide',stopSpeaking);
 </script>
-<nav class="app-nav" aria-label="Main navigation">
-<a href="/" aria-current="page"><span class="app-nav-icon" aria-hidden="true">🎧</span><span>Listen</span></a>
-<a href="/explore"><span class="app-nav-icon" aria-hidden="true">📍</span><span>Explore</span></a>
-<button type="button" id="app-menu-toggle" aria-haspopup="dialog" aria-controls="app-menu" aria-expanded="false"><span class="app-nav-icon" aria-hidden="true">☰</span><span>Menu</span></button>
-</nav>
+<nav class="app-nav" aria-label="Main navigation"><a href="/explore" aria-current="page"><span class="app-nav-icon" aria-hidden="true">📍</span><span>Explore & listen</span></a><button type="button" id="app-menu-toggle" aria-haspopup="dialog" aria-controls="app-menu" aria-expanded="false"><span class="app-nav-icon" aria-hidden="true">☰</span><span>Menu</span></button></nav>
 <dialog id="app-menu" aria-labelledby="app-menu-title"><h2 id="app-menu-title">Travel Storyteller</h2><nav aria-label="All pages">
-<a href="/" aria-current="page">🎧 Listen to stories</a>
+
 <a href="/explore">📍 Explore nearby</a>
-</nav><button type="button" id="app-menu-close">Back to the page</button></dialog>
+<a href="/explore#categories">Choose a category</a></nav><button type="button" id="app-menu-close">Back to the page</button></dialog>
 </body>
 </html>
 

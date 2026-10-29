@@ -28,6 +28,7 @@ function itemsForCategory(items,category){
 }
 function renderCategories(){
  const visible=Object.keys(sections).filter(key=>!guide||guide.complete===false||itemsForCategory(guide.items,key).length);
+ if(!visible.length)$('backToCategories').hidden=true;
  if(!visible.includes(selected))selected=visible[0]||'attractions';
  $('tabs').replaceChildren();
  for(const[key,[icon,name,hint]]of Object.entries(sections)){
@@ -71,7 +72,7 @@ function render(){
   if(item.image){const img=document.createElement('img');img.src=item.image.url;img.alt=item.name;img.loading='lazy';img.referrerPolicy='no-referrer';img.onerror=()=>photo.replaceChildren(document.createTextNode(icons[item.theme]||'📍'));photo.replaceChildren(img)}
   const body=document.createElement('div');body.className='body';const kind=node('small',originalNames[item.section]||'Place to visit');kind.className='kind';body.append(kind);
   const h=document.createElement('h3'),title=node('button',item.title);title.className='title';title.onclick=()=>openItem(item);h.append(title);body.append(h,node('p',item.reason));if(item.eventArea){const dates=node('small',eventDateLabel(item));dates.className='event-dates';body.append(dates);}if(guide.items.some(x=>x.id===item.id&&x.section==='photos')){const badge=node('small','📷 Photo spot');badge.className='photo-badge';body.append(badge);}const distance=node('small',item.eventArea?item.distanceKm+' km to the festival area':item.historyOnly?'Related to this area':item.distanceKm+' km from '+(guide.location.mode==='nearby'?'your search location':'the area’s reference point'));distance.className='distance';body.append(distance);
-  const links=document.createElement('div');links.className='links';const read=node('button','Read about this place');read.className='textbutton';read.onclick=()=>openItem(item);links.append(read,link(item.eventArea?'Festival area ↗':item.historyOnly?'Related area ↗':'View map ↗',mapUrl(item)));body.append(links);card.append(photo,body);$('cards').append(card);
+  const links=document.createElement('div');links.className='links';const listen=node('button','🎧 Listen');listen.className='textbutton';listen.onclick=()=>listenToItem(item);const read=node('button','Read about this place');read.className='textbutton';read.onclick=()=>openItem(item);links.append(read,listen,link(item.eventArea?'Festival area ↗':item.historyOnly?'Related area ↗':'View map ↗',mapUrl(item)));body.append(links);card.append(photo,body);$('cards').append(card);
  }
 }
 function openItem(item){
@@ -84,10 +85,12 @@ function openItem(item){
  for(const source of item.supportingSources||[])$('detailLinks').append(link('Local guide: '+source.title+' ↗',source.url));
  $('reportText').hidden=true;document.body.style.overflow='hidden';$('dialog').showModal();$('dialog').scrollTop=0;
 }
+function listenToItem(item){if(globalThis.ExploreNarration){globalThis.ExploreNarration.listen(item,guide.location);if($('dialog').open)$('dialog').close();}}
+$('listenDetail').onclick=()=>{if(activeItem)listenToItem(activeItem)};
 $('close').onclick=()=>$('dialog').close();$('dialog').addEventListener('close',()=>document.body.style.overflow='');
 $('report').onclick=()=>{const p=$('reportText');p.hidden=false;p.textContent=`Please send Mike this feedback in ChatGPT: ${guide.location.label} — ${activeItem.title} — what was unsuitable, missing or incorrect. This button does not send a report automatically.`};
 async function explore(input,{quiet=false}={}){
- if(!quiet)input={...input,specialists:researchMode&&!!$('specialists').checked};
+ if(!quiet){globalThis.ExploreNarration?.reset();input={...input,specialists:researchMode&&!!$('specialists').checked};}
  const id=++requestId;controller?.abort();controller=new AbortController();const currentController=controller;lastInput=input;inFlight=true;
  if(!quiet){$('status').textContent='Finding a varied selection and checking the source material. The first guide may take a little while…';$('searchBtn').disabled=true;$('gps').disabled=true;}
  $('error').hidden=true;$('choices').replaceChildren();
@@ -109,3 +112,15 @@ function refreshIfDue(){if(guide&&lastInput&&!inFlight&&!document.hidden&&Date.n
 setInterval(refreshIfDue,600000);document.addEventListener('visibilitychange',refreshIfDue);
 
 renderCategories();
+
+const backCategories=$('backToCategories');
+backCategories.onclick=()=>{
+ const target=$('categories');
+ target.scrollIntoView?.({behavior:globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+ const first=$('tabs').querySelector?.('button');first?.focus({preventScroll:true});
+};
+if(typeof IntersectionObserver!=='undefined'){
+ new IntersectionObserver(entries=>{const entry=entries[0];backCategories.hidden=!$('tabs').children.length||entry.isIntersecting||entry.boundingClientRect.top>0;},{threshold:0}).observe($('categories'));
+}else if(typeof window!=='undefined'){
+ const update=()=>{backCategories.hidden=!$('tabs').children.length||$('categories').getBoundingClientRect().bottom>=0};window.addEventListener('scroll',update,{passive:true});update();
+}
