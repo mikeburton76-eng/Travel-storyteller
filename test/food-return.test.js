@@ -1,0 +1,10 @@
+'use strict';
+const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const data=JSON.parse(fs.readFileSync(require.resolve('../food-open-data.json'),'utf8'));
+class E{constructor(){this.children=[];this.events={};this.attrs={};this.dataset={};this.style={};this.value='';this.checked=false;}append(...x){this.children.push(...x);}replaceChildren(...x){this.children=x;}setAttribute(k,v){this.attrs[k]=v;}addEventListener(k,f){this.events[k]=f;}}
+async function app(store){const nodes={},document={getElementById:id=>nodes[id]??=new E(),createElement:()=>new E(),createTextNode:text=>({textContent:text})};document.getElementById('town').value='Tideswell';const context={document,navigator:{},Date,URL,URLSearchParams,setTimeout,location:{search:''},DiscoverReturnState:{save:(k,v)=>store[k]=v,load:k=>store[k]||null},fetch:async url=>{assert.equal(url,'/food-open-data.json');return {ok:true,json:async()=>data};}};vm.runInNewContext(fs.readFileSync(require.resolve('../food-open-client.js'),'utf8'),context);await new Promise(r=>setImmediate(r));return nodes;}
+test('food filters survive opening a venue link and returning; missing sites offer an explicit search',async()=>{
+ const saved={},a=await app(saved);assert.equal(a.cards.children.length,9);assert.ok(a.cards.children.some(c=>c.children.at(-1).children.at(-1).children.some(l=>l.textContent==='Search for website ↗')));
+ a.hasWebsite.checked=true;a.hasWebsite.onchange();assert.equal(a.cards.children.length,6);a.find.value='Italian';a.find.oninput();assert.equal(a.cards.children.length,1);const links=a.cards.children[0].children.at(-1).children.at(-1).children;const website=links.find(l=>l.textContent==='Visit website ↗');assert.equal(website.target,'_blank');assert.equal(website.href,'https://www.salsitalian.co.uk/');website.events.click();
+ const b=await app(saved);assert.equal(b.hasWebsite.checked,true);assert.equal(b.find.value,'Italian');assert.equal(b.cards.children.length,1);
+});

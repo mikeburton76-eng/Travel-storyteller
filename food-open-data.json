@@ -19,14 +19,16 @@
       },
       "cuisine": "",
       "summary": "Restaurant on The Quadrant. Vegan choices listed.",
-      "website": null,
+      "website": "https://baileysrestaurant.co.uk/",
       "menu": null,
       "vegetarian": true,
       "vegan": true,
       "foodConfirmed": true,
       "locationApproximate": false,
       "source": "https://www.openstreetmap.org/node/7939887685",
-      "photo": null
+      "photo": null,
+      "websiteSource": "https://baileysrestaurant.co.uk/",
+      "websiteCheckedAt": "2026-10-30"
     },
     {
       "id": "node/13123602430",
@@ -187,14 +189,16 @@
       },
       "cuisine": "",
       "summary": "Pub on George Street. Food service listed.",
-      "website": null,
+      "website": "https://buxtonbrewery.co.uk/locations/tap-house/",
       "menu": null,
       "vegetarian": false,
       "vegan": false,
       "foodConfirmed": true,
       "locationApproximate": false,
       "source": "https://www.openstreetmap.org/node/618703517",
-      "photo": null
+      "photo": null,
+      "websiteSource": "https://buxtonbrewery.co.uk/locations/tap-house/",
+      "websiteCheckedAt": "2026-10-30"
     },
     {
       "id": "node/4331931156",
@@ -670,14 +674,16 @@
       },
       "cuisine": "",
       "summary": "Café on Hall Bank.",
-      "website": null,
+      "website": "https://lubensbuxton.co.uk/",
       "menu": null,
       "vegetarian": false,
       "vegan": false,
       "foodConfirmed": true,
       "locationApproximate": false,
       "source": "https://www.openstreetmap.org/node/2004782458",
-      "photo": null
+      "photo": null,
+      "websiteSource": "https://lubensbuxton.co.uk/",
+      "websiteCheckedAt": "2026-10-30"
     },
     {
       "id": "node/937950118",
@@ -691,14 +697,16 @@
       },
       "cuisine": "italian",
       "summary": "Italian restaurant on Eagle Parade.",
-      "website": null,
+      "website": "https://www.lucianosbuxton.co.uk/",
       "menu": null,
       "vegetarian": false,
       "vegan": false,
       "foodConfirmed": true,
       "locationApproximate": false,
       "source": "https://www.openstreetmap.org/node/937950118",
-      "photo": null
+      "photo": null,
+      "websiteSource": "https://www.lucianosbuxton.co.uk/",
+      "websiteCheckedAt": "2026-10-30"
     },
     {
       "id": "way/186282287",
@@ -805,14 +813,16 @@
       },
       "cuisine": "",
       "summary": "Café on The Square.",
-      "website": null,
+      "website": "https://www.no6tearooms.co.uk/",
       "menu": null,
       "vegetarian": false,
       "vegan": false,
       "foodConfirmed": true,
       "locationApproximate": false,
       "source": "https://www.openstreetmap.org/node/6423440585",
-      "photo": null
+      "photo": null,
+      "websiteSource": "https://www.no6tearooms.co.uk/",
+      "websiteCheckedAt": "2026-10-30"
     },
     {
       "id": "node/618714222",
@@ -1015,14 +1025,16 @@
       },
       "cuisine": "thai",
       "summary": "Thai restaurant on Cavendish Circus. Vegan choices listed.",
-      "website": null,
+      "website": "https://www.simplythaibuxton.co.uk/",
       "menu": null,
       "vegetarian": true,
       "vegan": true,
       "foodConfirmed": true,
       "locationApproximate": false,
       "source": "https://www.openstreetmap.org/node/3647662253",
-      "photo": null
+      "photo": null,
+      "websiteSource": "https://www.simplythaibuxton.co.uk/",
+      "websiteCheckedAt": "2026-10-30"
     },
     {
       "id": "node/4331931172",
@@ -1483,14 +1495,16 @@
       },
       "cuisine": "",
       "summary": "Pub on Queen Street.",
-      "website": null,
+      "website": "https://www.horseandjockeytideswell.co.uk/",
       "menu": null,
       "vegetarian": false,
       "vegan": false,
       "foodConfirmed": false,
       "locationApproximate": false,
       "source": "https://www.openstreetmap.org/node/383901212",
-      "photo": null
+      "photo": null,
+      "websiteSource": "https://www.horseandjockeytideswell.co.uk/",
+      "websiteCheckedAt": "2026-10-30"
     },
     {
       "id": "node/3791851544",
@@ -1525,14 +1539,16 @@
       },
       "cuisine": "pizza",
       "summary": "Pizza restaurant on Queen Street.",
-      "website": null,
+      "website": "https://www.salsitalian.co.uk/",
       "menu": null,
       "vegetarian": false,
       "vegan": false,
       "foodConfirmed": true,
       "locationApproximate": false,
       "source": "https://www.openstreetmap.org/node/459990469",
-      "photo": null
+      "photo": null,
+      "websiteSource": "https://www.salsitalian.co.uk/",
+      "websiteCheckedAt": "2026-10-30"
     },
     {
       "id": "node/4128097506",
@@ -1588,14 +1604,16 @@
       },
       "cuisine": "",
       "summary": "Pub on High Street.",
-      "website": null,
+      "website": "https://thestarinn-tideswell.co.uk/",
       "menu": null,
       "vegetarian": false,
       "vegan": false,
       "foodConfirmed": false,
       "locationApproximate": false,
       "source": "https://www.openstreetmap.org/node/509340306",
-      "photo": null
+      "photo": null,
+      "websiteSource": "https://thestarinn-tideswell.co.uk/",
+      "websiteCheckedAt": "2026-10-30"
     },
     {
       "id": "node/767262018",
@@ -1609,14 +1627,17 @@
       },
       "cuisine": "",
       "summary": "Café on Bank Square.",
-      "website": null,
+      "website": "https://tideswelllounge.com/",
       "menu": null,
       "vegetarian": false,
       "vegan": false,
       "foodConfirmed": true,
       "locationApproximate": false,
       "source": "https://www.openstreetmap.org/node/767262018",
-      "photo": null
+      "photo": null,
+      "websiteSource": "https://tideswelllounge.com/",
+      "websiteCheckedAt": "2026-10-30"
     }
-  ]
+  ],
+  "websiteLinksUpdatedAt": "2026-10-30"
 }

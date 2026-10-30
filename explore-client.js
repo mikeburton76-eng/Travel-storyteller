@@ -42,6 +42,7 @@ function renderCategories(){
  $('categoryMsg').textContent=guide?(visible.length?categoryHelp[selected]:'No supported suggestions found for this search yet. Try a nearby town.'):'Choose what interests you, then search a place or use your location.';
 }
 const icons={nature:'🌿',culture:'🎨',experience:'🎟️',architecture:'🏛️',history:'📜'};
+let activePageMode='home',applyPageMode=null,detailHistory=false;
 let guide=null,selected='attractions',requestId=0,lastInput=null,controller=null,activeItem=null,inFlight=false;
 function link(text,url){const a=document.createElement('a');a.textContent=text;a.href=url;a.target='_blank';a.rel='noopener';return a}
 function node(tag,text){const e=document.createElement(tag);e.textContent=text;return e}
@@ -84,11 +85,14 @@ function openItem(item){
  $('detailLinks').replaceChildren(link('Source: '+item.source.title+' ↗',item.source.url),link(item.eventArea?'Festival area ↗':item.historyOnly?'Related area ↗':'View map ↗',mapUrl(item)));
  if(item.eventTiming?.sourceUrl)$('detailLinks').append(link('Organiser dates ↗',item.eventTiming.sourceUrl));
  for(const source of item.supportingSources||[])$('detailLinks').append(link('Local guide: '+source.title+' ↗',source.url));
- $('reportText').hidden=true;document.body.style.overflow='hidden';$('dialog').showModal();$('dialog').scrollTop=0;
+ $('reportText').hidden=true;document.body.style.overflow='hidden';const wasOpen=$('dialog').open;$('dialog').showModal();$('dialog').scrollTop=0;if(!wasOpen&&globalThis.history?.pushState){try{globalThis.history.pushState({...globalThis.history.state,discoverPlaceDetail:true},'');detailHistory=true;}catch{detailHistory=false;}}
 }
 function listenToItem(item){if(globalThis.ExploreNarration){globalThis.ExploreNarration.listen(item,guide.location);if($('dialog').open)$('dialog').close();}}
 $('listenDetail').onclick=()=>{if(activeItem)listenToItem(activeItem)};
-$('close').onclick=()=>$('dialog').close();$('dialog').addEventListener('close',()=>document.body.style.overflow='');
+function closeDetail(){if($('dialog').open)$('dialog').close();}
+$('close').onclick=closeDetail;if($('closeDetailBottom'))$('closeDetailBottom').onclick=closeDetail;
+$('dialog').addEventListener('close',()=>{document.body.style.overflow='';if(detailHistory){detailHistory=false;if(globalThis.history?.state?.discoverPlaceDetail)globalThis.history.back();}});
+globalThis.window?.addEventListener?.('popstate',()=>{detailHistory=false;closeDetail();});
 $('report').onclick=()=>{const p=$('reportText');p.hidden=false;p.textContent=`Please send Mike this feedback in ChatGPT: ${guide.location.label} — ${activeItem.title} — what was unsuitable, missing or incorrect. This button does not send a report automatically.`};
 async function explore(input,{quiet=false}={}){
  if(!quiet){globalThis.ExploreNarration?.reset();input={...input,specialists:researchMode&&!!$('specialists').checked};}
@@ -130,9 +134,23 @@ if(typeof IntersectionObserver!=='undefined'){
 // UI modes reuse the original AI discovery and narration endpoints.
 if($('modeGo')&&$('modeHome')){
  let pageMode='home';
- const setMode=mode=>{pageMode=mode;globalThis.ExploreNarration?.stop();const controls=$('locationControls'),form=$('searchForm');if(mode==='go'){form.before(controls);$('locationHeading').textContent='Discover around you';$('modeHelp').textContent='Use your location, then choose a nearby place to read or hear.';$('listenNearby').hidden=false;$('place').placeholder='Or explore somewhere else';}else{form.after(controls);$('locationHeading').textContent='Where would you like to explore?';$('modeHelp').textContent='Search a place and choose what you would like to read or hear.';$('listenNearby').hidden=true;$('place').placeholder='Town, neighbourhood or landmark';}for(const [id,on]of [['modeGo',mode==='go'],['modeHome',mode==='home']]){if(on)$(id).setAttribute('aria-current','page');else $(id).removeAttribute('aria-current')}globalThis.window?.scrollTo?.({top:0,behavior:'smooth'});};
+ const setMode=mode=>{pageMode=mode;activePageMode=mode;globalThis.ExploreNarration?.stop();const controls=$('locationControls'),form=$('searchForm');if(mode==='go'){form.before(controls);$('locationHeading').textContent='Discover around you';$('modeHelp').textContent='Use your location, then choose a nearby place to read or hear.';$('listenNearby').hidden=false;$('place').placeholder='Or explore somewhere else';}else{form.after(controls);$('locationHeading').textContent='Where would you like to explore?';$('modeHelp').textContent='Search a place and choose what you would like to read or hear.';$('listenNearby').hidden=true;$('place').placeholder='Town, neighbourhood or landmark';}for(const [id,on]of [['modeGo',mode==='go'],['modeHome',mode==='home']]){if(on)$(id).setAttribute('aria-current','page');else $(id).removeAttribute('aria-current')}globalThis.window?.scrollTo?.({top:0,behavior:'smooth'});};
+ applyPageMode=setMode;
  $('modeGo').onclick=()=>setMode('go');$('modeHome').onclick=()=>setMode('home');
  $('listenNearby').onclick=()=>{if(!guide?.items.length)return;const items=itemsForCategory(guide.items,selected);const item=(items.length?items:guide.items).slice().sort((a,b)=>(a.distanceKm??Infinity)-(b.distanceKm??Infinity))[0];if(item)listenToItem(item);};
  setMode('home');
 }
+
+
+function saveExploreReturn(){
+ if(!guide)return;globalThis.DiscoverReturnState?.save('explore',{guide,selected,lastInput,place:$('place').value,mode:activePageMode,scroll:globalThis.window?.scrollY||0});
+}
+if($('foodTile'))$('foodTile').addEventListener('click',saveExploreReturn);
+globalThis.window?.addEventListener?.('pagehide',saveExploreReturn);
+try{
+ const saved=globalThis.DiscoverReturnState?.load('explore');
+ if(saved?.guide?.location&&Array.isArray(saved.guide.items)&&saved.guide.coverage&&Array.isArray(saved.guide.sources)){
+  guide=saved.guide;selected=Object.hasOwn(sections,saved.selected)?saved.selected:'attractions';lastInput=saved.lastInput||null;$('place').value=saved.place||'';applyPageMode?.(saved.mode==='go'?'go':'home');render();setTimeout(()=>globalThis.window?.scrollTo?.({top:Number(saved.scroll)||0,behavior:'instant'}),0);
+ }
+}catch{/* A missing return point must not prevent a fresh search. */}
 
