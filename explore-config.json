@@ -1,7 +1,7 @@
 {
-  "version": 9,
+  "version": 10,
   "enabled": true,
-  "cacheMinutes": 360,
+  "cacheMinutes": 43200,
   "cacheEntries": 32,
   "maxConcurrentBuilds": 2,
   "maxAiCallsPerHour": 12,

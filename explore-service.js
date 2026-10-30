@@ -224,8 +224,8 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
   pending.set(key,job);
   const task=build(safeInput,entry?.value,value=>{job.snapshot=value;release(value)},specialists).then(value=>{
    if(cache.size>=cfg.cacheEntries)cache.delete(cache.keys().next().value);
-   // Retry temporary provider/AI outages sooner without causing a request loop.
-   const ttl=value.selectionMode==='ai'?cfg.cacheMinutes*60000:120000;
+   // Completed guides, including source-only fallbacks, share the monthly reuse policy.
+   const ttl=cfg.cacheMinutes*60000;
    value.cacheUntil=new Date(now()+ttl).toISOString();cache.set(key,{value,expires:now()+ttl});return {...publicResult(value,false),complete:true};
   }).finally(()=>pending.delete(key));
   job.task=task;

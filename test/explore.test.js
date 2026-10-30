@@ -126,3 +126,15 @@ test('source-only guide independently populates evidenced categories with credit
  assert.equal(r.selectionMode,'sources');assert.ok(r.items.every(x=>x.selectionBasis==='source'));assert.equal(r.items.find(x=>x.id==='a').image.creator,'Test Photographer');
  assert.ok(!r.items.some(x=>x.section==='gems'&&!P.hidden.test(x.reason)));
 });
+
+test('monthly policy reuses AI guides for 30 days and checks changed sources only when used after expiry',async()=>{
+ const month=30*24*60*60000;assert.equal(defaults.cacheMinutes,43200);
+ let changed=false;const f=fixtures({writer:()=>answer(pool()),providerChanges:p=>{if(changed)p.candidates[0].text+=' A new garden was added.'}});
+ const first=await f.svc.explore({place:'Town'});assert.equal(Date.parse(first.cacheUntil),month);
+ f.tick(month-1);changed=true;assert.equal((await f.svc.explore({place:'Town'})).reused,true);assert.equal(f.builds,1);assert.equal(f.calls,1);
+ f.tick(2);const renewed=await f.svc.explore({place:'Town'});assert.equal(f.builds,2);assert.equal(f.calls,2);assert.equal(renewed.reused,false);
+});
+test('source-only guides follow the monthly policy instead of retrying every two minutes',async()=>{
+ const f=fixtures();const first=await f.svc.explore({place:'Town'});assert.equal(first.selectionMode,'sources');assert.equal(Date.parse(first.cacheUntil),30*24*60*60000);
+ f.tick(7*24*60*60000);assert.equal((await f.svc.explore({place:'Town'})).reused,true);assert.equal(f.builds,1);
+});
