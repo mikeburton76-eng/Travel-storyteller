@@ -13,7 +13,7 @@ test('Explore routes retain authentication and reject invalid or cross-site requ
   const response=await fetch(base+route,{headers:{authorization:auth}});assert.equal(response.status,200);
   const html=await response.text();assert.match(html,/aria-label="Main navigation"/);assert.match(html,/href="\/navigation.css"/);if(route==='/'||route==='/explore'){assert.match(html,/id="modeGo"/);assert.match(html,/id="modeHome"/)}else assert.match(html,/id="app-menu-toggle"/);assert.doesNotMatch(html,/Try the voice/);
  }
- for(const route of ['/navigation.css','/navigation.js','/explore-audio.js','/discover-design.css','/narrator-settings.js']){
+ for(const route of ['/navigation.css','/navigation.js','/explore-audio.js','/discover-design.css','/narrator-settings.js','/drive-test','/drive-client.js','/drive-test.css','/drive-logic.js','/drive-test-sw.js']){
   assert.equal((await fetch(base+route)).status,401);const response=await fetch(base+route,{headers:{authorization:auth}});assert.equal(response.status,200);assert.match(response.headers.get('cache-control'),/no-store/);
  }
  const landing=await(await fetch(base+'/',{headers:{authorization:auth}})).text();assert.match(landing,/id="storyPlayer"/);assert.match(landing,/id="backToCategories"/);
@@ -23,3 +23,4 @@ test('Explore routes retain authentication and reject invalid or cross-site requ
  assert.equal((await post({lat:123,lon:0})).status,400);
  assert.equal((await post({place:''})).status,400);
 });
+
