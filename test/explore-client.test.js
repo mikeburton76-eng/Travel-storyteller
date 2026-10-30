@@ -63,3 +63,6 @@ test('Categories shortcut appears only after populated choices have scrolled awa
 });
 
 test('On the Go puts location controls first and From Home puts search first',()=>{const a=app();assert.equal(a.nodes.modeHome.attrs['aria-current'],'page');assert.equal(a.nodes.searchForm.afterNode,a.nodes.locationControls);a.nodes.modeGo.onclick();assert.equal(a.nodes.modeGo.attrs['aria-current'],'page');assert.equal(a.nodes.searchForm.beforeNode,a.nodes.locationControls);assert.equal(a.nodes.listenNearby.hidden,false);a.nodes.modeHome.onclick();assert.equal(a.nodes.listenNearby.hidden,true);});
+
+
+test('food navigation carries the selected place and coordinates without changing category selection',()=>{const a=app();a.run('guide='+JSON.stringify({...fixture,location:{label:'Melbourne, Derbyshire',mode:'area',lat:52.82,lon:-1.43}})+';render()');const u=new URL(a.nodes.foodTile.href,'https://test.example');assert.equal(u.pathname,'/food-open-test');assert.equal(u.searchParams.get('place'),'Melbourne, Derbyshire');assert.equal(u.searchParams.get('lat'),'52.82');assert.equal(a.nodes.tabs.children[0].attrs['aria-pressed'],'true');});

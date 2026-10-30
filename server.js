@@ -155,6 +155,7 @@ function contentAllowed(...texts){return !excludedContent.test(texts.join(" ").n
 
 
 let exploreService;
+let placeSearchService;
 const server = http.createServer(async (req, res) => {
   if (req.method === "OPTIONS") {
     return sendJson(res, 204, {});
@@ -177,7 +178,18 @@ const server = http.createServer(async (req, res) => {
     return res.end(fs.readFileSync(path.join(__dirname, foodFile[0])));
   }
 
-  const exploreFiles = { '/drive-test': ['drive-test.html', 'text/html; charset=utf-8'], '/drive-client.js': ['drive-client.js', 'text/javascript; charset=utf-8'], '/drive-test.css': ['drive-test.css', 'text/css; charset=utf-8'], '/drive-logic.js': ['drive-logic.js', 'text/javascript; charset=utf-8'], '/drive-test-sw.js': ['drive-test-sw.js', 'text/javascript; charset=utf-8'], '/discover-design.css': ['discover-design.css', 'text/css; charset=utf-8'], '/narrator-settings.js': ['narrator-settings.js', 'text/javascript; charset=utf-8'], '/': ['explore.html', 'text/html; charset=utf-8'], '/explore-audio.js': ['explore-audio.js', 'text/javascript; charset=utf-8'], '/navigation.css': ['navigation.css', 'text/css; charset=utf-8'], '/navigation.js': ['navigation.js', 'text/javascript; charset=utf-8'], '/explore': ['explore.html', 'text/html; charset=utf-8'], '/explore-client.js': ['explore-client.js', 'text/javascript; charset=utf-8'] };
+
+  if (req.method === 'GET' && req.url.split('?')[0] === '/api/place-matches') {
+    const reply = (status, value) => { res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'private, no-store' }); res.end(JSON.stringify(value)); };
+    try {
+      if (req.headers.origin && new URL(req.headers.origin).host !== req.headers.host) return reply(403, {error:'Please search from Discover Places.'});
+      if (!placeSearchService) placeSearchService = require('./place-search-service').createPlaceSearch();
+      const q = new URL(req.url, 'http://localhost').searchParams.get('q');
+      return reply(200, {choices:await placeSearchService.search(q),source:'Wikidata'});
+    } catch(error) { return reply(error.status || 502, {error:error.status ? error.message : 'Place choices are unavailable. Please try again or add a region and country.'}); }
+  }
+
+  const exploreFiles = { '/place-search.js': ['place-search.js', 'text/javascript; charset=utf-8'], '/drive-test': ['drive-test.html', 'text/html; charset=utf-8'], '/drive-client.js': ['drive-client.js', 'text/javascript; charset=utf-8'], '/drive-test.css': ['drive-test.css', 'text/css; charset=utf-8'], '/drive-logic.js': ['drive-logic.js', 'text/javascript; charset=utf-8'], '/drive-test-sw.js': ['drive-test-sw.js', 'text/javascript; charset=utf-8'], '/discover-design.css': ['discover-design.css', 'text/css; charset=utf-8'], '/narrator-settings.js': ['narrator-settings.js', 'text/javascript; charset=utf-8'], '/': ['explore.html', 'text/html; charset=utf-8'], '/explore-audio.js': ['explore-audio.js', 'text/javascript; charset=utf-8'], '/navigation.css': ['navigation.css', 'text/css; charset=utf-8'], '/navigation.js': ['navigation.js', 'text/javascript; charset=utf-8'], '/explore': ['explore.html', 'text/html; charset=utf-8'], '/explore-client.js': ['explore-client.js', 'text/javascript; charset=utf-8'] };
   const exploreFile = exploreFiles[req.url.split('?')[0]];
   if (req.method === 'GET' && exploreFile) {
     res.writeHead(200, { 'Content-Type': exploreFile[1], 'Cache-Control': 'private, no-store' });

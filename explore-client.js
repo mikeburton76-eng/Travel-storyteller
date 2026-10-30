@@ -38,6 +38,7 @@ function renderCategories(){
   const copy=document.createElement('span');copy.className='category-copy';copy.append(node('strong',name),node('small',hint));
   b.append(symbol,copy);b.onclick=()=>{selected=key;renderCategories();if(guide){render()}else $('categoryMsg').textContent='Choose a location below to explore '+name.toLowerCase()+'.'};$('tabs').append(b);
  }
+ if($('foodTile')){const params=new URLSearchParams();if(guide?.location){params.set('place',guide.location.label);if(Number.isFinite(guide.location.lat)&&Number.isFinite(guide.location.lon)){params.set('lat',guide.location.lat);params.set('lon',guide.location.lon);}}$('foodTile').href='/food-open-test'+(params.toString()?'?'+params.toString():'');}
  $('categoryMsg').textContent=guide?(visible.length?categoryHelp[selected]:'No supported suggestions found for this search yet. Try a nearby town.'):'Choose what interests you, then search a place or use your location.';
 }
 const icons={nature:'🌿',culture:'🎨',experience:'🎟️',architecture:'🏛️',history:'📜'};
@@ -106,7 +107,8 @@ async function explore(input,{quiet=false}={}){
  }catch(error){if(id!==requestId)return;if(!quiet){$('error').hidden=false;$('error').textContent=error.name==='AbortError'?guide?.complete===false?'The fuller guide took too long. The first source-based suggestions remain below; please try again.':'The guide took too long to prepare. Please try again.':error.message;$('status').textContent=guide?'The previous guide is still shown below.':'';}}
  finally{clearTimeout(timer);if(id===requestId){inFlight=false;$('searchBtn').disabled=false;$('gps').disabled=false}}
 }
-$('searchForm').addEventListener('submit',event=>{event.preventDefault();const place=$('place').value.trim();if(place)explore({place})});
+if(globalThis.DiscoverPlaceSearch)globalThis.DiscoverPlaceSearch.attach({form:$('searchForm'),input:$('place'),list:$('placeSuggestions'),message:$('placeMatchStatus'),clearScope:$('clearPlaceScope'),onChoose:choice=>explore({place:choice.title})});
+else $('searchForm').addEventListener('submit',event=>{event.preventDefault();const place=$('place').value.trim();if(place)explore({place})});
 $('gps').onclick=()=>{if(!navigator.geolocation){$('error').hidden=false;$('error').textContent='GPS is unavailable. Please search a town instead.';return}$('status').textContent='Waiting for your location permission…';navigator.geolocation.getCurrentPosition(p=>explore({lat:Number(p.coords.latitude.toFixed(3)),lon:Number(p.coords.longitude.toFixed(3))}),()=>{$('status').textContent='Location could not be found. You can search a town instead.'},{enableHighAccuracy:false,timeout:15000,maximumAge:60000})};
 function refreshIfDue(){if(guide&&lastInput&&!inFlight&&!document.hidden&&Date.now()>=Date.parse(guide.cacheUntil))explore(lastInput,{quiet:true})}
 setInterval(refreshIfDue,600000);document.addEventListener('visibilitychange',refreshIfDue);
@@ -128,8 +130,9 @@ if(typeof IntersectionObserver!=='undefined'){
 // UI modes reuse the original AI discovery and narration endpoints.
 if($('modeGo')&&$('modeHome')){
  let pageMode='home';
- const setMode=mode=>{pageMode=mode;globalThis.ExploreNarration?.stop();const controls=$('locationControls'),form=$('searchForm');if(mode==='go'){form.before(controls);$('locationHeading').textContent='Discover around you';$('modeHelp').textContent='Use your location, then choose a nearby place to read or hear.';$('listenNearby').hidden=false;$('place').placeholder='Or explore somewhere else';}else{form.after(controls);$('locationHeading').textContent='Where would you like to explore?';$('modeHelp').textContent='Search a place and choose what you would like to read or hear.';$('listenNearby').hidden=true;$('place').placeholder='Town, village or landmark — add a country';}for(const [id,on]of [['modeGo',mode==='go'],['modeHome',mode==='home']]){if(on)$(id).setAttribute('aria-current','page');else $(id).removeAttribute('aria-current')}globalThis.window?.scrollTo?.({top:0,behavior:'smooth'});};
+ const setMode=mode=>{pageMode=mode;globalThis.ExploreNarration?.stop();const controls=$('locationControls'),form=$('searchForm');if(mode==='go'){form.before(controls);$('locationHeading').textContent='Discover around you';$('modeHelp').textContent='Use your location, then choose a nearby place to read or hear.';$('listenNearby').hidden=false;$('place').placeholder='Or explore somewhere else';}else{form.after(controls);$('locationHeading').textContent='Where would you like to explore?';$('modeHelp').textContent='Search a place and choose what you would like to read or hear.';$('listenNearby').hidden=true;$('place').placeholder='Town, neighbourhood or landmark';}for(const [id,on]of [['modeGo',mode==='go'],['modeHome',mode==='home']]){if(on)$(id).setAttribute('aria-current','page');else $(id).removeAttribute('aria-current')}globalThis.window?.scrollTo?.({top:0,behavior:'smooth'});};
  $('modeGo').onclick=()=>setMode('go');$('modeHome').onclick=()=>setMode('home');
  $('listenNearby').onclick=()=>{if(!guide?.items.length)return;const items=itemsForCategory(guide.items,selected);const item=(items.length?items:guide.items).slice().sort((a,b)=>(a.distanceKm??Infinity)-(b.distanceKm??Infinity))[0];if(item)listenToItem(item);};
  setMode('home');
 }
+
