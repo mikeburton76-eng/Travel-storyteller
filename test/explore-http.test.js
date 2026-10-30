@@ -13,9 +13,11 @@ test('Explore routes retain authentication and reject invalid or cross-site requ
   const response=await fetch(base+route,{headers:{authorization:auth}});assert.equal(response.status,200);
   const html=await response.text();assert.match(html,/aria-label="Main navigation"/);assert.match(html,/href="\/navigation.css"/);if(route==='/'||route==='/explore'){assert.match(html,/id="modeGo"/);assert.match(html,/id="modeHome"/)}else assert.match(html,/id="app-menu-toggle"/);assert.doesNotMatch(html,/Try the voice/);
  }
- for(const route of ['/navigation.css','/navigation.js','/explore-audio.js','/discover-design.css','/narrator-settings.js','/drive-test','/drive-client.js','/drive-test.css','/drive-logic.js','/drive-test-sw.js']){
+ for(const route of ['/navigation.css','/navigation.js','/explore-audio.js','/discover-design.css','/narrator-settings.js','/drive-test','/drive-client.js','/drive-test.css','/drive-logic.js','/drive-test-sw.js','/food-test','/food-test.css','/food-client.js','/food-demo.webp']){
   assert.equal((await fetch(base+route)).status,401);const response=await fetch(base+route,{headers:{authorization:auth}});assert.equal(response.status,200);assert.match(response.headers.get('cache-control'),/no-store/);
  }
+ const food=await(await fetch(base+'/food-test',{headers:{authorization:auth}})).text();assert.match(food,/not real venues or recommendations/);assert.match(food,/AI-generated food illustrations/);
+ const photo=await fetch(base+'/food-demo.webp',{headers:{authorization:auth}});assert.equal(photo.headers.get('content-type'),'image/webp');assert.equal(Buffer.from(await photo.arrayBuffer()).toString('ascii',0,4),'RIFF');
  const landing=await(await fetch(base+'/',{headers:{authorization:auth}})).text();assert.match(landing,/id="storyPlayer"/);assert.match(landing,/id="backToCategories"/);
  const post=(body,extra={})=>fetch(base+'/api/explore',{method:'POST',headers:{authorization:auth,'content-type':'application/json',...extra},body:JSON.stringify(body)});
  assert.equal((await post({place:'Sydney'},{origin:'https://unrelated.test'})).status,403);

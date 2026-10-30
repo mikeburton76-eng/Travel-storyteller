@@ -160,6 +160,19 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 204, {});
   }
 
+// Isolated food layout experiment: static assets only, behind existing auth.
+  const foodFiles = {
+    '/food-test': ['food-test.html', 'text/html; charset=utf-8'],
+    '/food-test.css': ['food-test.css', 'text/css; charset=utf-8'],
+    '/food-client.js': ['food-client.js', 'text/javascript; charset=utf-8'],
+    '/food-demo.webp': ['food-demo.webp', 'image/webp']
+  };
+  const foodFile = foodFiles[req.url.split('?')[0]];
+  if (req.method === 'GET' && foodFile) {
+    res.writeHead(200, { 'Content-Type': foodFile[1], 'Cache-Control': 'private, no-store' });
+    return res.end(fs.readFileSync(path.join(__dirname, foodFile[0])));
+  }
+
   const exploreFiles = { '/drive-test': ['drive-test.html', 'text/html; charset=utf-8'], '/drive-client.js': ['drive-client.js', 'text/javascript; charset=utf-8'], '/drive-test.css': ['drive-test.css', 'text/css; charset=utf-8'], '/drive-logic.js': ['drive-logic.js', 'text/javascript; charset=utf-8'], '/drive-test-sw.js': ['drive-test-sw.js', 'text/javascript; charset=utf-8'], '/discover-design.css': ['discover-design.css', 'text/css; charset=utf-8'], '/narrator-settings.js': ['narrator-settings.js', 'text/javascript; charset=utf-8'], '/': ['explore.html', 'text/html; charset=utf-8'], '/explore-audio.js': ['explore-audio.js', 'text/javascript; charset=utf-8'], '/navigation.css': ['navigation.css', 'text/css; charset=utf-8'], '/navigation.js': ['navigation.js', 'text/javascript; charset=utf-8'], '/explore': ['explore.html', 'text/html; charset=utf-8'], '/explore-client.js': ['explore-client.js', 'text/javascript; charset=utf-8'] };
   const exploreFile = exploreFiles[req.url.split('?')[0]];
   if (req.method === 'GET' && exploreFile) {
