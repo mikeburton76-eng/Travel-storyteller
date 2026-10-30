@@ -1,11 +1,11 @@
 # Mike's narrator requirements
 
 - Mike selected Piper Southern English Female (`en_GB-southern_english_female-low`) after hearing both Piper candidates.
-- Isabella remains backed up, but is no longer the selected narrator.
+- The abandoned browser voice experiment has been removed. Do not restore it from historical branches or backups.
 - Keep switching narrator simple; the approved voices and default are in `voice-config.json`.
 - No paid voice API or subscription. Do not enable paid hosting or upgrade a plan without Mike's agreement.
 - Keep a reproducible copy of the model, voice and software. Do not follow mutable model versions automatically.
-- Kokoro iPhone browser generation failed after five minutes. Generate Piper audio on the server and send standard PCM WAV to the phone.
+- Generate Piper audio on the server and send standard PCM WAV to the phone; do not restore on-device model generation.
 - Never silently fall back to Daniel or another built-in voice.
 - Mike warns that this voice sometimes pronounces words poorly. Do not treat her as a permanent choice or couple application features to her identity. Keep pronunciation changes separate from preparation/playback improvements.
 
@@ -13,7 +13,7 @@
 
 This branch adds `/voice-test`, `/voices` and `/speech`, behind the existing password protection.
 It does not change Render settings. Deployment still needs a free-host resource check.
-`npm ci` verifies/downloads the fixed Piper voice snapshot; it no longer installs Kokoro or Transformers.js.
+`npm ci` verifies/downloads only the fixed Piper voice snapshot.
 Install the pinned Python voice dependencies using `bash scripts/setup-voice.sh` (Python 3.12+).
 The model revision and SHA256 checksums are in `piper-model-lock.json`.
 The exact voice model/configuration and model card are privately backed up. Requirements are pinned.
