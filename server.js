@@ -163,6 +163,9 @@ const server = http.createServer(async (req, res) => {
 
 // Isolated food layout experiment: static assets only, behind existing auth.
   const foodFiles = {
+    '/stay': ['stay.html', 'text/html; charset=utf-8'],
+    '/stay-client.js': ['stay-client.js', 'text/javascript; charset=utf-8'],
+    '/stay-data.json': ['stay-data.json', 'application/json; charset=utf-8'],
     '/food-open-test': ['food-open-test.html', 'text/html; charset=utf-8'],
     '/food-open.css': ['food-open.css', 'text/css; charset=utf-8'],
     '/food-open-client.js': ['food-open-client.js', 'text/javascript; charset=utf-8'],

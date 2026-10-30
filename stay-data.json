@@ -1,0 +1,316 @@
+{
+  "checkedAt": "2026-10-30",
+  "reviewDue": "2027-04-30",
+  "reviewIntervalMonths": 6,
+  "automaticReview": false,
+  "coverage": [
+    "Buxton",
+    "Tideswell"
+  ],
+  "items": [
+    {
+      "id": "node/251493033",
+      "name": "Premier Inn",
+      "area": "Buxton",
+      "type": "hotel",
+      "website": "https://www.premierinn.com/gb/en/hotels/england/derbyshire/buxton/buxton.html",
+      "summary": "Hotel on London Road with an on-site restaurant.",
+      "address": "131 London Road, Buxton, SK17 9NW",
+      "coord": {
+        "lat": 53.250106,
+        "lon": -1.9107191
+      },
+      "mapSource": "https://www.openstreetmap.org/node/251493033",
+      "sources": [
+        "https://www.premierinn.com/gb/en/hotels/england/derbyshire/buxton/buxton.html",
+        "https://www.openstreetmap.org/node/251493033"
+      ],
+      "checkedAt": "2026-10-30",
+      "reviewDue": "2027-04-30"
+    },
+    {
+      "id": "way/117880922",
+      "name": "Old Hall Hotel",
+      "area": "Buxton",
+      "type": "hotel",
+      "website": "https://www.champneys.com/hotels/old-hall.html",
+      "summary": "Historic hotel on The Square, beside the Pavilion Gardens.",
+      "address": "The Square, Buxton, SK17 6BD",
+      "coord": {
+        "lat": 53.2583115,
+        "lon": -1.9155629777777778
+      },
+      "mapSource": "https://www.openstreetmap.org/way/117880922",
+      "sources": [
+        "https://www.champneys.com/hotels/old-hall.html",
+        "https://www.openstreetmap.org/way/117880922"
+      ],
+      "checkedAt": "2026-10-30",
+      "reviewDue": "2027-04-30"
+    },
+    {
+      "id": "way/117882931",
+      "name": "Palace Hotel",
+      "area": "Buxton",
+      "type": "hotel",
+      "website": "https://www.britanniahotels.com/hotels/palace-hotel-buxton",
+      "summary": "Hotel on Palace Road with gardens and leisure facilities.",
+      "address": "Palace Road, Buxton, SK17 6AG",
+      "coord": {
+        "lat": 53.26114603,
+        "lon": -1.915563045
+      },
+      "mapSource": "https://www.openstreetmap.org/way/117882931",
+      "sources": [
+        "https://www.britanniahotels.com/hotels/palace-hotel-buxton",
+        "https://www.openstreetmap.org/way/117882931"
+      ],
+      "checkedAt": "2026-10-30",
+      "reviewDue": "2027-04-30"
+    },
+    {
+      "id": "way/118355112",
+      "name": "The Lee Wood Hotel",
+      "area": "Buxton",
+      "type": "hotel",
+      "website": "https://www.leewoodhotel.co.uk/",
+      "summary": "Hotel at The Park, with room information and dining details on its website.",
+      "address": "The Park, Buxton, SK17 6TQ",
+      "coord": {
+        "lat": 53.26148435897436,
+        "lon": -1.9208964743589745
+      },
+      "mapSource": "https://www.openstreetmap.org/way/118355112",
+      "sources": [
+        "https://www.leewoodhotel.co.uk/",
+        "https://www.openstreetmap.org/way/118355112"
+      ],
+      "checkedAt": "2026-10-30",
+      "reviewDue": "2027-04-30"
+    },
+    {
+      "id": "venue:buxton-crescent-hotel",
+      "name": "Buxton Crescent Hotel",
+      "area": "Buxton",
+      "type": "hotel",
+      "website": "https://www.champneys.com/hotels/buxton-crescent.html",
+      "summary": "Hotel and spa in the Georgian Crescent.",
+      "address": "The Crescent, Buxton",
+      "coord": null,
+      "mapSource": null,
+      "sources": [
+        "https://www.champneys.com/hotels/buxton-crescent.html"
+      ],
+      "checkedAt": "2026-10-30",
+      "reviewDue": "2027-04-30"
+    },
+    {
+      "id": "node/11964637808",
+      "name": "Roseleigh",
+      "area": "Buxton",
+      "type": "guest_house",
+      "website": "https://roseleighhotel.co.uk/",
+      "summary": "Guest house offering bed and breakfast on Broadwalk, overlooking the Pavilion Gardens.",
+      "address": "19 Broadwalk, Buxton, SK17 6JR",
+      "coord": {
+        "lat": 53.2547053,
+        "lon": -1.9183992
+      },
+      "mapSource": "https://www.openstreetmap.org/node/11964637808",
+      "sources": [
+        "https://roseleighhotel.co.uk/",
+        "https://www.openstreetmap.org/node/11964637808"
+      ],
+      "checkedAt": "2026-10-30",
+      "reviewDue": "2027-04-30"
+    },
+    {
+      "id": "venue:the-old-manse-guest-house",
+      "name": "The Old Manse Guest House",
+      "area": "Buxton",
+      "type": "guest_house",
+      "website": "https://www.oldmanse.co.uk/",
+      "summary": "Adults-only guest house on Clifton Road.",
+      "address": "6 Clifton Road, Buxton, SK17 6QL",
+      "coord": null,
+      "mapSource": null,
+      "sources": [
+        "https://www.oldmanse.co.uk/"
+      ],
+      "checkedAt": "2026-10-30",
+      "reviewDue": "2027-04-30"
+    },
+    {
+      "id": "venue:up-buxton",
+      "name": "UP Buxton",
+      "area": "Buxton",
+      "type": "guest_house",
+      "website": "https://upbuxton.co.uk/",
+      "summary": "Boutique guest house with individually furnished rooms on Market Street.",
+      "address": "9–11 Market Street, Buxton, SK17 6JY",
+      "coord": null,
+      "mapSource": null,
+      "sources": [
+        "https://upbuxton.co.uk/"
+      ],
+      "checkedAt": "2026-10-30",
+      "reviewDue": "2027-04-30"
+    },
+    {
+      "id": "way/118097853",
+      "name": "Queen's Head",
+      "area": "Buxton",
+      "type": "pub_rooms",
+      "website": "https://www.queensbuxton.co.uk/hotel/",
+      "summary": "Pub with guest rooms behind the main bar area.",
+      "address": "High Street, Buxton, SK17 6EU",
+      "coord": {
+        "lat": 53.25482787777778,
+        "lon": -1.9157136444444443
+      },
+      "mapSource": "https://www.openstreetmap.org/way/118097853",
+      "sources": [
+        "https://www.queensbuxton.co.uk/hotel/",
+        "https://www.openstreetmap.org/way/118097853"
+      ],
+      "checkedAt": "2026-10-30",
+      "reviewDue": "2027-04-30"
+    },
+    {
+      "id": "node/826552167",
+      "name": "Lime Tree Park",
+      "area": "Buxton",
+      "type": "camping",
+      "website": "https://www.limetreeparkbuxton.com/",
+      "summary": "Holiday park offering camping, caravanning and self-catering stays.",
+      "address": "Duke’s Drive, Buxton, SK17 9RP",
+      "coord": {
+        "lat": 53.2491357,
+        "lon": -1.8999844
+      },
+      "mapSource": "https://www.openstreetmap.org/node/826552167",
+      "sources": [
+        "https://www.limetreeparkbuxton.com/",
+        "https://www.openstreetmap.org/node/826552167"
+      ],
+      "checkedAt": "2026-10-30",
+      "reviewDue": "2027-04-30"
+    },
+    {
+      "id": "node/383898359",
+      "name": "George Inn",
+      "area": "Tideswell",
+      "type": "pub_rooms",
+      "website": "https://www.thegeorgeinntideswell.co.uk/",
+      "summary": "Village pub with guest rooms on Commercial Road.",
+      "address": "Commercial Road, Tideswell, SK17 8NU",
+      "coord": {
+        "lat": 53.2788279,
+        "lon": -1.7718674
+      },
+      "mapSource": "https://www.openstreetmap.org/node/383898359",
+      "sources": [
+        "https://www.thegeorgeinntideswell.co.uk/",
+        "https://www.openstreetmap.org/node/383898359"
+      ],
+      "checkedAt": "2026-10-30",
+      "reviewDue": "2027-04-30"
+    },
+    {
+      "id": "node/383901212",
+      "name": "Horse and Jockey",
+      "area": "Tideswell",
+      "type": "pub_rooms",
+      "website": "https://www.horseandjockeytideswell.co.uk/accommodation/",
+      "summary": "Pub with guest accommodation on Queen Street.",
+      "address": "Queen Street, Tideswell, SK17 8JZ",
+      "coord": {
+        "lat": 53.2755843,
+        "lon": -1.7742526
+      },
+      "mapSource": "https://www.openstreetmap.org/node/383901212",
+      "sources": [
+        "https://www.horseandjockeytideswell.co.uk/accommodation/",
+        "https://www.openstreetmap.org/node/383901212"
+      ],
+      "checkedAt": "2026-10-30",
+      "reviewDue": "2027-04-30"
+    },
+    {
+      "id": "node/4350343578",
+      "name": "Blossom House",
+      "area": "Tideswell",
+      "type": "guest_house",
+      "website": "https://blossomhousetideswell.co.uk/",
+      "summary": "Bed and breakfast on Queen Street, with room details on its website.",
+      "address": "Queen Street, Tideswell, SK17 8JZ",
+      "coord": {
+        "lat": 53.2757539,
+        "lon": -1.7743789
+      },
+      "mapSource": "https://www.openstreetmap.org/node/4350343578",
+      "sources": [
+        "https://blossomhousetideswell.co.uk/",
+        "https://www.openstreetmap.org/node/4350343578"
+      ],
+      "checkedAt": "2026-10-30",
+      "reviewDue": "2027-04-30"
+    },
+    {
+      "id": "node/10808139905",
+      "name": "The Old Vicarage B&B",
+      "area": "Tideswell",
+      "type": "guest_house",
+      "website": "https://oldvicaragebnb.com/",
+      "summary": "Bed and breakfast in a former vicarage on High Street.",
+      "address": "High Street, Tideswell, SK17 8LD",
+      "coord": {
+        "lat": 53.2793457,
+        "lon": -1.7733952
+      },
+      "mapSource": "https://www.openstreetmap.org/node/10808139905",
+      "sources": [
+        "https://oldvicaragebnb.com/",
+        "https://www.openstreetmap.org/node/10808139905"
+      ],
+      "checkedAt": "2026-10-30",
+      "reviewDue": "2027-04-30"
+    },
+    {
+      "id": "venue:merman-barn",
+      "name": "Merman Barn",
+      "area": "Tideswell",
+      "type": "guest_house",
+      "website": "https://mermanbarn.co.uk/",
+      "summary": "B&B in a converted limestone barn on Alma Road. The venue states that it does not accommodate children or pets.",
+      "address": "Alma Road, Tideswell, SK17 8LS",
+      "coord": null,
+      "mapSource": null,
+      "sources": [
+        "https://mermanbarn.co.uk/"
+      ],
+      "checkedAt": "2026-10-30",
+      "reviewDue": "2027-04-30"
+    },
+    {
+      "id": "node/4350351545",
+      "name": "The Merchant's Yard",
+      "area": "Tideswell",
+      "type": "hotel",
+      "website": "https://www.themerchantsyard.com/stay-1",
+      "summary": "Restaurant with boutique guest rooms on St John’s Road.",
+      "address": "St John’s Road, Tideswell, SK17 8NY",
+      "coord": {
+        "lat": 53.2790489,
+        "lon": -1.7711235
+      },
+      "mapSource": "https://www.openstreetmap.org/node/4350351545",
+      "sources": [
+        "https://www.themerchantsyard.com/stay-1",
+        "https://www.openstreetmap.org/node/4350351545"
+      ],
+      "checkedAt": "2026-10-30",
+      "reviewDue": "2027-04-30"
+    }
+  ]
+}

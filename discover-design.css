@@ -4,3 +4,6 @@
 /* Place choices and the single food entry keep the existing layout compact. */
 .place-match-status{font-size:12px;color:#526573;margin:9px 0}.place-suggestions{display:grid;gap:6px;margin:10px 0}.place-suggestions[hidden]{display:none}.place-choice{font:inherit;text-align:left;color:#19384b;background:#f4f9fc;border:1px solid #d3e3ec;border-radius:10px;padding:11px;cursor:pointer}.place-choice strong,.place-choice small{display:block}.place-choice small{font-size:12px;color:#526573;margin-top:3px}.place-choice:focus-visible{outline:3px solid #3789ae;outline-offset:2px}.food-tile{display:flex;width:100%;text-decoration:none;background:white;margin-top:9px}.food-tile:focus-visible{outline:3px solid #3789ae;outline-offset:2px}
 
+
+.directory-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:9px}.directory-tiles .food-tile{margin:0;align-self:stretch;min-width:0}.directory-note{display:block;font-size:11px;color:#60727d;margin-top:8px}
+

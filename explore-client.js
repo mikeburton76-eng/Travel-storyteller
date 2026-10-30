@@ -38,7 +38,7 @@ function renderCategories(){
   const copy=document.createElement('span');copy.className='category-copy';copy.append(node('strong',name),node('small',hint));
   b.append(symbol,copy);b.onclick=()=>{selected=key;renderCategories();if(guide){render()}else $('categoryMsg').textContent='Choose a location below to explore '+name.toLowerCase()+'.'};$('tabs').append(b);
  }
- if($('foodTile')){const params=new URLSearchParams();if(guide?.location){params.set('place',guide.location.label);if(Number.isFinite(guide.location.lat)&&Number.isFinite(guide.location.lon)){params.set('lat',guide.location.lat);params.set('lon',guide.location.lon);}}$('foodTile').href='/food-open-test'+(params.toString()?'?'+params.toString():'');}
+ for(const [id,path]of [['foodTile','/food-open-test'],['stayTile','/stay']]){if($(id)){const params=new URLSearchParams();if(guide?.location){params.set('place',guide.location.label);if(Number.isFinite(guide.location.lat)&&Number.isFinite(guide.location.lon)){params.set('lat',guide.location.lat);params.set('lon',guide.location.lon);}}$(id).href=path+(params.toString()?'?'+params.toString():'');}}
  $('categoryMsg').textContent=guide?(visible.length?categoryHelp[selected]:'No supported suggestions found for this search yet. Try a nearby town.'):'Choose what interests you, then search a place or use your location.';
 }
 const icons={nature:'🌿',culture:'🎨',experience:'🎟️',architecture:'🏛️',history:'📜'};
@@ -145,7 +145,7 @@ if($('modeGo')&&$('modeHome')){
 function saveExploreReturn(){
  if(!guide)return;globalThis.DiscoverReturnState?.save('explore',{guide,selected,lastInput,place:$('place').value,mode:activePageMode,scroll:globalThis.window?.scrollY||0});
 }
-if($('foodTile'))$('foodTile').addEventListener('click',saveExploreReturn);
+for(const id of ['foodTile','stayTile'])if($(id))$(id).addEventListener('click',saveExploreReturn);
 globalThis.window?.addEventListener?.('pagehide',saveExploreReturn);
 try{
  const saved=globalThis.DiscoverReturnState?.load('explore');
