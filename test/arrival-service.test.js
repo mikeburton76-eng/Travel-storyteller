@@ -36,3 +36,8 @@ test('Tideswell uses the explicitly dated parish statistic with its primary sour
  assert.match(item.reason,/including Wheston.*1,827.*2011/);
  assert.ok(item.sources.some(s=>s.url.includes('peakdistrict.gov.uk')));
 });
+
+test('former and Roman settlements are excluded from current-place arrival introductions',()=>{
+ for(const description of ['Roman town in England','Former settlement in Australia','Archaeological site of a city'])assert.equal(profile({...page,description}),null);
+ assert.ok(profile({...page,description:'Historic town in England'}));
+});
