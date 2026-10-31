@@ -22,6 +22,12 @@ test('Explore routes retain authentication and reject invalid or cross-site requ
  const food=await(await fetch(base+'/food-test',{headers:{authorization:auth}})).text();assert.match(food,/not real venues or recommendations/);assert.match(food,/AI-generated food illustrations/);
  const photo=await fetch(base+'/food-demo.webp',{headers:{authorization:auth}});assert.equal(photo.headers.get('content-type'),'image/webp');assert.equal(Buffer.from(await photo.arrayBuffer()).toString('ascii',0,4),'RIFF');
  const landing=await(await fetch(base+'/',{headers:{authorization:auth}})).text();assert.match(landing,/id="storyPlayer"/);assert.match(landing,/id="backToCategories"/);
+ assert.equal((await fetch(base+'/api/arrivals',{method:'POST'})).status,401);
+ const arrival=(body,extra={})=>fetch(base+'/api/arrivals',{method:'POST',headers:{authorization:auth,'content-type':'application/json',...extra},body:JSON.stringify(body)});
+ assert.equal((await arrival({lat:123,lon:0})).status,400);
+ assert.equal((await arrival({place:''})).status,400);
+ assert.equal((await arrival({place:'Tideswell'},{origin:'https://unrelated.test'})).status,403);
+ assert.equal((await arrival({place:'Tideswell'},{'content-type':'text/plain'})).status,415);
  const post=(body,extra={})=>fetch(base+'/api/explore',{method:'POST',headers:{authorization:auth,'content-type':'application/json',...extra},body:JSON.stringify(body)});
  assert.equal((await post({place:'Sydney'},{origin:'https://unrelated.test'})).status,403);
  assert.equal((await post({place:'Sydney'},{'content-type':'text/plain'})).status,415);

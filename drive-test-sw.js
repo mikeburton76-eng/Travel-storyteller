@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='discover-driving-shell-v1';
+const CACHE='discover-driving-shell-v2';
 const ASSETS=['/drive-test','/drive-test.css','/drive-client.js','/drive-logic.js'];
 self.addEventListener('install',event=>event.waitUntil((async()=>{const cache=await caches.open(CACHE);await cache.addAll(ASSETS);await self.skipWaiting();})()));
 self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
