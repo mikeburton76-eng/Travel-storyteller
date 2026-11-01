@@ -25,7 +25,7 @@
   if(cross>120||ahead>Math.min(3000,Math.max(1000,movement.speed*90)))return null;
   return {item,metres,ahead,cross,eta:ahead/movement.speed,trigger:ahead<=Math.max(80,Math.min(450,movement.speed*12))};
  }
- function choose(items,fix,movement,played){return items.map(i=>approaching(i,fix,movement,played)).filter(Boolean).sort((a,b)=>Number(!!b.arrival)-Number(!!a.arrival)||(a.eta??a.metres)-(b.eta??b.metres))[0]||null;}
+ function choose(items,fix,movement,played){return items.map(i=>approaching(i,fix,movement,played)).filter(Boolean).sort((a,b)=>Number(b.trigger)-Number(a.trigger)||Number(!!b.arrival)-Number(!!a.arrival)||(a.eta??a.metres)-(b.eta??b.metres))[0]||null;}
  function opening(item){if(item.kind==='arrival'&&item.reason.length<=1500)return item.reason;const sentences=item.reason.match(/[^.!?]+(?:[.!?](?=\s|$)|$)/g)||[item.reason];let text='';for(const sentence of sentences){if((text+' '+sentence).trim().length>480)break;text=(text+' '+sentence).trim();if(text.split(/\s+/).length>=40)break;}return text||item.reason.slice(0,450).replace(/\s+\S*$/,'')+'…';}
  const api={distance,bearing,angle,valid,key,places,motion,approaching,choose,opening};
  if(typeof module!=='undefined')module.exports=api;else globalThis.DriveLogic=api;

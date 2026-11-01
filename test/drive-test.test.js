@@ -21,16 +21,16 @@ test('higher speeds trigger further away; duplicate and area-only locations are 
 });
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 async function app({tripItems=[item],wakeLock,fetchImpl,online=false,autoStart=true,confirm=true}={}){
- const nodes=new Map(),events={},windowEvents={},sources=[];let gps,requests=0;
+ const nodes=new Map(),events={},windowEvents={},sources=[],timers=new Map();let gps,requests=0,timerId=0;
  const node=()=>({disabled:false,textContent:'',value:'Buxton',children:[],append(...items){this.children.push(...items);},replaceChildren(...items){this.children=items;},removeAttribute(name){delete this[name];},pause(){this.paused=true;this.onpause?.();},currentTime:0,async play(){this.paused=false;this.ended=false;this.currentTime=0;this.onplaying?.();this.currentTime=1;this.ontimeupdate?.();sources.push(this);}});
  const document={hidden:false,getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id);},createElement:node,addEventListener(k,f){events[k]=f;}};
  const trip={label:'Tideswell',items:tripItems,audio:Object.fromEntries(tripItems.map(i=>[L.key(i),new Blob(['wav'])])),savedAt:new Date().toISOString()};
  const indexedDB={open(){const request={};queueMicrotask(()=>{request.result={close(){},transaction(){const tx={objectStore(){return {get(){const r={};queueMicrotask(()=>{r.result=trip;r.onsuccess();tx.oncomplete();});return r;}};}};return tx;}};request.onsuccess();});return request;}};
  class AudioContext{constructor(){this.state='running';this.sampleRate=24000;this.destination={};}resume(){return Promise.resolve();}createBuffer(){return {duration:.0001};}createBufferSource(){const s={connect(){},disconnect(){},start(){sources.push(this);},stop(){}};return s;}async decodeAudioData(){return {duration:22};}}
  const navigator={onLine:online,wakeLock,geolocation:{watchPosition(success){gps=success;return 7;},clearWatch(){gps=null;}}};
- vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../drive-client.js'),'utf8'),{document,navigator,window:{addEventListener(k,f){windowEvents[k]=f;}},DriveLogic:L,createDrivePlayer:options=>require('../drive-player').createDrivePlayer({...options,schedule:()=>1,cancel(){},url:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}}}),AudioContext,indexedDB,Blob,AbortController,DOMException,URL:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}},Date,performance,setTimeout:()=>1,clearTimeout(){},setInterval:()=>1,clearInterval(){},fetch(...args){requests++;if(fetchImpl)return fetchImpl(...args);throw Error('Offline fetch must not occur');}});
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../drive-client.js'),'utf8'),{document,navigator,window:{addEventListener(k,f){windowEvents[k]=f;}},DriveLogic:L,createDrivePlayer:options=>require('../drive-player').createDrivePlayer({...options,schedule:()=>1,cancel(){},url:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}}}),AudioContext,indexedDB,Blob,AbortController,DOMException,URL:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}},Date,performance,setTimeout(fn,ms){timers.set(++timerId,{fn,ms});return timerId;},clearTimeout(id){timers.delete(id);},setInterval:()=>1,clearInterval(){},fetch(...args){requests++;if(fetchImpl)return fetchImpl(...args);throw Error('Offline fetch must not occur');}});
  await tick();if(confirm)nodes.get('confirmVoice').onclick();if(autoStart)await nodes.get('start').onclick();await tick();
- return {nodes,events,document,sources,navigator,get gps(){return gps;},get requests(){return requests;},position(overrides){const f=fix(overrides);gps({timestamp:f.time,coords:{latitude:f.lat,longitude:f.lon,accuracy:f.accuracy,speed:f.speed,heading:f.heading}});}};
+ return {nodes,events,document,sources,navigator,timers,runTimer(ms){const entry=[...timers].find(([,t])=>t.ms===ms);if(entry){timers.delete(entry[0]);entry[1].fn();}},get gps(){return gps;},get requests(){return requests;},position(overrides){const f=fix(overrides);gps({timestamp:f.time,coords:{latitude:f.lat,longitude:f.lon,accuracy:f.accuracy,speed:f.speed,heading:f.heading}});}};
 }
 test('offline session prepares saved audio before approach, plays once and makes no network calls',async()=>{
  const a=await app();a.position({});await tick();await tick();assert.match(a.nodes.get('timing').textContent,/saved on this phone/);assert.equal(a.sources.filter(s=>s.currentTime>0).length,0);
@@ -70,4 +70,18 @@ test('ambiguous preparation offers place choices before any guide or voice downl
 test('audio prepared online can be reused after turning away and losing signal',async()=>{
  const a=await app({tripItems:[],online:true,fetchImpl:async url=>({ok:true,json:async()=>url==='/api/explore'?{complete:true,location:{label:'Town'},items:[item]}:url==='/api/arrivals'?{items:[]}:{defaultVoice:'pippa'},blob:async()=>new Blob(['wav'])})});
  a.position({});for(let i=0;i<6;i++)await tick();assert.match(a.nodes.get('timing').textContent,/ready/);a.position({heading:270});await tick();a.navigator.onLine=false;const previous=a.requests;a.position({heading:90});await tick();a.position({lon:.002});await tick();assert.equal(a.sources.length,1);assert.equal(a.requests,previous);assert.match(a.nodes.get('log').textContent,/Reusing prepared audio/);a.nodes.get('stop').onclick();
+});
+
+test('an in-range landmark takes priority over a distant arrival introduction',()=>{
+ const f=fix({lon:.002}),near=L.choose([arrival,item],f,L.motion(f),new Set());assert.equal(near.item.id,item.id);assert.equal(near.trigger,true);
+});
+test('a prepared distant arrival cannot hold up automatic playback of a nearer landmark',async()=>{
+ const a=await app({tripItems:[arrival,item]});a.position({});await tick();await tick();assert.match(a.nodes.get('placeName').textContent,/Introducing Village/);assert.equal(a.sources.length,0);
+ a.position({lon:.002});await tick();await tick();assert.equal(a.sources.length,1);assert.equal(a.nodes.get('placeName').textContent,item.name);assert.match(a.nodes.get('log').textContent,/Switching from Introducing Village outside its playback area to A landmark in range/);a.nodes.get('stop').onclick();
+});
+test('parked automatic check uses the actual automatic playback path after a delay without GPS or downloads',async()=>{
+ const a=await app({autoStart:false});a.nodes.get('testAutomatic').onclick();assert.equal(a.gps,undefined);assert.equal(a.sources.length,0);assert.equal(a.requests,0);a.runTimer(5000);await tick();assert.equal(a.sources.length,1);assert.match(a.nodes.get('log').textContent,/Automatic playback requested: Parked check/);assert.equal(a.gps,undefined);assert.equal(a.requests,0);a.sources.at(-1).onended();assert.match(a.nodes.get('status').textContent,/Parked automatic check finished/);
+});
+test('hiding the page cancels the parked countdown without starting audio',async()=>{
+ const a=await app({autoStart:false});a.nodes.get('testAutomatic').onclick();a.document.hidden=true;a.events.visibilitychange();a.runTimer(5000);await tick();assert.equal(a.sources.length,0);assert.equal(a.nodes.get('start').disabled,false);
 });
