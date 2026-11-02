@@ -24,3 +24,7 @@ test('an accepted but stalled audio request is detected',()=>{
 test('stopping cancels old player callbacks and permits a new clip on the same native element',()=>{
  const a=setup();a.start();const oldProgress=a.element.ontimeupdate;a.player.stop();a.start();a.element.currentTime=1;oldProgress();assert.equal(a.progress,0);a.element.ontimeupdate();assert.equal(a.progress,1);
 });
+
+test('ending a session pauses the established player without stripping its loaded source',()=>{
+ const a=setup();a.start();const src=a.element.src;a.player.stop();assert.equal(a.element.src,src);assert.equal(a.element.paused,true);a.player.stop({release:true});assert.equal(a.element.src,undefined);
+});

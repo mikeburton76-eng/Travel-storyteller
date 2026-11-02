@@ -21,7 +21,8 @@ test('playback stays local at higher speeds; duplicate and area-only locations a
 });
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 async function app({tripItems=[item],wakeLock,fetchImpl,online=false,autoStart=true,confirm=true,historyStorage}={}){
- const nodes=new Map(),events={},windowEvents={},sources=[],timers=new Map();let gps,requests=0,timerId=0;
+ const nodes=new Map(),events={},windowEvents={},sources=[],timers=new Map(),intervals=[];let gps,requests=0,timerId=0,nowMs=Date.now();
+ class Clock extends Date{constructor(...args){super(...(args.length?args:[nowMs]));}static now(){return nowMs;}}
  const node=()=>({disabled:false,textContent:'',value:'Buxton',children:[],append(...items){this.children.push(...items);},replaceChildren(...items){this.children=items;},removeAttribute(name){delete this[name];},pause(){this.paused=true;this.onpause?.();},currentTime:0,async play(){this.paused=false;this.ended=false;this.currentTime=0;this.onplaying?.();this.currentTime=1;this.ontimeupdate?.();sources.push(this);}});
  const historyData=new Map(),historyStore=historyStorage||{getItem:key=>historyData.get(key)||null,setItem:(key,value)=>historyData.set(key,value)};
  const document={hidden:false,getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id);},createElement:node,addEventListener(k,f){events[k]=f;}};
@@ -29,9 +30,9 @@ async function app({tripItems=[item],wakeLock,fetchImpl,online=false,autoStart=t
  const indexedDB={open(){const request={};queueMicrotask(()=>{request.result={close(){},transaction(){const tx={objectStore(){return {get(){const r={};queueMicrotask(()=>{r.result=trip;r.onsuccess();tx.oncomplete();});return r;}};}};return tx;}};request.onsuccess();});return request;}};
  class AudioContext{constructor(){this.state='running';this.sampleRate=24000;this.destination={};}resume(){return Promise.resolve();}createBuffer(){return {duration:.0001};}createBufferSource(){const s={connect(){},disconnect(){},start(){sources.push(this);},stop(){}};return s;}async decodeAudioData(){return {duration:22};}}
  const navigator={onLine:online,wakeLock,geolocation:{watchPosition(success){gps=success;return 7;},clearWatch(){gps=null;}}};
- vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../drive-client.js'),'utf8'),{document,navigator,window:{addEventListener(k,f){windowEvents[k]=f;}},DriveLogic:L,DriveHistory:{createDriveHistory:options=>require('../drive-history').createDriveHistory({...options,storage:historyStore})},createDrivePlayer:options=>require('../drive-player').createDrivePlayer({...options,schedule:()=>1,cancel(){},url:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}}}),AudioContext,indexedDB,Blob,AbortController,DOMException,URL:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}},Date,performance,setTimeout(fn,ms){timers.set(++timerId,{fn,ms});return timerId;},clearTimeout(id){timers.delete(id);},setInterval:()=>1,clearInterval(){},fetch(...args){requests++;if(fetchImpl)return fetchImpl(...args);throw Error('Offline fetch must not occur');}});
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../drive-client.js'),'utf8'),{document,navigator,window:{addEventListener(k,f){windowEvents[k]=f;}},DriveLogic:L,DriveHistory:{createDriveHistory:options=>require('../drive-history').createDriveHistory({...options,storage:historyStore})},createDrivePlayer:options=>require('../drive-player').createDrivePlayer({...options,schedule:()=>1,cancel(){},url:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}}}),AudioContext,indexedDB,Blob,AbortController,DOMException,URL:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}},Date:Clock,performance,setTimeout(fn,ms){timers.set(++timerId,{fn,ms});return timerId;},clearTimeout(id){timers.delete(id);},setInterval(fn){intervals.push(fn);return intervals.length;},clearInterval(id){intervals[id-1]=null;},fetch(...args){requests++;if(fetchImpl)return fetchImpl(...args);throw Error('Offline fetch must not occur');}});
  await tick();if(confirm)nodes.get('confirmVoice').onclick();if(autoStart)await nodes.get('start').onclick();await tick();
- return {nodes,events,document,sources,navigator,timers,historyStore,runTimer(ms){const entry=[...timers].find(([,t])=>t.ms===ms);if(entry){timers.delete(entry[0]);entry[1].fn();}},get gps(){return gps;},get requests(){return requests;},position(overrides){const f=fix(overrides);gps({timestamp:f.time,coords:{latitude:f.lat,longitude:f.lon,accuracy:f.accuracy,speed:f.speed,heading:f.heading}});}};
+ return {nodes,events,document,sources,navigator,timers,historyStore,runIntervals(){for(const fn of intervals)fn?.();},advance(ms){nowMs+=ms;},runTimer(ms){const entry=[...timers].find(([,t])=>t.ms===ms);if(entry){timers.delete(entry[0]);entry[1].fn();}},get gps(){return gps;},get requests(){return requests;},position(overrides){const f=fix({time:Clock.now(),...overrides});gps({timestamp:f.time,coords:{latitude:f.lat,longitude:f.lon,accuracy:f.accuracy,speed:f.speed,heading:f.heading}});}};
 }
 test('offline session prepares saved audio before approach, plays once and makes no network calls',async()=>{
  const a=await app();a.position({});await tick();await tick();assert.match(a.nodes.get('timing').textContent,/saved on this phone/);assert.equal(a.sources.filter(s=>s.currentTime>0).length,0);
@@ -52,11 +53,11 @@ test('offline service worker caches only the separate test shell, never API or m
 });
 
 const arrival={...item,id:'arrival:town',kind:'arrival',profileVersion:3,pageId:1,placeName:'Village',name:'Introducing Village',coord:{lat:.01,lon:.01},arrivalRadiusM:700,prepareRadiusM:2200,checkedAt:new Date().toISOString(),reviewAfter:new Date(Date.now()+365*86400000).toISOString(),audioKey:'revision1'};
-test('village arrival uses the 100 m area without requiring speed or heading',()=>{
+test('village arrival uses the 200 m area without requiring speed or heading',()=>{
  const f=fix({speed:null,heading:null});const approaching=L.approaching(arrival,f,null);assert.ok(approaching);assert.equal(approaching.trigger,false);assert.equal(L.approaching(arrival,fix({lat:.0095,lon:.0095,speed:0,heading:null}),null).trigger,true);assert.equal(L.approaching(arrival,fix({accuracy:200}),null),null);
  assert.equal(L.approaching(arrival,fix({lat:.0095,lon:.0095}),null,new Set([L.key(arrival)])),null);
 });
-test('downloaded arrival starts within 100 m without relying on heading and plays once',async()=>{
+test('downloaded arrival starts within 200 m without relying on heading and plays once',async()=>{
  const a=await app({tripItems:[arrival]});a.position({speed:null,heading:null});await tick();await tick();assert.equal(a.sources.filter(s=>s.currentTime>0).length,0);a.position({lat:.0095,lon:.0095,speed:0,heading:null});await tick();assert.equal(a.sources.filter(s=>s.currentTime>0).length,1);a.sources.at(-1).onended();a.position({lat:.0096,lon:.0096,speed:0,heading:null});await tick();assert.equal(a.sources.filter(s=>s.currentTime>0).length,1);assert.equal(a.requests,0);
 });
 test('an unresolved screen-wake request no longer prevents GPS tracking from starting',async()=>{const a=await app({wakeLock:{request:()=>new Promise(()=>{})}});assert.equal(typeof a.gps,'function');a.nodes.get('stop').onclick();});
@@ -78,7 +79,7 @@ test('an in-range landmark takes priority over a distant arrival introduction',(
 });
 test('a prepared distant arrival cannot hold up automatic playback of a nearer landmark',async()=>{
  const a=await app({tripItems:[arrival,item]});a.position({});await tick();await tick();assert.match(a.nodes.get('placeName').textContent,/Introducing Village/);assert.equal(a.sources.length,0);
- a.position({lon:.0023});await tick();await tick();assert.equal(a.sources.length,1);assert.equal(a.nodes.get('placeName').textContent,item.name);assert.match(a.nodes.get('log').textContent,/Switching from Introducing Village outside its playback area to A landmark in range/);a.nodes.get('stop').onclick();
+ a.position({lon:.0023});await tick();await tick();assert.equal(a.sources.length,1);assert.equal(a.nodes.get('placeName').textContent,item.name);assert.match(a.nodes.get('log').textContent,/Switching from Introducing Village outside its playback area to queued A landmark/);a.nodes.get('stop').onclick();
 });
 test('parked automatic check uses the actual automatic playback path after a delay without GPS or downloads',async()=>{
  const a=await app({autoStart:false});a.nodes.get('testAutomatic').onclick();assert.equal(a.gps,undefined);assert.equal(a.sources.length,0);assert.equal(a.requests,0);a.runTimer(5000);await tick();assert.equal(a.sources.length,1);assert.match(a.nodes.get('log').textContent,/Automatic playback requested: Parked check/);assert.equal(a.gps,undefined);assert.equal(a.requests,0);a.sources.at(-1).onended();assert.match(a.nodes.get('status').textContent,/Parked automatic check finished/);
@@ -87,11 +88,11 @@ test('hiding the page cancels the parked countdown without starting audio',async
  const a=await app({autoStart:false});a.nodes.get('testAutomatic').onclick();a.document.hidden=true;a.events.visibilitychange();a.runTimer(5000);await tick();assert.equal(a.sources.length,0);assert.equal(a.nodes.get('start').disabled,false);
 });
 
-test('100 m is a radial playback limit for both sights and arrivals, including legacy broad radii',()=>{
+test('200 m is a radial playback limit for both sights and arrivals, including legacy broad radii',()=>{
  const at=m=>fix({lon:item.coord.lon-m/6371000*180/Math.PI});
- for(const speed of [10,30]){assert.equal(L.approaching(item,at(99),{speed,heading:90}).trigger,true);assert.equal(L.approaching(item,at(101),{speed,heading:90}).trigger,false);assert.equal(L.approaching(item,at(600),{speed,heading:90}).trigger,false);}
- const old={...arrival,coord:item.coord,arrivalRadiusM:3000,prepareRadiusM:4800};assert.equal(L.approaching(old,at(99),null).trigger,true);assert.equal(L.approaching(old,at(101),null).trigger,false);assert.equal(L.approaching(old,at(1000),null).trigger,false);
- const across=L.approaching(item,fix({lat:.0008,lon:.0025}),{speed:20,heading:90});assert.ok(across.ahead<100&&across.metres>100);assert.equal(across.trigger,false);
+ for(const speed of [10,30]){assert.equal(L.approaching(item,at(199),{speed,heading:90}).trigger,true);assert.equal(L.approaching(item,at(201),{speed,heading:90}).trigger,false);assert.equal(L.approaching(item,at(600),{speed,heading:90}).trigger,false);}
+ const old={...arrival,coord:item.coord,arrivalRadiusM:3000,prepareRadiusM:4800};assert.equal(L.approaching(old,at(199),null).trigger,true);assert.equal(L.approaching(old,at(201),null).trigger,false);assert.equal(L.approaching(old,at(1000),null).trigger,false);
+ const across=L.approaching(item,fix({lat:.0008,lon:.0013}),{speed:20,heading:90});assert.ok(across.ahead<200&&across.metres>200);assert.equal(across.trigger,false);
 });
 
 test('old downloaded arrival audio with the repetitive advice is not reused after the content revision',async()=>{
@@ -108,4 +109,17 @@ test('Hear this place again plays a saved clip once on request, and reset allows
 });
 test('the parked automatic sound check does not consume daily playback of a place',async()=>{
  const a=await app({autoStart:false});a.nodes.get('testAutomatic').onclick();a.runTimer(5000);await tick();a.sources.at(-1).onended();assert.equal(a.nodes.get('historyList').children.length,0);await a.nodes.get('start').onclick();a.position({lon:.0023});await tick();await tick();assert.equal(a.sources.length,2);a.nodes.get('stop').onclick();
+});
+
+test('an item latches inside 200 m and starts after delayed audio is ready beyond that distance',async()=>{
+ let resolveSpeech;const speech=new Promise(resolve=>{resolveSpeech=resolve;});
+ const a=await app({tripItems:[],online:true,fetchImpl:async url=>url==='/speech'?speech:{ok:true,json:async()=>url==='/api/explore'?{complete:true,location:{label:'Town'},items:[item]}:url==='/api/arrivals'?{items:[]}:{defaultVoice:'pippa'}}});
+ a.position({});for(let i=0;i<5;i++)await tick();a.position({lon:.0015});assert.match(a.nodes.get('log').textContent,/Queued after entering 200 m/);a.position({lon:.01,heading:270});a.advance(15000);resolveSpeech({ok:true,blob:async()=>new Blob(['wav'])});for(let i=0;i<5;i++)await tick();assert.equal(a.sources.length,1);assert.match(a.nodes.get('log').textContent,/Automatic playback requested: A landmark/);a.nodes.get('stop').onclick();
+});
+test('places entered while another clip plays remain queued through leaving range and the playback gap',async()=>{
+ const second={...item,id:'second',name:'Second landmark',coord:{lat:0,lon:.006},source:{url:'https://en.wikipedia.org/wiki/Second'}};
+ const a=await app({tripItems:[item,second]});a.position({lon:.0023});await tick();await tick();assert.equal(a.sources.length,1);a.position({lon:.0045});a.position({lon:.012});assert.equal(a.nodes.get('savedPreview').paused,false);assert.match(a.nodes.get('log').textContent,/Queued after entering 200 m: Second landmark/);a.sources[0].onended();a.position({lon:.012});await tick();assert.equal(a.sources.length,1);a.advance(20001);a.runIntervals();await tick();await tick();assert.equal(a.sources.length,2);assert.equal(a.nodes.get('placeName').textContent,'Second landmark');a.nodes.get('stop').onclick();
+});
+test('Stop discards a triggered item even if an outstanding audio request later returns',async()=>{
+ let resolveSpeech;const speech=new Promise(resolve=>{resolveSpeech=resolve;});const a=await app({tripItems:[],online:true,fetchImpl:async url=>url==='/speech'?speech:{ok:true,json:async()=>url==='/api/explore'?{complete:true,location:{label:'Town'},items:[item]}:url==='/api/arrivals'?{items:[]}:{defaultVoice:'pippa'}}});a.position({lon:.0023});for(let i=0;i<4;i++)await tick();a.nodes.get('stop').onclick();resolveSpeech({ok:true,blob:async()=>new Blob(['wav'])});for(let i=0;i<4;i++)await tick();assert.equal(a.sources.length,0);
 });

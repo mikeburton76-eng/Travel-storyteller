@@ -1,7 +1,7 @@
 'use strict';
 // Straight-line approach estimates, deliberately independent of road navigation.
 (()=>{
- const PLAYBACK_METRES=100;
+ const PLAYBACK_METRES=200;
  const rad=x=>x*Math.PI/180;
  function distance(a,b){const p=rad(b.lat-a.lat),q=rad(b.lon-a.lon);return 6371000*2*Math.asin(Math.min(1,Math.sqrt(Math.sin(p/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(q/2)**2)));}
  function bearing(a,b){const p=rad(a.lat),q=rad(b.lat),d=rad(b.lon-a.lon);return (Math.atan2(Math.sin(d)*Math.cos(q),Math.cos(p)*Math.sin(q)-Math.sin(p)*Math.cos(q)*Math.cos(d))*180/Math.PI+360)%360;}
