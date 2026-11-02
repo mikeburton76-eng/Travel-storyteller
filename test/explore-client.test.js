@@ -80,3 +80,15 @@ test('reading panel has top/bottom close controls and browser Back closes it wit
 });
 
 test('Places to stay carries the selected location and preserves the return point',()=>{let saved;const a=app(undefined,'',{DiscoverReturnState:{load:()=>null,save:(_key,value)=>saved=value}});a.run('guide='+JSON.stringify({...fixture,location:{label:'Tideswell',mode:'area',lat:53.278,lon:-1.773}})+';render()');const u=new URL(a.nodes.stayTile.href,'https://test.example');assert.equal(u.pathname,'/stay');assert.equal(u.searchParams.get('place'),'Tideswell');assert.equal(u.searchParams.get('lat'),'53.278');a.nodes.stayTile.events.click();assert.equal(saved.guide.location.label,'Tideswell');});
+
+test('every category sorts by real distance after choosing the appropriate duplicate card',()=>{
+ const a=app();for(const category of ['attractions','gems','walks','family','history','events']){
+ const nearSection=['attractions','history'].includes(category)?'buildings':category==='walks'?'photos':category;
+ const rows=[{...fixture.items[0],id:'far',name:'Far sight',section:category,coord:{lat:0,lon:.02},distanceKm:.1},{...fixture.items[0],id:'near',name:category==='walks'?'Near garden':'Near sight',section:nearSection,coord:{lat:0,lon:.001},distanceKm:.1},{...fixture.items[0],id:'unknown',name:'Unknown location',section:category,coord:null,distanceKm:0}];
+ a.run('guide='+JSON.stringify({...fixture,location:{label:'Search point',mode:'nearby',lat:0,lon:0},items:rows}));
+ assert.deepEqual(JSON.parse(a.run('JSON.stringify(itemsForCategory(guide.items,'+JSON.stringify(category)+').map(x=>x.id))')),['near','far','unknown'],category);
+ }
+});
+test('a different explored place changes proximity order without relying on an old distance field',()=>{
+ const a=app(),rows=[{...fixture.items[0],id:'west',name:'West',coord:{lat:0,lon:.001}},{...fixture.items[0],id:'east',name:'East',coord:{lat:0,lon:.019}}];a.run('guide='+JSON.stringify({...fixture,location:{label:'West point',mode:'area',lat:0,lon:0},items:rows}));assert.equal(a.run('itemsForCategory(guide.items,"attractions")[0].id'),'west');a.run('guide.location={label:"East point",mode:"area",lat:0,lon:.02}');assert.equal(a.run('itemsForCategory(guide.items,"attractions")[0].id'),'east');
+});

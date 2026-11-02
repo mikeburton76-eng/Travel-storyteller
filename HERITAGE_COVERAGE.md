@@ -10,3 +10,7 @@ Two coordinate-scoped reviewed supplements address reported Buxton gaps:
 Reviewed 2 November 2026. Supplements are included only within the existing geographic radius and merge with matching source candidates. Reviewed text and coordinates survive less precise duplicates. Existing candidate/result limits and AI-call budgets remain; reviewed category additions can replace a non-must-see item within a full guide. General heritage and walking rules apply worldwide where source evidence is available. These rules do not promise exhaustive coverage.
 
 Guide content version is now 11. The 30-day reuse policy remains unchanged. After deployment, run a fresh Buxton search; existing offline trip downloads need preparing again to include the additions. The 200-metre entry queue, voice setup and listening-history rules are unchanged.
+
+## Stable nearest-first browsing
+
+Each existing Explore category sorts its deduplicated cards by straight-line distance from the guide's search point, with unmapped items last and alphabetical ties. This is the latest GPS search point for a nearby guide, or the selected place's reference point for a named search. It does not watch live GPS, reroute, continuously reshuffle cards or request another AI guide to sort them. Displayed distances use the same calculation as ordering. Food and stay pages inherit the selected search coordinates for the same nearest-first behaviour; selecting a local trial area without a point uses its centre. The voice-trigger queue is independent of this browsing order.
