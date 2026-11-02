@@ -20,17 +20,18 @@ test('playback stays local at higher speeds; duplicate and area-only locations a
  assert.ok(L.opening({...item,reason:('This is a supported sentence about a place. ').repeat(30)}).length<=480);
 });
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
-async function app({tripItems=[item],wakeLock,fetchImpl,online=false,autoStart=true,confirm=true}={}){
+async function app({tripItems=[item],wakeLock,fetchImpl,online=false,autoStart=true,confirm=true,historyStorage}={}){
  const nodes=new Map(),events={},windowEvents={},sources=[],timers=new Map();let gps,requests=0,timerId=0;
  const node=()=>({disabled:false,textContent:'',value:'Buxton',children:[],append(...items){this.children.push(...items);},replaceChildren(...items){this.children=items;},removeAttribute(name){delete this[name];},pause(){this.paused=true;this.onpause?.();},currentTime:0,async play(){this.paused=false;this.ended=false;this.currentTime=0;this.onplaying?.();this.currentTime=1;this.ontimeupdate?.();sources.push(this);}});
+ const historyData=new Map(),historyStore=historyStorage||{getItem:key=>historyData.get(key)||null,setItem:(key,value)=>historyData.set(key,value)};
  const document={hidden:false,getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id);},createElement:node,addEventListener(k,f){events[k]=f;}};
  const trip={label:'Tideswell',items:tripItems,audio:Object.fromEntries(tripItems.map(i=>[L.key(i),new Blob(['wav'])])),savedAt:new Date().toISOString()};
  const indexedDB={open(){const request={};queueMicrotask(()=>{request.result={close(){},transaction(){const tx={objectStore(){return {get(){const r={};queueMicrotask(()=>{r.result=trip;r.onsuccess();tx.oncomplete();});return r;}};}};return tx;}};request.onsuccess();});return request;}};
  class AudioContext{constructor(){this.state='running';this.sampleRate=24000;this.destination={};}resume(){return Promise.resolve();}createBuffer(){return {duration:.0001};}createBufferSource(){const s={connect(){},disconnect(){},start(){sources.push(this);},stop(){}};return s;}async decodeAudioData(){return {duration:22};}}
  const navigator={onLine:online,wakeLock,geolocation:{watchPosition(success){gps=success;return 7;},clearWatch(){gps=null;}}};
- vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../drive-client.js'),'utf8'),{document,navigator,window:{addEventListener(k,f){windowEvents[k]=f;}},DriveLogic:L,createDrivePlayer:options=>require('../drive-player').createDrivePlayer({...options,schedule:()=>1,cancel(){},url:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}}}),AudioContext,indexedDB,Blob,AbortController,DOMException,URL:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}},Date,performance,setTimeout(fn,ms){timers.set(++timerId,{fn,ms});return timerId;},clearTimeout(id){timers.delete(id);},setInterval:()=>1,clearInterval(){},fetch(...args){requests++;if(fetchImpl)return fetchImpl(...args);throw Error('Offline fetch must not occur');}});
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../drive-client.js'),'utf8'),{document,navigator,window:{addEventListener(k,f){windowEvents[k]=f;}},DriveLogic:L,DriveHistory:{createDriveHistory:options=>require('../drive-history').createDriveHistory({...options,storage:historyStore})},createDrivePlayer:options=>require('../drive-player').createDrivePlayer({...options,schedule:()=>1,cancel(){},url:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}}}),AudioContext,indexedDB,Blob,AbortController,DOMException,URL:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}},Date,performance,setTimeout(fn,ms){timers.set(++timerId,{fn,ms});return timerId;},clearTimeout(id){timers.delete(id);},setInterval:()=>1,clearInterval(){},fetch(...args){requests++;if(fetchImpl)return fetchImpl(...args);throw Error('Offline fetch must not occur');}});
  await tick();if(confirm)nodes.get('confirmVoice').onclick();if(autoStart)await nodes.get('start').onclick();await tick();
- return {nodes,events,document,sources,navigator,timers,runTimer(ms){const entry=[...timers].find(([,t])=>t.ms===ms);if(entry){timers.delete(entry[0]);entry[1].fn();}},get gps(){return gps;},get requests(){return requests;},position(overrides){const f=fix(overrides);gps({timestamp:f.time,coords:{latitude:f.lat,longitude:f.lon,accuracy:f.accuracy,speed:f.speed,heading:f.heading}});}};
+ return {nodes,events,document,sources,navigator,timers,historyStore,runTimer(ms){const entry=[...timers].find(([,t])=>t.ms===ms);if(entry){timers.delete(entry[0]);entry[1].fn();}},get gps(){return gps;},get requests(){return requests;},position(overrides){const f=fix(overrides);gps({timestamp:f.time,coords:{latitude:f.lat,longitude:f.lon,accuracy:f.accuracy,speed:f.speed,heading:f.heading}});}};
 }
 test('offline session prepares saved audio before approach, plays once and makes no network calls',async()=>{
  const a=await app();a.position({});await tick();await tick();assert.match(a.nodes.get('timing').textContent,/saved on this phone/);assert.equal(a.sources.filter(s=>s.currentTime>0).length,0);
@@ -95,4 +96,16 @@ test('100 m is a radial playback limit for both sights and arrivals, including l
 
 test('old downloaded arrival audio with the repetitive advice is not reused after the content revision',async()=>{
  const old={...arrival,profileVersion:2,coord:{lat:0,lon:0}};const a=await app({tripItems:[old]});a.position({speed:0,heading:null});await tick();assert.equal(a.sources.length,0);assert.match(a.nodes.get('savedStatus').textContent,/needs updating/);a.nodes.get('stop').onclick();
+});
+
+test('a return journey after reloading does not play an item already heard today',async()=>{
+ const first=await app();first.position({lon:.0023});await tick();await tick();assert.equal(first.sources.length,1);first.nodes.get('stop').onclick();
+ const second=await app({historyStorage:first.historyStore});second.position({lon:.0023});await tick();await tick();assert.equal(second.sources.length,0);assert.match(second.nodes.get('decision').textContent,/Already heard today/);second.nodes.get('stop').onclick();
+});
+test('Hear this place again plays a saved clip once on request, and reset allows a new journey',async()=>{
+ const a=await app();a.position({lon:.0023});await tick();await tick();a.nodes.get('stop').onclick();const row=a.nodes.get('historyList').children[0];assert.ok(row);row.children[1].onclick();await tick();assert.equal(a.sources.length,2);a.sources.at(-1).onended();assert.match(a.nodes.get('historyList').children[0].children[0].textContent,/2 plays/);
+ a.nodes.get('resetHistory').onclick();assert.equal(a.nodes.get('historyList').children.length,0);await a.nodes.get('start').onclick();a.position({lon:.0023});await tick();await tick();assert.equal(a.sources.length,3);a.nodes.get('stop').onclick();
+});
+test('the parked automatic sound check does not consume daily playback of a place',async()=>{
+ const a=await app({autoStart:false});a.nodes.get('testAutomatic').onclick();a.runTimer(5000);await tick();a.sources.at(-1).onended();assert.equal(a.nodes.get('historyList').children.length,0);await a.nodes.get('start').onclick();a.position({lon:.0023});await tick();await tick();assert.equal(a.sources.length,2);a.nodes.get('stop').onclick();
 });
