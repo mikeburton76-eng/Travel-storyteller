@@ -3,7 +3,7 @@ const P=require('./explore-policy'),{createHash}=require('node:crypto');
 const settlement=/\b(village|town|city|hamlet|suburb|neighbou?rhood|settlement|municipality)\b/i;
 const formerSettlement=/\b(?:ancient|former|abandoned|deserted|defunct|ruined|Roman)\s+(?:(?:Roman|spa|market|port|bathing|fortified)\s+)*(?:town|city|village|settlement|hamlet|site)\b|\barchaeological site\b/i;
 const isSettlement=p=>!formerSettlement.test(p.description||'')&&settlement.test(p.description||'')&&!/\b(hotel|church|cathedral|museum|gallery|company|university|school|hospital|airport|railway station|town hall|film|album|sports team|national park|monument|battlefield)\b/i.test(p.description||'');
-const radius=description=>/\bcity\b/i.test(description)?3000:/\btown\b/i.test(description)?1400:/\bhamlet\b/i.test(description)?500:1000;
+const ARRIVAL_RADIUS_METRES=100;
 function profile(page,now=Date.now()){
  const coord=P.coordinate(page.coordinates?.[0]?.lat,page.coordinates?.[0]?.lon),name=P.plain(page.title||'');
  if(!coord||!name||!isSettlement(page)||!P.allowed(name,page.description||''))return null;
@@ -15,9 +15,9 @@ function profile(page,now=Date.now()){
  const selected=[],add=s=>{if(!s||selected.includes(s))return;const candidate=[...selected,s].join(' ');if(candidate.split(/\s+/).length<=120&&candidate.length<=1200)selected.push(s);};
  add(hook||safe[0]);add(history);add(stat);if(selected.join(' ').split(/\s+/).length<60)add(safe.find(s=>!selected.includes(s)));
  if(!selected.length)return null;
- const text='You’re near '+name+'. '+selected.join(' ')+' Explore local visitor information for places to eat and stay; check details directly with each venue.';
+ const text='You’re near '+name+'. '+selected.join(' ');
  const checkedAt=new Date(now).toISOString(),due=new Date(now);due.setUTCFullYear(due.getUTCFullYear()+1);
- return {id:'arrival:'+page.pageid,profileVersion:2,kind:'arrival',pageId:page.pageid,name:'Introducing '+name,placeName:name,title:name,reason:text,coord,arrivalRadiusM:radius(page.description||''),prepareRadiusM:radius(page.description||'')+1800,source:{kind:'wikipedia',title:name,url:'https://en.wikipedia.org/wiki/'+encodeURIComponent(name.replace(/ /g,'_'))},sources:[{title:name,url:'https://en.wikipedia.org/wiki/'+encodeURIComponent(name.replace(/ /g,'_'))},...(page.pageid===456017?[{title:'Peak District National Park — Tideswell and Wheston parish statement (2011 census)',url:'https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0021/344451/Tideswell-and-Wheston.pdf'}]:[])],checkedAt,reviewAfter:due.toISOString(),audioKey:createHash('sha256').update(text).digest('hex').slice(0,16),standout:hook||null,history:history||null,stat:stat||null,selectionBasis:'source',notice:'Source-based introduction; annual review when used. Distances are approximate, and food/stay coverage in this app remains local.'};
+ return {id:'arrival:'+page.pageid,profileVersion:3,kind:'arrival',pageId:page.pageid,name:'Introducing '+name,placeName:name,title:name,reason:text,coord,arrivalRadiusM:ARRIVAL_RADIUS_METRES,prepareRadiusM:ARRIVAL_RADIUS_METRES+1800,source:{kind:'wikipedia',title:name,url:'https://en.wikipedia.org/wiki/'+encodeURIComponent(name.replace(/ /g,'_'))},sources:[{title:name,url:'https://en.wikipedia.org/wiki/'+encodeURIComponent(name.replace(/ /g,'_'))},...(page.pageid===456017?[{title:'Peak District National Park — Tideswell and Wheston parish statement (2011 census)',url:'https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0021/344451/Tideswell-and-Wheston.pdf'}]:[])],checkedAt,reviewAfter:due.toISOString(),audioKey:createHash('sha256').update(text).digest('hex').slice(0,16),standout:hook||null,history:history||null,stat:stat||null,selectionBasis:'source',notice:'Source-based introduction; annual review when used. Distances are approximate, and food/stay coverage in this app remains local.'};
 }
 function createArrivalService({fetchImpl=fetch,now=()=>Date.now()}={}){
  const profiles=new Map(),geocache=new Map(),pending=new Map();let calls=[];

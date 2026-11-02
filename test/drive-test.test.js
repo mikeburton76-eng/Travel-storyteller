@@ -5,7 +5,7 @@ const item={id:'church',name:'A landmark',reason:'This landmark has a long histo
 const fix=(overrides={})=>({lat:0,lon:0,accuracy:10,time:Date.now(),speed:13.4,heading:90,...overrides});
 test('approach uses speed, heading and a narrow corridor; places behind or across another road do not trigger',()=>{
  const f=fix(),m=L.motion(f);assert.ok(L.approaching(item,f,m).eta>20);assert.equal(L.approaching(item,f,m).trigger,false);
- assert.equal(L.approaching(item,fix({lon:.002}),m).trigger,true);
+ assert.equal(L.approaching(item,fix({lon:.0023}),m).trigger,true);
  assert.equal(L.approaching(item,f,{speed:13.4,heading:270}),null);
  assert.equal(L.approaching({...item,coord:{lat:.005,lon:.003}},f,m),null);
  assert.equal(L.approaching(item,f,m,new Set([item.source.url])),null);
@@ -14,8 +14,8 @@ test('poor fixes, stationary readings and missing direction cannot auto-play; us
  assert.equal(L.motion(fix({accuracy:200})),null);assert.equal(L.motion(fix({accuracy:NaN})),null);assert.equal(L.motion(fix({speed:0})),null);assert.equal(L.motion(fix({heading:-1})),null);
  const now=Date.now(),previous=fix({time:now-10000,speed:null,heading:null});const m=L.motion(fix({lon:.001,time:now,speed:null,heading:null}),previous);assert.ok(m.speed>10&&m.speed<12);assert.equal(m.heading,90);
 });
-test('higher speeds trigger further away; duplicate and area-only locations are omitted',()=>{
- const f=fix({lon:.001});assert.equal(L.approaching(item,f,{speed:10,heading:90}).trigger,false);assert.equal(L.approaching(item,f,{speed:25,heading:90}).trigger,true);
+test('playback stays local at higher speeds; duplicate and area-only locations are omitted',()=>{
+ const f=fix({lon:.001});assert.equal(L.approaching(item,f,{speed:10,heading:90}).trigger,false);assert.equal(L.approaching(item,f,{speed:25,heading:90}).trigger,false);
  assert.equal(L.places([item,{...item,id:'duplicate'}, {...item,id:'festival',source:{url:'festival'},eventArea:true},{...item,id:'history',source:{url:'history'},historyOnly:true},{...item,id:'bad',coord:{lat:NaN,lon:0}}]).length,1);
  assert.ok(L.opening({...item,reason:('This is a supported sentence about a place. ').repeat(30)}).length<=480);
 });
@@ -34,12 +34,12 @@ async function app({tripItems=[item],wakeLock,fetchImpl,online=false,autoStart=t
 }
 test('offline session prepares saved audio before approach, plays once and makes no network calls',async()=>{
  const a=await app();a.position({});await tick();await tick();assert.match(a.nodes.get('timing').textContent,/saved on this phone/);assert.equal(a.sources.filter(s=>s.currentTime>0).length,0);
- a.position({lon:.002});await tick();assert.equal(a.sources.filter(s=>s.currentTime>0).length,1);assert.equal(a.requests,0);
+ a.position({lon:.0023});await tick();assert.equal(a.sources.filter(s=>s.currentTime>0).length,1);assert.equal(a.requests,0);
  const source=a.sources.at(-1);source.onended();a.position({lon:.0021});await tick();assert.equal(a.sources.filter(s=>s.currentTime>0).length,1);
 });
 test('old GPS and a turn away prevent saved narration from playing',async()=>{
- const a=await app();a.position({});await tick();await tick();a.position({lon:.002,time:Date.now()-20000});assert.equal(a.sources.filter(s=>s.currentTime>0).length,0);assert.match(a.nodes.get('status').textContent,/fresh/);
- a.position({lon:.002,heading:270});await tick();assert.equal(a.sources.filter(s=>s.currentTime>0).length,0);
+ const a=await app();a.position({});await tick();await tick();a.position({lon:.0023,time:Date.now()-20000});assert.equal(a.sources.filter(s=>s.currentTime>0).length,0);assert.match(a.nodes.get('status').textContent,/fresh/);
+ a.position({lon:.0023,heading:270});await tick();assert.equal(a.sources.filter(s=>s.currentTime>0).length,0);
 });
 test('hiding the page stops GPS and audio and requires an explicit restart',async()=>{
  const a=await app();a.position({});await tick();a.document.hidden=true;a.events.visibilitychange();assert.equal(a.gps,null);assert.equal(a.nodes.get('start').disabled,false);assert.match(a.nodes.get('status').textContent,/hidden/);
@@ -50,13 +50,13 @@ test('offline service worker caches only the separate test shell, never API or m
  listeners.fetch({request:{method:'POST',url:'https://test.example/drive-test'},respondWith(){assert.fail('POST intercepted');}});
 });
 
-const arrival={...item,id:'arrival:town',kind:'arrival',profileVersion:2,pageId:1,placeName:'Village',name:'Introducing Village',coord:{lat:.01,lon:.01},arrivalRadiusM:700,prepareRadiusM:2200,checkedAt:new Date().toISOString(),reviewAfter:new Date(Date.now()+365*86400000).toISOString(),audioKey:'revision1'};
-test('village arrival uses an area instead of the narrow landmark corridor, even with no speed or heading',()=>{
- const f=fix({speed:null,heading:null});const approaching=L.approaching(arrival,f,null);assert.ok(approaching);assert.equal(approaching.trigger,false);assert.equal(L.approaching(arrival,fix({lat:.006,lon:.006,speed:0,heading:null}),null).trigger,true);assert.equal(L.approaching(arrival,fix({accuracy:200}),null),null);
- assert.equal(L.approaching(arrival,fix({lat:.006,lon:.006}),null,new Set([L.key(arrival)])),null);
+const arrival={...item,id:'arrival:town',kind:'arrival',profileVersion:3,pageId:1,placeName:'Village',name:'Introducing Village',coord:{lat:.01,lon:.01},arrivalRadiusM:700,prepareRadiusM:2200,checkedAt:new Date().toISOString(),reviewAfter:new Date(Date.now()+365*86400000).toISOString(),audioKey:'revision1'};
+test('village arrival uses the 100 m area without requiring speed or heading',()=>{
+ const f=fix({speed:null,heading:null});const approaching=L.approaching(arrival,f,null);assert.ok(approaching);assert.equal(approaching.trigger,false);assert.equal(L.approaching(arrival,fix({lat:.0095,lon:.0095,speed:0,heading:null}),null).trigger,true);assert.equal(L.approaching(arrival,fix({accuracy:200}),null),null);
+ assert.equal(L.approaching(arrival,fix({lat:.0095,lon:.0095}),null,new Set([L.key(arrival)])),null);
 });
-test('downloaded arrival starts on entering the village area without relying on heading and plays once',async()=>{
- const a=await app({tripItems:[arrival]});a.position({speed:null,heading:null});await tick();await tick();assert.equal(a.sources.filter(s=>s.currentTime>0).length,0);a.position({lat:.006,lon:.006,speed:0,heading:null});await tick();assert.equal(a.sources.filter(s=>s.currentTime>0).length,1);a.sources.at(-1).onended();a.position({lat:.007,lon:.007,speed:0,heading:null});await tick();assert.equal(a.sources.filter(s=>s.currentTime>0).length,1);assert.equal(a.requests,0);
+test('downloaded arrival starts within 100 m without relying on heading and plays once',async()=>{
+ const a=await app({tripItems:[arrival]});a.position({speed:null,heading:null});await tick();await tick();assert.equal(a.sources.filter(s=>s.currentTime>0).length,0);a.position({lat:.0095,lon:.0095,speed:0,heading:null});await tick();assert.equal(a.sources.filter(s=>s.currentTime>0).length,1);a.sources.at(-1).onended();a.position({lat:.0096,lon:.0096,speed:0,heading:null});await tick();assert.equal(a.sources.filter(s=>s.currentTime>0).length,1);assert.equal(a.requests,0);
 });
 test('an unresolved screen-wake request no longer prevents GPS tracking from starting',async()=>{const a=await app({wakeLock:{request:()=>new Promise(()=>{})}});assert.equal(typeof a.gps,'function');a.nodes.get('stop').onclick();});
 
@@ -69,19 +69,30 @@ test('ambiguous preparation offers place choices before any guide or voice downl
 });
 test('audio prepared online can be reused after turning away and losing signal',async()=>{
  const a=await app({tripItems:[],online:true,fetchImpl:async url=>({ok:true,json:async()=>url==='/api/explore'?{complete:true,location:{label:'Town'},items:[item]}:url==='/api/arrivals'?{items:[]}:{defaultVoice:'pippa'},blob:async()=>new Blob(['wav'])})});
- a.position({});for(let i=0;i<6;i++)await tick();assert.match(a.nodes.get('timing').textContent,/ready/);a.position({heading:270});await tick();a.navigator.onLine=false;const previous=a.requests;a.position({heading:90});await tick();a.position({lon:.002});await tick();assert.equal(a.sources.length,1);assert.equal(a.requests,previous);assert.match(a.nodes.get('log').textContent,/Reusing prepared audio/);a.nodes.get('stop').onclick();
+ a.position({});for(let i=0;i<6;i++)await tick();assert.match(a.nodes.get('timing').textContent,/ready/);a.position({heading:270});await tick();a.navigator.onLine=false;const previous=a.requests;a.position({heading:90});await tick();a.position({lon:.0023});await tick();assert.equal(a.sources.length,1);assert.equal(a.requests,previous);assert.match(a.nodes.get('log').textContent,/Reusing prepared audio/);a.nodes.get('stop').onclick();
 });
 
 test('an in-range landmark takes priority over a distant arrival introduction',()=>{
- const f=fix({lon:.002}),near=L.choose([arrival,item],f,L.motion(f),new Set());assert.equal(near.item.id,item.id);assert.equal(near.trigger,true);
+ const f=fix({lon:.0023}),near=L.choose([arrival,item],f,L.motion(f),new Set());assert.equal(near.item.id,item.id);assert.equal(near.trigger,true);
 });
 test('a prepared distant arrival cannot hold up automatic playback of a nearer landmark',async()=>{
  const a=await app({tripItems:[arrival,item]});a.position({});await tick();await tick();assert.match(a.nodes.get('placeName').textContent,/Introducing Village/);assert.equal(a.sources.length,0);
- a.position({lon:.002});await tick();await tick();assert.equal(a.sources.length,1);assert.equal(a.nodes.get('placeName').textContent,item.name);assert.match(a.nodes.get('log').textContent,/Switching from Introducing Village outside its playback area to A landmark in range/);a.nodes.get('stop').onclick();
+ a.position({lon:.0023});await tick();await tick();assert.equal(a.sources.length,1);assert.equal(a.nodes.get('placeName').textContent,item.name);assert.match(a.nodes.get('log').textContent,/Switching from Introducing Village outside its playback area to A landmark in range/);a.nodes.get('stop').onclick();
 });
 test('parked automatic check uses the actual automatic playback path after a delay without GPS or downloads',async()=>{
  const a=await app({autoStart:false});a.nodes.get('testAutomatic').onclick();assert.equal(a.gps,undefined);assert.equal(a.sources.length,0);assert.equal(a.requests,0);a.runTimer(5000);await tick();assert.equal(a.sources.length,1);assert.match(a.nodes.get('log').textContent,/Automatic playback requested: Parked check/);assert.equal(a.gps,undefined);assert.equal(a.requests,0);a.sources.at(-1).onended();assert.match(a.nodes.get('status').textContent,/Parked automatic check finished/);
 });
 test('hiding the page cancels the parked countdown without starting audio',async()=>{
  const a=await app({autoStart:false});a.nodes.get('testAutomatic').onclick();a.document.hidden=true;a.events.visibilitychange();a.runTimer(5000);await tick();assert.equal(a.sources.length,0);assert.equal(a.nodes.get('start').disabled,false);
+});
+
+test('100 m is a radial playback limit for both sights and arrivals, including legacy broad radii',()=>{
+ const at=m=>fix({lon:item.coord.lon-m/6371000*180/Math.PI});
+ for(const speed of [10,30]){assert.equal(L.approaching(item,at(99),{speed,heading:90}).trigger,true);assert.equal(L.approaching(item,at(101),{speed,heading:90}).trigger,false);assert.equal(L.approaching(item,at(600),{speed,heading:90}).trigger,false);}
+ const old={...arrival,coord:item.coord,arrivalRadiusM:3000,prepareRadiusM:4800};assert.equal(L.approaching(old,at(99),null).trigger,true);assert.equal(L.approaching(old,at(101),null).trigger,false);assert.equal(L.approaching(old,at(1000),null).trigger,false);
+ const across=L.approaching(item,fix({lat:.0008,lon:.0025}),{speed:20,heading:90});assert.ok(across.ahead<100&&across.metres>100);assert.equal(across.trigger,false);
+});
+
+test('old downloaded arrival audio with the repetitive advice is not reused after the content revision',async()=>{
+ const old={...arrival,profileVersion:2,coord:{lat:0,lon:0}};const a=await app({tripItems:[old]});a.position({speed:0,heading:null});await tick();assert.equal(a.sources.length,0);assert.match(a.nodes.get('savedStatus').textContent,/needs updating/);a.nodes.get('stop').onclick();
 });
