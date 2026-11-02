@@ -1,0 +1,12 @@
+# Historic places, gardens and public walks
+
+The existing categories and screen layout are unchanged. Historic hotels, inns and houses can be history subjects when supplied evidence supports that significance. Public gardens, promenades and riverside paths can appear under walking when their text supports actual walking use. A garden name alone does not establish a walking route; route length, difficulty, access and accessibility are not inferred. Ordinary hotels do not become attractions merely because they sit in a historic town.
+
+Two coordinate-scoped reviewed supplements address reported Buxton gaps:
+
+- **Old Hall Hotel:** historical significance and Mary Queen of Scots' visits, with the oldest-hotel claim explicitly qualified as reputed and limited to England. No accommodation promotion. Sources: [Wikipedia](https://en.wikipedia.org/wiki/Old_Hall_Hotel), [Visit Buxton](https://www.visitbuxton.co.uk/old-hall-hotel/) and [Historic England](https://historicengland.org.uk/listing/the-list/list-entry/1257847). Reference coordinate: 53.2582, -1.9153, from the encyclopedia record.
+- **Buxton Pavilion Gardens:** public garden walks and supported family activities. Its reviewed reference coordinate is 53.25802, -1.9180561 from [Parks & Gardens](https://www.parksandgardens.org/places/pavilion-gardens-buxton), replacing a coarse encyclopedia coordinate farther southwest. This is a reference point in the venue area, not a surveyed entrance. Text is also supported by the [operator's visitor information](https://paviliongardens.co.uk/visiting-pavilion-gardens-buxton/) and [gardens description](https://paviliongardens.co.uk/visiting-pavilion-gardens-buxton/the-gardens/).
+
+Reviewed 2 November 2026. Supplements are included only within the existing geographic radius and merge with matching source candidates. Reviewed text and coordinates survive less precise duplicates. Existing candidate/result limits and AI-call budgets remain; reviewed category additions can replace a non-must-see item within a full guide. General heritage and walking rules apply worldwide where source evidence is available. These rules do not promise exhaustive coverage.
+
+Guide content version is now 11. The 30-day reuse policy remains unchanged. After deployment, run a fresh Buxton search; existing offline trip downloads need preparing again to include the additions. The 200-metre entry queue, voice setup and listening-history rules are unchanged.

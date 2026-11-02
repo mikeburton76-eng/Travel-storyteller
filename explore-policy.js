@@ -3,7 +3,7 @@
 // they cannot certify semantic or visual suitability.
 const excluded = /\b(massacres?|shootings?|spree[ -]?kill\w*|school[ -]?shoot\w*|killings?|killed|murder\w*|homicid\w*|assassinat\w*|rap(?:e|es|ed|ing|ist|ists)|sexual[ -]?(?:assault|abuse|violence|exploitation)|child[ -]?abuse|molest\w*|terroris\w*|genocid\w*|lynch\w*|tortur\w*|suicid\w*|executions?|atrocit\w*|porn\w*|sex[ -]?club|strip[ -]?club|brothels?|fatal[ -]?accident|serial[ -]?kill\w*|battlefields?|sieges?)\b/iu;
 const closed = /\b(permanently closed|permanently shut|temporarily closed|closed for|closed until|demolished|no longer exists|defunct|disused|was a railway station|former railway station)\b/i;
-const visitor = /\b(wakes week|well[ -]dressing|carnival|fringe|bookshops?|bookstores?|bookbinding|antique shops?|record shops?|craft shops?|tourist information|visitor cent(?:re|er)|visitor information|museum|galler(?:y|ies)|gardens?|parks?|observatory|aquarium|zoo|castle|palace|cathedral|church|abbey|temple|bridge|tower|theat(?:re|er)|concert hall|opera house|librar(?:y|ies)|markets?|arcade|pier|beach|waterfall|caverns?|caves?|botanic\w*|monument|heritage|historic\w*|landmark|archaeolog\w*|ruins|railway|funicular|sculpture|artwork|trail|walk|harbour|harbor|waterfront|festival|tradition|invention|discovery|memorial|hills?|mountains?|ridges?|gorges?|valleys?|viewpoints?|lakes?|reservoirs?|nature reserves?|country parks?|botanical gardens?)\b/i;
+const visitor = /\b(manors?|stately homes?|country houses?|historic houses?|mansions?|châteaux|chateaux|château|chateau|wakes week|well[ -]dressing|carnival|fringe|bookshops?|bookstores?|bookbinding|antique shops?|record shops?|craft shops?|tourist information|visitor cent(?:re|er)|visitor information|museum|galler(?:y|ies)|gardens?|parks?|observatory|aquarium|zoo|castle|palace|cathedral|church|abbey|temple|bridge|tower|theat(?:re|er)|concert hall|opera house|librar(?:y|ies)|markets?|arcade|pier|beach|waterfall|caverns?|caves?|botanic\w*|monument|heritage|historic\w*|landmark|archaeolog\w*|ruins|railway|funicular|sculpture|artwork|trail|walk|harbour|harbor|waterfront|festival|tradition|invention|discovery|memorial|hills?|mountains?|ridges?|gorges?|valleys?|viewpoints?|lakes?|reservoirs?|nature reserves?|country parks?|botanical gardens?)\b/i;
 const festival=/\b(festivals?|fringe|wakes?(?: week)?|well[ -]dressings?|carnivals?)\b/i;
 function eventPlace(name,text){return festival.test(name)&&festival.test(name+' '+text)&&!/\b(festival hall|festival theatre|festival theater|festival street)\b/i.test(name)}
 const hidden = /\b(lesser[ -]known|less[ -]visited|off the beaten (?:track|path)|overlooked|local favou?rite|hidden gem)\b/i;
@@ -15,15 +15,21 @@ const sourceMarkup=/\{\{|\}\}|\[\[|\]\]|\|\s*(?:name|lat|long|directions|phone|t
 const shopType=/\b(book[ -]?(?:shop|store)s?|books|bookbinding|antiques?(?: shop| centre| center)?|record (?:shop|store)|craft shop|artisan shop|specialist shop|independent shop)\b/i;
 function shopGem(name,text){return !/\b(museum|galler(?:y|ies)|librar(?:y|ies))\b/i.test(name)&&(shopType.test(name)||/\b(?:an?|independent|specialist) (?:independent )?(?:bookshop|bookstore|book shop|book store|antique shop|record shop|craft shop)\b/i.test(text))&&/\b(second[ -]hand books|rare books|antiquarian|bookbinding|local crafts?|handmade|artisan|vintage|curated|independent book(?:shop|store)|speciali[sz]es? in|unusual collection)\b/i.test(text)}
 function gemEvidence(text,name=''){return hidden.test(text)||shopGem(name,text)}
+const heritageType=/\b(hotels?|inns?|manors?|stately homes?|country houses?|historic houses?|mansions?|palaces?|chateaux|châteaux)\b/i;
+function heritagePlace(name,text){return heritageType.test(name+' '+text)&&/\b(Grade\s+[I123]+\*?\s+listed|listed building|heritage[ -]listed|national historic landmark|historic (?:house|hotel|inn|manor|mansion|residence)|former royal residence)\b/i.test(text);}
+const walkingUse=/\b(walk\w*|hik\w*|footpaths?|trails?|strolls?|promenades?|riverside paths?|public paths?)\b/i;
+function historySubject(text){return /\b(invent\w*|discover\w*|tradition\w*|engineer\w*|settlement|settled|grew|founded|festival|craft|market|people|community|transport|industry|industrial|changed|transformed|develop\w*|scientist)\b/i.test(text)||/\b(?:king|queen|monarch|royal)\b[^.!?]*\b(?:stayed|visited|residence|custody|house arrest)\b|\b(?:home of|residence of|lived here|lived at|stayed here|restored the|restoration of)\b/i.test(text);}
 function visitorSuitable(name,text,historyOnly=false){
  if(!allowed(name,text)||closed.test(text)||sourceMarkup.test(name+' '+text))return false;
  if(historyOnly)return true;
+ if(/\b(hotel|inn)\b/i.test(name)&&!heritagePlace(name,text))return false;
  if(/\b(book[ -]?(?:shop|store)|antique shop|record shop|craft shop)\b/i.test(name)&&!shopGem(name,text))return false;
  if(/\b(station|stations|depot|TMD|railway shed)\b/i.test(name)&&!/\b(heritage railway|steam railway|scenic railway|tourist railway|railway museum|transport museum|visitor attraction|tourist attraction|architectural landmark|UNESCO World Heritage)\b/i.test(text))return false;
  return true;
 }
 function themeOf(name, text) {
  if(shopGem(name,text))return 'culture';
+ if(heritageType.test(name)&&heritagePlace(name,text))return 'architecture';
  if(/\b(barracks|government house|town hall|office building|bank building|church|cathedral|temple|bridge|tower|streetscapes?)\b/i.test(name))return 'architecture';
  const checks=[
   ['nature', /\b(garden|gardens|park|beach|lake|canyon|waterfall|caves?|caverns?|hills?|mountains?|ridges?|gorges?|valleys?|viewpoints?|nature|wildlife|botanic|coast|forest|bay)\b/i],
@@ -46,4 +52,5 @@ function coordinate(lat, lon) {
  lat = Number(lat); lon = Number(lon);
  return Number.isFinite(lat)&&Number.isFinite(lon)&&Math.abs(lat)<=90&&Math.abs(lon)<=180 ? {lat,lon} : null;
 }
-module.exports = { allowed, cleanParagraphs, plain, visitor, hidden, festival, eventPlace, closed, sourceMarkup, shopType, shopGem, gemEvidence, visitorSuitable, themeOf, distanceKm, coordinate };
+module.exports = { heritageType,heritagePlace,historySubject,walkingUse,allowed, cleanParagraphs, plain, visitor, hidden, festival, eventPlace, closed, sourceMarkup, shopType, shopGem, gemEvidence, visitorSuitable, themeOf, distanceKm, coordinate };
+

@@ -11,5 +11,6 @@ const reviewed=[{
  reviewedAt:'2026-10-29'
 }];
 function nearbyWalks(location,radiusKm){return reviewed.filter(c=>P.distanceKm(location,c.coord)<=radiusKm).map(c=>({...c,coord:{...c.coord},supportingSources:[...c.supportingSources]}))}
-function walkingParagraphs(text){return String(text||'').slice(0,18000).split(/\n\s*\n/).filter(p=>p.length>=40&&p.length<=800&&P.allowed(p)&&!P.sourceMarkup.test(p)&&!P.closed.test(p)&&/\b(walking route|circular walk|hiking|footpath|walking trail|walkers|walks? (?:along|through|from|to)|public access)\b/i.test(p)).slice(0,2).join('\n\n')}
+function walkingParagraphs(text){return String(text||'').slice(0,18000).split(/\n\s*\n/).filter(p=>p.length>=40&&p.length<=800&&P.allowed(p)&&!P.sourceMarkup.test(p)&&!P.closed.test(p)&&/\b(walking route|circular walk|hiking|footpath|walking trail|walkers|strolls?|promenades?|riverside paths?|public paths?|walks? (?:along|through|from|to)|public access)\b/i.test(p)).slice(0,2).join('\n\n')}
 module.exports={nearbyWalks,walkingParagraphs};
+
