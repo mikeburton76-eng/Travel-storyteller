@@ -18,3 +18,16 @@ Each existing Explore category sorts its deduplicated cards by straight-line dis
 ## Buxton Museum relocation — checked 3 November 2026
 
 The council reports that Buxton Museum and Art Gallery reopened on 15 October 2026 in a dedicated temporary building next to Buxton Library on Kents Bank Road, replacing the former Terrace Road venue. A reviewed operator-sourced museum record now takes precedence over stale encyclopedia closure/location text. The coordinate 53.252346, -1.907888 is an approximate reference for the library postcode SK17 9HW, not a surveyed museum entrance; it is labelled as approximate in the description. No old museum-building photograph is copied onto the new visitor location. Sources: council museum page, council reopening announcement, official library address and published postcode location. Guide content version is 12; the monthly reuse policy is unchanged. Run a fresh search and replace older offline downloads after deployment.
+
+# Local search boundaries
+
+City Explore searches use a 10 km straight-line radius (previously 40 km).
+The existing final coordinate check applies to every source, including travel
+listings and subject searches. Reviewed Buxton supplements additionally require
+the search point to be within 3 km of the individual place, and respect any
+smaller requested radius. Priority never overrides the geographic boundary.
+Manchester therefore cannot include these Buxton additions. Distances remain
+straight-line distances, not driving times or municipal boundary polygons.
+Guide version 13 identifies this scope change; previously displayed guides need
+a fresh search after deployment.
+

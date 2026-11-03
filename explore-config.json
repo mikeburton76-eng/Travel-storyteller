@@ -1,5 +1,5 @@
 {
-  "version": 12,
+  "version": 13,
   "enabled": true,
   "cacheMinutes": 43200,
   "cacheEntries": 32,
@@ -12,7 +12,7 @@
   "maxOutputTokens": 8000,
   "nearbyRadiusKm": 3,
   "nearbyWiderRadiusKm": 10,
-  "areaRadiusKm": 40,
+  "areaRadiusKm": 10,
   "townRadiusKm": 12,
   "villageRadiusKm": 6,
   "categoryLimits": {
@@ -31,4 +31,5 @@
   "specialistMaxOutputTokens": 2600,
   "specialistMaxResults": 28
 }
+
 

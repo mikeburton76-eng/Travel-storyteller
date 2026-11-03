@@ -3,6 +3,28 @@ const {test}=require('node:test'),assert=require('node:assert/strict');
 const {nearbyHeritage}=require('../explore-heritage'),P=require('../explore-policy');
 const {fallbackSelection,validateSelection,sourceCategories}=require('../explore-service'),{createSourceProvider}=require('../explore-sources'),cfg=require('../explore-config');
 const location={label:'Buxton',title:'Buxton',lat:53.258,lon:-1.916,mode:'area',scale:'town',overview:''};
+test('Buxton supplements stay local even when a caller requests a wide city radius',()=>{
+ assert.equal(nearbyHeritage({lat:53.4808,lon:-2.2426,label:'Manchester'},40).length,0);
+ assert.equal(nearbyHeritage({...location,lat:53.35},40).length,0);
+ assert.equal(nearbyHeritage(location,cfg.townRadiusKm).length,3);
+ assert.equal(nearbyHeritage(location,.01).length,0);
+});
+test('Manchester collection rejects distant Buxton places from search and travel listings',async()=>{
+ const manchester={lat:53.4808,lon:-2.2426,label:'Manchester',title:'Manchester',scale:'city',mode:'area',overview:''};
+ const local={title:'Manchester Art Gallery',description:'Public art museum and gallery',extract:'Manchester Art Gallery is a public art museum with exhibitions and collections for visitors.',coordinates:[{lat:53.4786,lon:-2.2413}]};
+ const far={title:'Old Hall Hotel',description:'Historic hotel and listed building',extract:'The Old Hall Hotel is a Grade II listed historic hotel and former royal residence in Buxton.',coordinates:[{lat:53.2582,lon:-1.9153}]};
+ const provider=createSourceProvider({fetchImpl:async raw=>{
+  const u=new URL(raw);let data={query:{pages:{1:local,2:far}}};
+  if(u.searchParams.get('action')==='parse')data={parse:{title:'Manchester',wikitext:{'*':u.hostname==='en.wikivoyage.org'?'{{see|name=Old Hall Hotel|lat=53.2582|long=-1.9153|content=This historic hotel is a listed building and former royal residence in Buxton.}}':''}}};
+  return {ok:true,json:async()=>data};
+ }});
+ const previews=[];const pool=await provider.collect(manchester,cfg,p=>previews.push(p));
+ assert.equal(pool.radiusKm,10);
+ assert.ok(pool.candidates.some(c=>c.name===local.title));
+ assert.ok(pool.candidates.every(c=>P.distanceKm(manchester,c.coord)<=10));
+ assert.ok(!pool.candidates.some(c=>/Buxton|Old Hall/.test(c.name)));
+ assert.ok(previews.flatMap(p=>p.candidates).every(c=>P.distanceKm(manchester,c.coord)<=10));
+});
 test('Buxton historic hotel and public gardens fit the existing categories without booking copy',()=>{
  const candidates=nearbyHeritage(location,3).map((c,i)=>({...c,id:'reviewed-'+i,theme:P.themeOf(c.name,c.text),distanceKm:.2}));
  const guide=fallbackSelection({location,candidates},cfg);
@@ -42,3 +64,4 @@ test('a full guide keeps reviewed walking and historic coverage within the resul
 test('the museum supplement uses current council reopening information and not the old Terrace Road location',()=>{
  const c=nearbyHeritage(location,3).find(c=>c.name==='Buxton Museum and Art Gallery');assert.ok(c);assert.equal(c.source.kind,'operator');assert.match(c.text,/15 October 2026/);assert.match(c.text,/Kents Bank Road/);assert.ok(P.distanceKm(c.coord,{lat:53.256993,lon:-1.913040})>.4);assert.equal(c.skipSourceImage,true);const guide=fallbackSelection({location,candidates:[{...c,id:'museum',theme:'culture'}]},cfg);assert.ok(guide.items.some(i=>i.section==='museums'));
 });
+

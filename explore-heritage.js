@@ -17,5 +17,7 @@ const reviewed=[{
  source:{kind:'operator',title:'Derbyshire County Council — Buxton Museum and Art Gallery',url:'https://www.derbyshire.gov.uk/leisure/buxton-museum/buxton-museum-and-art-gallery.aspx'},
  supportingSources:[{title:'Derbyshire County Council — reopening, 14 October 2026',url:'https://www.derbyshire.gov.uk/council/news-events/news-updates/news/buxton-museum-and-art-gallery-returns-in-temporary-new-home.aspx'},{title:'Buxton Library — address',url:'https://libraries.derbyshire.gov.uk/-/buxton-library'},{title:'Library postcode reference point (approximate)',url:'https://www.doogal.co.uk/ShowMap?postcode=SK17%209HW'}],reviewedAt:'2026-11-03'
 }];
-function nearbyHeritage(location,radiusKm){return reviewed.filter(c=>P.distanceKm(location,c.coord)<=radiusKm).map(c=>({...c,coord:{...c.coord},supportingSources:c.supportingSources.map(s=>({...s}))}));}
+// These fill gaps in a local guide, rather than promoting Buxton to nearby cities.
+function nearbyHeritage(location,radiusKm){const localRadius=Math.min(radiusKm,3);return reviewed.filter(c=>P.distanceKm(location,c.coord)<=localRadius).map(c=>({...c,coord:{...c.coord},supportingSources:c.supportingSources.map(s=>({...s}))}));}
 module.exports={nearbyHeritage};
+
