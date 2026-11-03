@@ -9,10 +9,12 @@
  const valid=c=>c&&Number.isFinite(c.lat)&&Number.isFinite(c.lon)&&Math.abs(c.lat)<=90&&Math.abs(c.lon)<=180;
  const key=item=>item.kind==='arrival'?item.id+':'+(item.audioKey||'legacy'):(item.source?.url||item.id);
  function places(items){const seen=new Set();return items.filter(i=>{const k=i.kind==='arrival'?i.id:key(i);if(!k||seen.has(k)||!valid(i.coord)||i.eventArea||i.historyOnly||!i.reason||!i.name)return false;seen.add(k);return true;});}
- function motion(fix,previous){
+ function motion(fix,previous,lastHeading=null){
   if(!valid(fix)||!Number.isFinite(fix.accuracy)||fix.accuracy>75||fix.accuracy<0)return null;
   let speed=Number.isFinite(fix.speed)&&fix.speed>=0?fix.speed:null,heading=Number.isFinite(fix.heading)&&fix.heading>=0&&fix.heading<360?fix.heading:null;
-  if(previous){const dt=(fix.time-previous.time)/1000,d=distance(previous,fix);if(dt>0&&dt<=30&&d>Math.max(12,fix.accuracy,previous.accuracy)){if(speed===null)speed=d/dt;if(heading===null)heading=bearing(previous,fix);}}
+  let quiet=false;
+  if(previous){const dt=(fix.time-previous.time)/1000,d=distance(previous,fix);quiet=dt>0&&dt<=60&&d<=Math.max(12,fix.accuracy,previous.accuracy);if(dt>0&&dt<=30&&d>Math.max(12,fix.accuracy,previous.accuracy)){if(speed===null||speed<1)speed=d/dt;if(heading===null)heading=bearing(previous,fix);}}
+  if((speed!==null&&speed<1)||(speed===null&&quiet)){if(Number.isFinite(lastHeading)&&lastHeading>=0&&lastHeading<360)return {speed:0,heading:lastHeading,stationary:true};return null;}
   if(speed===null||speed<1||speed>55||heading===null)return null;
   return {speed,heading};
  }
@@ -23,7 +25,7 @@
   if(delta>65||metres<20)return null;
   const cross=metres*Math.sin(rad(delta)),ahead=metres*Math.cos(rad(delta));
   if(cross>250||ahead>Math.min(3000,Math.max(1000,movement.speed*90)))return null;
-  return {item,metres,ahead,cross,eta:ahead/movement.speed,trigger:metres<=PLAYBACK_METRES,arrival:item.kind==='arrival'};
+  return {item,metres,ahead,cross,eta:movement.speed>0?ahead/movement.speed:null,trigger:metres<=PLAYBACK_METRES,arrival:item.kind==='arrival'};
  }
  function choose(items,fix,movement,played){return items.map(i=>approaching(i,fix,movement,played)).filter(Boolean).sort((a,b)=>Number(b.trigger)-Number(a.trigger)||a.metres-b.metres||Number(!!a.arrival)-Number(!!b.arrival))[0]||null;}
  function movingAway(item,fix,movement){return valid(item?.coord)&&valid(fix)&&!!movement&&distance(fix,item.coord)>35&&angle(movement.heading,bearing(fix,item.coord))>100;}

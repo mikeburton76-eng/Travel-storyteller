@@ -132,3 +132,7 @@ test('start chime is a valid short PCM WAV with nonzero samples, not a silent pl
 test('a prepared settlement is abandoned immediately when the car turns away before entering its trigger',async()=>{
  const a=await app({tripItems:[arrival]});a.position({lon:0});await tick();await tick();assert.match(a.nodes.get('placeName').textContent,/Introducing Village/);a.position({lon:-.001,heading:270});await tick();assert.equal(a.sources.length,0);assert.equal(a.nodes.get('placeName').textContent,'');assert.match(a.nodes.get('log').textContent,/Discarding unplayed Introducing Village: moving away/);assert.equal(a.nodes.get('historyList').children.length,0);a.nodes.get('stop').onclick();
 });
+
+test('the journey holds its last moving heading when parked instead of waiting for direction again',async()=>{
+ const a=await app();a.position({speed:10,heading:90});await tick();a.advance(2000);a.position({speed:0,heading:null});await tick();assert.match(a.nodes.get('speed').textContent,/last travel direction held/);assert.doesNotMatch(a.nodes.get('decision').textContent,/Direction not established/);a.nodes.get('stop').onclick();
+});
