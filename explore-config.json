@@ -1,5 +1,5 @@
 {
-  "version": 13,
+  "version": 14,
   "enabled": true,
   "cacheMinutes": 43200,
   "cacheEntries": 32,
@@ -31,5 +31,6 @@
   "specialistMaxOutputTokens": 2600,
   "specialistMaxResults": 28
 }
+
 
 

@@ -4,6 +4,7 @@ const {createHash}=require('node:crypto');
 const {nearbyWalks,walkingParagraphs}=require('./explore-walks');
 const {nearbyEvents}=require('./explore-events');
 const {nearbyHeritage}=require('./explore-heritage');
+const {createActivityProvider}=require('./explore-activities');
 const UA = 'TravelStoryteller/1.0 (https://github.com/mikeburton76-eng/Travel-storyteller)';
 const endpoint = { wikipedia:'https://en.wikipedia.org/w/api.php', wikivoyage:'https://en.wikivoyage.org/w/api.php', commons:'https://commons.wikimedia.org/w/api.php' };
 const pageUrl = (kind, title) => `https://en.${kind}.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`;
@@ -93,8 +94,9 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   if(!response.ok)throw Error(`${kind} could not be loaded (${response.status}).`);
   const data=await response.json();if(data.error)throw Error(`${kind} could not complete this search.`);return data;
  }
+ const nearbyActivities=createActivityProvider({fetchImpl});
  const pages = data => Object.values(data.query?.pages||{});
- const visitorPage=p=>(P.visitor.test(p.title+' '+(p.description||''))||P.heritagePlace(p.title,p.extract||p.description||'')||(!p.extract&&P.heritageType.test(p.title+' '+(p.description||'')))||P.shopGem(p.title,p.extract||p.description||''))&&!/^(?:(?:capital )?(?:village|town|city|suburb|county|municipality|district|neighbourhood) (?:in|of|and|on|near)|local government area|government agency|rail depot)\b/i.test(p.description||'')&&!/^(?:List of |Timeline of |Parks and gardens of |Tourism in |Transport in )/i.test(p.title);
+ const visitorPage=p=>(P.visitor.test(p.title+' '+(p.description||''))||P.activityType.test(p.title+' '+(p.description||''))||P.heritagePlace(p.title,p.extract||p.description||'')||(!p.extract&&P.heritageType.test(p.title+' '+(p.description||'')))||P.shopGem(p.title,p.extract||p.description||''))&&!/^(?:(?:capital )?(?:village|town|city|suburb|county|municipality|district|neighbourhood) (?:in|of|and|on|near)|local government area|government agency|rail depot)\b/i.test(p.description||'')&&!/^(?:List of |Timeline of |Parks and gardens of |Tourism in |Transport in )/i.test(p.title);
  async function resolve(input) {
   if(input.lat!==undefined){const coord=P.coordinate(input.lat,input.lon);if(!coord)throw Object.assign(Error('Please try your location again.'),{status:400});return {...coord,label:'your location',title:null,mode:'nearby',overview:'',source:null};}
   const query=String(input.place||'').trim();if(!query||query.length>100||!P.allowed(query))throw Object.assign(Error('Please enter a town or city, including its country where needed.'),{status:400});
@@ -118,6 +120,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    const d=await api('wikipedia',{generator:'geosearch',ggscoord:`${location.lat}|${location.lon}`,ggsradius:Math.min(10000,radiusKm*1000),ggslimit:50,prop:'description|coordinates|pageprops'});
    return pages(d).filter(p=>p.title&&p.title!==location.title&&p.pageprops?.disambiguation===undefined&&P.allowed(p.title,p.description||'')&&visitorPage(p)&&!/^List of |^Timeline of /i.test(p.title));
   };
+  const activityTask=nearbyActivities(location,location.mode==='nearby'?config.nearbyWiderRadiusKm:radius);
   let near=[];try{near=await base(radius)}catch{warnings.push('Nearby encyclopedia coverage could not be loaded.');}
   if(location.mode==='nearby'&&near.length<4){try{near=await base(config.nearbyWiderRadiusKm);warnings.push('The search includes a wider area because nearby results were limited.');}catch{}}
   const limit=location.mode==='nearby'?config.nearbyWiderRadiusKm:radius;
@@ -160,7 +163,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    }
   }catch{warnings.push('A travel guide was not available for this place.');}}
   if(location.title){
-   const terms=['tourism','walk','viewpoint','family','museum','gallery','park','beach','market','bridge','tourist information','visitor centre','(festival OR fringe OR jazz)','(\"wakes week\" OR \"well dressing\" OR carnival)','(bookshop OR bookstore OR bookbinding)','(antiques OR artisan OR \"record shop\")','hiking trail','circular walk','(children OR playground OR kids)','(zoo OR aquarium OR wildlife)'];
+   const terms=['tourism','walk','viewpoint','(family OR children OR \"indoor activities\")','(museum OR \"science centre\" OR \"natural history\")','gallery','park','beach','market','bridge','tourist information','visitor centre','(festival OR fringe OR jazz)','(\"wakes week\" OR \"well dressing\" OR carnival)','(bookshop OR bookstore OR bookbinding)','(antiques OR artisan OR \"record shop\")','hiking trail','circular walk','(bowling OR \"mini golf\" OR \"laser tag\" OR \"soft play\")','(zoo OR aquarium OR wildlife)'];
    const searchName=location.title.replace(/,.*$/,'');
    const results=await Promise.allSettled(terms.map(terms=>api('wikipedia',{generator:'search',gsrsearch:`"${searchName.replace(/["\\]/g,'')}" ${terms}`,gsrnamespace:0,gsrlimit:12,prop:'coordinates|description|extracts|pageimages|pageprops',exintro:1,explaintext:1,exlimit:'max',piprop:'name'})));
    for(const result of results){if(result.status!=='fulfilled'){warnings.push('Some subject searches were unavailable.');continue}
@@ -228,28 +231,44 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    const q=p.coordinates?.[0]||nearPage.coordinates?.[0];candidates.push({name:p.title,text:p.extract.slice(0,1400),coord:q?{lat:q.lat,lon:q.lon}:null,imageFile:p.pageimage,source:{kind:'wikipedia',title:p.title,url:pageUrl('wikipedia',p.title)},guideListed:false,wikidata:p.pageprops?.wikibase_item});}
   // Rural walking information is often below the encyclopedia introduction.
   const walkTitles=[...new Set(candidates.filter(c=>!c.reviewedPriority&&!c.historyOnly&&!c.walkOnly&&c.coord&&c.source?.kind==='wikipedia'&&P.visitorSuitable(c.name,c.text)&&P.themeOf(c.name,c.text)==='nature').sort((a,b)=>P.distanceKm(location,a.coord)-P.distanceKm(location,b.coord)).map(c=>c.source.title))].slice(0,8);
-  if(walkTitles.length)try{
-   const d=await api('wikipedia',{titles:walkTitles.join('|'),redirects:1,prop:'extracts',explaintext:1,exlimit:'max'});
-   for(const page of pages(d)){const context=walkingParagraphs(page.extract);if(!context)continue;
+  const museumTitles=[...new Set(candidates.filter(c=>!c.sourceOnly&&c.coord&&c.source?.kind==='wikipedia'&&/\bmuseum\b/i.test(c.name)).sort((a,b)=>P.distanceKm(location,a.coord)-P.distanceKm(location,b.coord)).map(c=>c.source.title))].slice(0,6);
+  const contextTitles=[...new Set([...walkTitles,...museumTitles])].slice(0,14);
+  if(contextTitles.length)try{
+   const d=await api('wikipedia',{titles:contextTitles.join('|'),redirects:1,prop:'extracts',explaintext:1,exlimit:'max'});
+   for(const page of pages(d)){
+    if(museumTitles.includes(page.title)){
+     const familyContext=P.cleanParagraphs(page.extract).split(/\n\s*\n/).find(p=>p.length>=35&&p.length<=1000&&P.familyUse.test(p)&&!P.closed.test(p));
+     if(familyContext)for(const c of candidates)if(c.source?.kind==='wikipedia'&&c.source.title===page.title&&!P.familyUse.test(c.text))c.text+='\n\n'+familyContext;
+    }
+    const context=walkTitles.includes(page.title)?walkingParagraphs(page.extract):null;if(!context)continue;
     for(const c of candidates)if(c.source?.kind==='wikipedia'&&c.source.title===page.title){c.walkingContext=context;c.text=c.text.slice(0,900)+'\n\nWalking context: '+context;}
    }
-  }catch{warnings.push('Some walking descriptions could not be checked.');}
+  }catch{warnings.push('Some walking or museum activity descriptions could not be checked.');}
+  const activities=await activityTask;
+  if(activities.unavailable)warnings.push('Some indoor activity and museum listings could not be checked.');
+  candidates.push(...activities.candidates);
   candidates.unshift(...await eventTask);
   const unique=new Map();
   for(const c of candidates){
    if(!c.coord||!P.visitorSuitable(c.name,c.text,c.historyOnly))continue;
    const distance=P.distanceKm(location,c.coord);if(distance>limit)continue;
    const key=(c.wikidata||c.wikipedia||c.name).toLowerCase().replace(/[^\p{L}\p{N}]+/gu,'');
-   if(unique.has(key)){const old=unique.get(key);if(c.mustSee){old.mustSee=true;old.supportingSources=[...old.supportingSources||[],...c.supportingSources||[]];if(!old.reviewedPriority&&c.text.includes('Local tourism context:'))old.text=c.text;}if(c.queryFeatured&&!old.queryFeatured){old.queryFeatured=true;old.prominence+=2;}continue;}
-   const old=[...unique.values()].find(x=>(x.name.toLowerCase()===c.name.toLowerCase()&&P.distanceKm(c.coord,x.coord)<2)||P.distanceKm(c.coord,x.coord)<.15&&(x.name.toLowerCase().includes(c.name.toLowerCase())||c.name.toLowerCase().includes(x.name.toLowerCase())));if(old)continue;
+   if(unique.has(key)){const old=unique.get(key);if(c.website&&!old.website)old.website=c.website;if(c.mustSee){old.mustSee=true;old.supportingSources=[...old.supportingSources||[],...c.supportingSources||[]];if(!old.reviewedPriority&&c.text.includes('Local tourism context:'))old.text=c.text;}if(c.queryFeatured&&!old.queryFeatured){old.queryFeatured=true;old.prominence+=2;}continue;}
+   const old=[...unique.values()].find(x=>(x.name.toLowerCase()===c.name.toLowerCase()&&P.distanceKm(c.coord,x.coord)<2)||P.distanceKm(c.coord,x.coord)<.15&&(x.name.toLowerCase().includes(c.name.toLowerCase())||c.name.toLowerCase().includes(x.name.toLowerCase())));if(old){if(c.website&&!old.website)old.website=c.website;continue;}
    unique.set(key,{...c,eventArea:!!c.eventArea||P.eventPlace(c.name,c.text),distanceKm:Number(distance.toFixed(1)),theme:c.historyOnly?'history':c.walkOnly?'nature':(c.eventArea||P.eventPlace(c.name,c.text))?'culture':P.themeOf(c.name,c.text),prominence:(/\b(iconic|famous|major attraction|must-see|most popular|renowned)\b/i.test(c.text)?2:0)+(travelRoot?.text.includes(c.name)?2:0)+(c.queryFeatured?2:0)});
   }
   // Interleave themes before trimming, so a dense centre cannot consume the prompt.
   const groups=['nature','culture','experience','architecture','history'].map(theme=>[...unique.values()].filter(c=>c.theme===theme).sort((a,b)=>b.prominence-a.prominence||Number(b.guideListed)-Number(a.guideListed)||a.distanceKm-b.distanceKm));
-  const balanced=[...unique.values()].filter(c=>c.reviewedPriority||c.mustSee||c.walkOnly).sort((a,b)=>Number(!!b.reviewedPriority)-Number(!!a.reviewedPriority)||b.prominence-a.prominence||a.distanceKm-b.distanceKm).slice(0,config.maxCandidates);
+  const ordered=[...unique.values()].sort((a,b)=>Number(!!b.reviewedPriority)-Number(!!a.reviewedPriority)||Number(!!b.mustSee)-Number(!!a.mustSee)||b.prominence-a.prominence||a.distanceKm-b.distanceKm);
+  const balanced=[];const reserve=(rows,n)=>{for(const c of rows.slice(0,n))if(!balanced.includes(c)&&balanced.length<config.maxCandidates)balanced.push(c);};
+  reserve(ordered.filter(c=>/\b(museum|galler(?:y|ies))\b/i.test(c.name)),4);
+  const activitiesFirst=ordered.filter(c=>P.familyUse.test(c.text)).sort((a,b)=>Number(!!b.activityOnly)-Number(!!a.activityOnly));
+  const kinds=new Set(),varied=activitiesFirst.filter(c=>{const key=c.activityKind||c.name;if(kinds.has(key))return false;kinds.add(key);return true});
+  reserve(varied,4);
+  reserve(ordered.filter(c=>c.reviewedPriority||c.mustSee||c.walkOnly),config.maxCandidates);
   for(const c of [...unique.values()].filter(c=>c.eventArea).slice(0,4))if(!balanced.includes(c)&&balanced.length<config.maxCandidates)balanced.push(c);
   // Reserve a few evidenced category candidates before dense-city trimming.
-  const lenses=[/\b(family[ -]friendly|families|for children|children[’']s|kids|playground|all ages)\b/i,P.walkingUse,{test:text=>P.heritagePlace('',text)}];
+  const lenses=[P.familyUse,P.walkingUse,{test:text=>P.heritagePlace('',text)}];
   for(const lens of lenses)for(const c of [...unique.values()].filter(c=>!c.historyOnly&&lens.test(c.text)).slice(0,4))if(!balanced.includes(c)&&balanced.length<config.maxCandidates)balanced.push(c);
   for(const g of groups)for(let i=g.length-1;i>=0;i--)if(balanced.includes(g[i]))g.splice(i,1);
   while(groups.some(g=>g.length)&&balanced.length<config.maxCandidates)for(const g of groups)if(g.length&&balanced.length<config.maxCandidates)balanced.push(g.shift());
@@ -276,4 +295,5 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
  return {resolve,collect,images,visitorInformation:location=>require('./explore-visitor-info').visitorInformation(location,{fetchImpl})};
 }
 module.exports={createSourceProvider,parseListings,districtTitles,stripWiki,tourismHighlights};
+
 
