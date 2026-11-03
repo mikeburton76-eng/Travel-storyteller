@@ -223,7 +223,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    if(!q||!p.extract||p.title===location.title||!P.allowed(p.title,p.extract)||P.closed.test(p.extract)||!visitorPage(p))continue;
    candidates.push({name:p.title,text:p.extract.slice(0,1400),coord:{lat:q.lat,lon:q.lon},imageFile:p.pageimage,wikidata:p.pageprops?.wikibase_item,guideListed:true,queryFeatured:true,source:{kind:'wikipedia',title:p.title,url:pageUrl('wikipedia',p.title)}});
   }
-  for(const c of candidates){if(c.historyOnly)continue;const p=articles.get(c.wikipedia||(c.source?.kind==='wikipedia'?c.source.title:null));if(p){if(!c.coord&&p.coordinates?.[0])c.coord={lat:p.coordinates[0].lat,lon:p.coordinates[0].lon};if(!c.imageFile)c.imageFile=p.pageimage;if(!c.wikidata)c.wikidata=p.pageprops?.wikibase_item;}}
+  for(const c of candidates){if(c.historyOnly)continue;const p=articles.get(c.wikipedia||(c.source?.kind==='wikipedia'?c.source.title:null));if(p){if(!c.coord&&p.coordinates?.[0])c.coord={lat:p.coordinates[0].lat,lon:p.coordinates[0].lon};if(!c.imageFile&&!c.skipSourceImage)c.imageFile=p.pageimage;if(!c.wikidata)c.wikidata=p.pageprops?.wikibase_item;}}
   for(const nearPage of near){const p=articles.get(nearPage.title);if(!p?.extract||!P.allowed(p.title,p.extract)||P.closed.test(p.extract))continue;
    const q=p.coordinates?.[0]||nearPage.coordinates?.[0];candidates.push({name:p.title,text:p.extract.slice(0,1400),coord:q?{lat:q.lat,lon:q.lon}:null,imageFile:p.pageimage,source:{kind:'wikipedia',title:p.title,url:pageUrl('wikipedia',p.title)},guideListed:false,wikidata:p.pageprops?.wikibase_item});}
   // Rural walking information is often below the encyclopedia introduction.

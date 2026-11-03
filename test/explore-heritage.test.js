@@ -38,3 +38,7 @@ test('reviewed gardens survive absent sources and an encyclopedia location that 
 test('a full guide keeps reviewed walking and historic coverage within the result budget',()=>{
  const candidates=nearbyHeritage(location,3).map((c,i)=>({...c,id:'reviewed-'+i,theme:P.themeOf(c.name,c.text)}));const existing=Array.from({length:cfg.maxResults},(_,i)=>({id:'other-'+i,name:'Other sight '+i,section:'attractions',mustSee:i===0}));const guide=sourceCategories({overview:'',items:existing},{location,candidates},cfg);assert.ok(guide.items.length<=cfg.maxResults);assert.ok(guide.items.some(i=>i.id==='other-0'));assert.ok(guide.items.some(i=>i.name==='Old Hall Hotel'&&i.section==='history'));assert.ok(guide.items.some(i=>i.name==='Buxton Pavilion Gardens'&&i.section==='walks'));
 });
+
+test('the museum supplement uses current council reopening information and not the old Terrace Road location',()=>{
+ const c=nearbyHeritage(location,3).find(c=>c.name==='Buxton Museum and Art Gallery');assert.ok(c);assert.equal(c.source.kind,'operator');assert.match(c.text,/15 October 2026/);assert.match(c.text,/Kents Bank Road/);assert.ok(P.distanceKm(c.coord,{lat:53.256993,lon:-1.913040})>.4);assert.equal(c.skipSourceImage,true);const guide=fallbackSelection({location,candidates:[{...c,id:'museum',theme:'culture'}]},cfg);assert.ok(guide.items.some(i=>i.section==='museums'));
+});

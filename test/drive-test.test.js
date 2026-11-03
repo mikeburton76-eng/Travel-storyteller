@@ -62,8 +62,8 @@ test('downloaded arrival starts within 200 m without relying on heading and play
 });
 test('an unresolved screen-wake request no longer prevents GPS tracking from starting',async()=>{const a=await app({wakeLock:{request:()=>new Promise(()=>{})}});assert.equal(typeof a.gps,'function');a.nodes.get('stop').onclick();});
 
-test('starting requires the listener to confirm audible Pippa, not only a successful player request',async()=>{
- const a=await app({confirm:false});assert.equal(a.gps,undefined);assert.match(a.nodes.get('status').textContent,/I can hear Pippa/);a.nodes.get('confirmVoice').onclick();await a.nodes.get('start').onclick();assert.equal(typeof a.gps,'function');a.nodes.get('stop').onclick();
+test('Start plays a saved sound check and begins GPS after it ends without a separate confirmation button',async()=>{
+ const a=await app({confirm:false});assert.equal(a.gps,undefined);assert.equal(a.sources.length,1);assert.match(a.nodes.get('status').textContent,/journey starts after/);a.sources.at(-1).onended();assert.equal(typeof a.gps,'function');assert.equal(a.nodes.get('historyList').children.length,0);a.nodes.get('stop').onclick();
 });
 test('ambiguous preparation offers place choices before any guide or voice download',async()=>{
  const calls=[];const a=await app({autoStart:false,fetchImpl:async url=>{calls.push(url);return {ok:true,json:async()=>({choices:[{title:'Buxton',description:'Derbyshire, England'},{title:'Buxton, Maine',description:'United States'}]})};}});
@@ -79,7 +79,7 @@ test('an in-range landmark takes priority over a distant arrival introduction',(
 });
 test('a prepared distant arrival cannot hold up automatic playback of a nearer landmark',async()=>{
  const a=await app({tripItems:[arrival,item]});a.position({});await tick();await tick();assert.match(a.nodes.get('placeName').textContent,/Introducing Village/);assert.equal(a.sources.length,0);
- a.position({lon:.0023});await tick();await tick();assert.equal(a.sources.length,1);assert.equal(a.nodes.get('placeName').textContent,item.name);assert.match(a.nodes.get('log').textContent,/Switching from Introducing Village outside its playback area to queued A landmark/);a.nodes.get('stop').onclick();
+ a.position({lon:.0023});await tick();await tick();assert.equal(a.sources.length,1);assert.equal(a.nodes.get('placeName').textContent,item.name);assert.match(a.nodes.get('log').textContent,/Switching from Introducing Village to nearer queued A landmark/);a.nodes.get('stop').onclick();
 });
 test('parked automatic check uses the actual automatic playback path after a delay without GPS or downloads',async()=>{
  const a=await app({autoStart:false});a.nodes.get('testAutomatic').onclick();assert.equal(a.gps,undefined);assert.equal(a.sources.length,0);assert.equal(a.requests,0);a.runTimer(5000);await tick();assert.equal(a.sources.length,1);assert.match(a.nodes.get('log').textContent,/Automatic playback requested: Parked check/);assert.equal(a.gps,undefined);assert.equal(a.requests,0);a.sources.at(-1).onended();assert.match(a.nodes.get('status').textContent,/Parked automatic check finished/);
@@ -122,4 +122,16 @@ test('places entered while another clip plays remain queued through leaving rang
 });
 test('Stop discards a triggered item even if an outstanding audio request later returns',async()=>{
  let resolveSpeech;const speech=new Promise(resolve=>{resolveSpeech=resolve;});const a=await app({tripItems:[],online:true,fetchImpl:async url=>url==='/speech'?speech:{ok:true,json:async()=>url==='/api/explore'?{complete:true,location:{label:'Town'},items:[item]}:url==='/api/arrivals'?{items:[]}:{defaultVoice:'pippa'}}});a.position({lon:.0023});for(let i=0;i<4;i++)await tick();a.nodes.get('stop').onclick();resolveSpeech({ok:true,blob:async()=>new Blob(['wav'])});for(let i=0;i<4;i++)await tick();assert.equal(a.sources.length,0);
+});
+
+test('a newly reached sight takes priority over an earlier queued village moving away, without deleting the village',async()=>{
+ const village={...arrival,id:'wye-head',name:'Introducing Wye Head',coord:{lat:0,lon:.0005},source:{url:'https://en.wikipedia.org/wiki/Wye_Head'}},museum={...item,id:'museum',name:'Museum',coord:{lat:0,lon:.006},source:{url:'https://en.wikipedia.org/wiki/Museum'}};let finishSpeech;const speech=new Promise(resolve=>{finishSpeech=resolve;});
+ const a=await app({tripItems:[museum],online:true,fetchImpl:async url=>url==='/speech'?speech:{ok:true,json:async()=>url==='/api/explore'?{complete:true,location:{label:'Buxton'},items:[village,museum]}:url==='/api/arrivals'?{items:[]}:{defaultVoice:'pippa'}}});
+ a.position({});for(let i=0;i<5;i++)await tick();assert.equal(a.sources.length,0);a.position({lon:.0045});for(let i=0;i<4;i++)await tick();assert.equal(a.sources.length,1);assert.equal(a.nodes.get('placeName').textContent,'Museum');assert.match(a.nodes.get('log').textContent,/to nearer queued Museum/);a.sources.at(-1).onended();finishSpeech({ok:true,blob:async()=>new Blob(['wav'])});a.advance(20001);a.runIntervals();for(let i=0;i<5;i++)await tick();assert.equal(a.sources.length,2);assert.equal(a.nodes.get('placeName').textContent,'Introducing Wye Head');a.nodes.get('stop').onclick();
+});
+test('online sound preparation never starts GPS until the prepared welcome is explicitly played',async()=>{
+ const a=await app({tripItems:[],autoStart:false,confirm:false,online:true,fetchImpl:async()=>({ok:true,json:async()=>({defaultVoice:'pippa'}),blob:async()=>new Blob(['wav'])})});await a.nodes.get('start').onclick();assert.equal(a.gps,undefined);assert.equal(a.sources.length,0);assert.equal(a.nodes.get('start').textContent,'Play welcome & start');const pending=a.nodes.get('start').onclick();assert.equal(a.sources.length,1);await pending;a.sources.at(-1).onended();assert.equal(typeof a.gps,'function');a.nodes.get('stop').onclick();
+});
+test('Stop during the welcome prevents its completion from starting GPS later',async()=>{
+ const a=await app({confirm:false});const ended=a.sources.at(-1).onended;a.nodes.get('stop').onclick();ended();assert.equal(a.gps,undefined);assert.equal(a.nodes.get('start').disabled,false);
 });
