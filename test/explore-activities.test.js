@@ -8,21 +8,21 @@ const origin={lat:53.4808,lon:-2.2426};
 const element=(id,tags,point=origin)=>({type:'node',id,lat:point.lat,lon:point.lon,tags:{name:'Venue '+id,...tags}});
 test('mapped activity types work at coordinates worldwide without assuming prices, ages or facilities',()=>{
  for(const point of [origin,{lat:-33.87,lon:151.21},{lat:40.71,lon:-74}]){
-  const records=activityRecords({elements:[element(1,{leisure:'bowling_alley',website:'https://example.org/'},point),element(2,{leisure:'miniature_golf'},point),element(3,{sport:'laser_tag'},point),element(4,{tourism:'museum',name:'Science Museum'},point)]},point,10);
-  assert.equal(records.length,4);assert.ok(records.every(c=>c.sourceOnly));
+  const records=activityRecords({elements:[element(1,{leisure:'bowling_alley',website:'https://example.org/'},point),element(2,{leisure:'miniature_golf'},point),element(3,{sport:'laser_tag'},point),element(4,{tourism:'museum',name:'Science Museum'},point),element(5,{amenity:'cinema'},point),element(6,{leisure:'escape_game'},point)]},point,10);
+  assert.equal(records.length,6);assert.ok(records.every(c=>c.sourceOnly));
   assert.equal(records.find(c=>c.activityKind==='bowling').website,'https://example.org/');
   assert.ok(records.filter(c=>c.activityOnly).every(c=>P.familyUse.test(c.text)));
   assert.ok(records.every(c=>!/free entry|all ages|wheelchair|open daily|£/.test(c.text)));
  }
 });
 test('private, closed, adult-only, unsafe and far-away records do not become family suggestions',()=>{
- const records=activityRecords({elements:[element(1,{leisure:'bowling_alley',access:'private'}),element(2,{leisure:'miniature_golf',disused:'yes'}),element(3,{leisure:'laser_game',min_age:'18'}),element(4,{leisure:'bowling_alley',description:'A site associated with a massacre.'}),element(5,{leisure:'indoor_play'},{lat:53.2582,lon:-1.9153}),element(6,{leisure:'bowling_alley',website:'javascript:alert(1)'})]},origin,10);
+ const records=activityRecords({elements:[element(1,{leisure:'bowling_alley',access:'private'}),element(2,{leisure:'miniature_golf',disused:'yes'}),element(3,{leisure:'laser_game',min_age:'18'}),element(4,{leisure:'bowling_alley',description:'A site associated with a massacre.'}),element(5,{leisure:'indoor_play'},{lat:53.2582,lon:-1.9153}),element(6,{leisure:'bowling_alley',website:'javascript:alert(1)'}),element(7,{amenity:'cinema',cinema:'erotic'}),element(8,{amenity:'cinema','disused:amenity':'cinema'})]},origin,10);
  assert.equal(records.length,1);assert.equal(records[0].name,'Venue 6');assert.equal(records[0].website,null);
  assert.ok(!P.familyUse.test('The museum was founded by a family of merchants.'));
 });
 test('cached and concurrent lookups share one free request, use the boundary and fail briefly without blocking',async()=>{
  let calls=0,time=0,query='';const lookup=createActivityProvider({now:()=>time,fetchImpl:async(url,o)=>{calls++;query=new URL(url).searchParams.get('data');return {ok:true,json:async()=>({elements:[element(1,{leisure:'miniature_golf'})]})}}});
- const [a,b]=await Promise.all([lookup(origin,40),lookup(origin,40)]);assert.equal(calls,1);assert.equal(a.candidates.length,1);assert.deepEqual(a,b);assert.match(query,/around:10000,/);assert.match(query,/out center tags 100/);
+ const [a,b]=await Promise.all([lookup(origin,40),lookup(origin,40)]);assert.equal(calls,1);assert.equal(a.candidates.length,1);assert.deepEqual(a,b);assert.match(query,/around:10000,/);assert.match(query,/out center tags 100/);assert.ok(query.includes('[amenity=cinema]'));assert.ok(query.includes('escape_game'));
  time=29*86400000;await lookup(origin,40);assert.equal(calls,1);time=31*86400000;await lookup(origin,40);assert.equal(calls,2);
  let attempts=0;const broken=createActivityProvider({now:()=>time,fetchImpl:async()=>{attempts++;throw Error('offline')}});assert.equal((await broken(origin,10)).unavailable,true);await broken(origin,10);assert.equal(attempts,2);time+=300001;await broken(origin,10);assert.equal(attempts,4);
 });
@@ -67,3 +67,4 @@ test('a dense city retains museums and different activities, enriches museum evi
  const guide=sourceCategories({items:[]},pool,cfg);assert.ok(guide.items.some(c=>c.name===museum.title&&c.section==='family'));assert.ok(guide.items.some(c=>c.name===museum.title&&c.section==='museums'));
  assert.ok(guide.items.some(c=>c.website==='https://example.org/bowl'));
 });
+
