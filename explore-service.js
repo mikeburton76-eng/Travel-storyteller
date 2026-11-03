@@ -124,7 +124,7 @@ function sourceCategories(chosen,pool,config){
    if(c.walkOnly&&section!=='walks')continue;
    const rule=section==='gems'?{test:text=>P.gemEvidence(text,c.name)}:EXTRA_RULES[section];
    if(section==='museums'&&!/\b(museum|galler(?:y|ies))\b/i.test(c.name))continue;
-   const reason=evidence(rule);
+   const reason=evidence(rule)||(section==='family'&&P.familyVenue(c.name,c.text)?evidence(P.familyVenueType):null);
    if(!reason||(section==='walks'&&/walking distance|walked past|walk to (?:the )?station/i.test(reason)))continue;
    add(c,section,reason);
   }
@@ -253,5 +253,6 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
  return {explore};
 }
 module.exports={createExploreService,validateSelection,fallbackSelection,sourceCategories,sourceDescription,mergeSpecialists,specialistPrompt,SYSTEM};
+
 
 

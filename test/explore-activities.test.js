@@ -68,3 +68,14 @@ test('a dense city retains museums and different activities, enriches museum evi
  assert.ok(guide.items.some(c=>c.website==='https://example.org/bowl'));
 });
 
+
+test('named aquariums and planetariums qualify without family wording in the source',()=>{
+ const examples=[
+  ['SEA LIFE Bangkok Ocean World','SEA LIFE Bangkok Ocean World is an aquarium in the Siam Paragon shopping centre.'],
+  ['Bangkok Planetarium','Bangkok Planetarium presents shows about astronomy and the night sky.'],
+  ['Siam Paragon','Siam Paragon is a shopping centre that contains an aquarium.']
+ ];
+ const candidates=examples.map(([name,text],i)=>({id:String(i),name,text,theme:'experience',coord:origin,source:{kind:'wikipedia'}}));
+ const guide=sourceCategories({items:[]},{candidates},cfg);
+ assert.deepEqual(guide.items.filter(item=>item.section==='family').map(item=>item.name),examples.slice(0,2).map(([name])=>name));
+});

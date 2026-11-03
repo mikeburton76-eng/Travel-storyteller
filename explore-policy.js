@@ -6,6 +6,12 @@ const closed = /\b(permanently closed|permanently shut|temporarily closed|closed
 const visitor = /\b(manors?|stately homes?|country houses?|historic houses?|mansions?|châteaux|chateaux|château|chateau|wakes week|well[ -]dressing|carnival|fringe|bookshops?|bookstores?|bookbinding|antique shops?|record shops?|craft shops?|tourist information|visitor cent(?:re|er)|visitor information|museum|galler(?:y|ies)|gardens?|parks?|observatory|aquarium|zoo|castle|palace|cathedral|church|abbey|temple|bridge|tower|theat(?:re|er)|concert hall|opera house|librar(?:y|ies)|markets?|arcade|pier|beach|waterfall|caverns?|caves?|botanic\w*|monument|heritage|historic\w*|landmark|archaeolog\w*|ruins|railway|funicular|sculpture|artwork|trail|walk|harbour|harbor|waterfront|festival|tradition|invention|discovery|memorial|hills?|mountains?|ridges?|gorges?|valleys?|viewpoints?|lakes?|reservoirs?|nature reserves?|country parks?|botanical gardens?)\b/i;
 const activityType=/\b(cinemas?|movie theat(?:re|er)s?|bowling(?: alley)?|mini(?:ature)?[ -]?golf|adventure golf|crazy golf|laser[ -](?:tag|quest)|soft play|indoor play|trampoline parks?|escape rooms?)\b/i;
 const familyUse=/\b(family[ -]friendly|families|for children|children[’']s|kids|playgrounds?|all ages|cinemas?|movie theat(?:re|er)s?|escape rooms?|bowling alleys?|ten[ -]pin bowling|mini(?:ature)?[ -]?golf|adventure golf|crazy golf|laser[ -](?:tag|quest)|soft play|indoor play|trampoline parks?|interactive (?:exhibits|displays)|hands[ -]on (?:exhibits|experiments|activities))\b/i;
+const familyVenueType = /\b(aquariums?|planetariums?|science cent(?:re|er)s?|science museums?|zoos?|(?:water|theme|amusement) parks?|children[’']s museums?)\b/i;
+function familyVenue(name, text = '') {
+ const description = plain(text);
+ return familyVenueType.test(name) || familyVenueType.test(description.match(/^[^.\n]{0,150}/)?.[0] || '') &&
+  /^(?:(?:a|an|the) )?(?:public |indoor |outdoor )?(?:aquarium|planetarium|science cent(?:re|er)|science museum|zoo|(?:water|theme|amusement) park)\b|^[^.\n]{1,100}\bis (?:a|an|the) (?:public |indoor |outdoor )?(?:aquarium|planetarium|science cent(?:re|er)|science museum|zoo|(?:water|theme|amusement) park)\b/i.test(description);
+}
 const festival=/\b(festivals?|fringe|wakes?(?: week)?|well[ -]dressings?|carnivals?)\b/i;
 function eventPlace(name,text){return festival.test(name)&&festival.test(name+' '+text)&&!/\b(festival hall|festival theatre|festival theater|festival street)\b/i.test(name)}
 const hidden = /\b(lesser[ -]known|less[ -]visited|off the beaten (?:track|path)|overlooked|local favou?rite|hidden gem)\b/i;
@@ -55,7 +61,7 @@ function coordinate(lat, lon) {
  lat = Number(lat); lon = Number(lon);
  return Number.isFinite(lat)&&Number.isFinite(lon)&&Math.abs(lat)<=90&&Math.abs(lon)<=180 ? {lat,lon} : null;
 }
-module.exports = { activityType,familyUse,heritageType,heritagePlace,historySubject,walkingUse,allowed, cleanParagraphs, plain, visitor, hidden, festival, eventPlace, closed, sourceMarkup, shopType, shopGem, gemEvidence, visitorSuitable, themeOf, distanceKm, coordinate };
+module.exports = { familyVenue, familyVenueType, activityType,familyUse,heritageType,heritagePlace,historySubject,walkingUse,allowed, cleanParagraphs, plain, visitor, hidden, festival, eventPlace, closed, sourceMarkup, shopType, shopGem, gemEvidence, visitorSuitable, themeOf, distanceKm, coordinate };
 
 
 

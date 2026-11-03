@@ -96,7 +96,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
  }
  const nearbyActivities=createActivityProvider({fetchImpl});
  const pages = data => Object.values(data.query?.pages||{});
- const visitorPage=p=>(P.visitor.test(p.title+' '+(p.description||''))||P.activityType.test(p.title+' '+(p.description||''))||P.heritagePlace(p.title,p.extract||p.description||'')||(!p.extract&&P.heritageType.test(p.title+' '+(p.description||'')))||P.shopGem(p.title,p.extract||p.description||''))&&!/^(?:(?:capital )?(?:village|town|city|suburb|county|municipality|district|neighbourhood) (?:in|of|and|on|near)|local government area|government agency|rail depot)\b/i.test(p.description||'')&&!/^(?:List of |Timeline of |Parks and gardens of |Tourism in |Transport in )/i.test(p.title);
+ const visitorPage=p=>(P.familyVenue(p.title,p.description)||P.familyVenue(p.title,p.extract)||P.visitor.test(p.title+' '+(p.description||''))||P.activityType.test(p.title+' '+(p.description||''))||P.heritagePlace(p.title,p.extract||p.description||'')||(!p.extract&&P.heritageType.test(p.title+' '+(p.description||'')))||P.shopGem(p.title,p.extract||p.description||''))&&!/^(?:(?:capital )?(?:village|town|city|suburb|county|municipality|district|neighbourhood) (?:in|of|and|on|near)|local government area|government agency|rail depot)\b/i.test(p.description||'')&&!/^(?:List of |Timeline of |Parks and gardens of |Tourism in |Transport in )/i.test(p.title);
  async function resolve(input) {
   if(input.lat!==undefined){const coord=P.coordinate(input.lat,input.lon);if(!coord)throw Object.assign(Error('Please try your location again.'),{status:400});return {...coord,label:'your location',title:null,mode:'nearby',overview:'',source:null};}
   const query=String(input.place||'').trim();if(!query||query.length>100||!P.allowed(query))throw Object.assign(Error('Please enter a town or city, including its country where needed.'),{status:400});
@@ -163,7 +163,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    }
   }catch{warnings.push('A travel guide was not available for this place.');}}
   if(location.title){
-   const terms=['tourism','walk','viewpoint','(family OR children OR \"indoor activities\")','(museum OR \"science centre\" OR \"natural history\")','gallery','park','beach','market','bridge','tourist information','visitor centre','(festival OR fringe OR jazz)','(\"wakes week\" OR \"well dressing\" OR carnival)','(bookshop OR bookstore OR bookbinding)','(antiques OR artisan OR \"record shop\")','hiking trail','circular walk','(cinema OR bowling OR \"escape room\" OR \"mini golf\" OR \"laser tag\" OR \"soft play\")','(zoo OR aquarium OR wildlife)'];
+   const terms=['tourism','walk','viewpoint','(family OR children OR \"indoor activities\")','(museum OR \"science centre\" OR \"natural history\")','gallery','park','beach','market','bridge','tourist information','visitor centre','(festival OR fringe OR jazz)','(\"wakes week\" OR \"well dressing\" OR carnival)','(bookshop OR bookstore OR bookbinding)','(antiques OR artisan OR \"record shop\")','hiking trail','circular walk','(cinema OR bowling OR \"escape room\" OR \"mini golf\" OR \"laser tag\" OR \"soft play\")','(zoo OR aquarium OR planetarium OR "water park" OR "theme park" OR "amusement park" OR wildlife)'];
    const searchName=location.title.replace(/,.*$/,'');
    const results=await Promise.allSettled(terms.map(terms=>api('wikipedia',{generator:'search',gsrsearch:`"${searchName.replace(/["\\]/g,'')}" ${terms}`,gsrnamespace:0,gsrlimit:12,prop:'coordinates|description|extracts|pageimages|pageprops',exintro:1,explaintext:1,exlimit:'max',piprop:'name'})));
    for(const result of results){if(result.status!=='fulfilled'){warnings.push('Some subject searches were unavailable.');continue}
@@ -262,7 +262,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   const ordered=[...unique.values()].sort((a,b)=>Number(!!b.reviewedPriority)-Number(!!a.reviewedPriority)||Number(!!b.mustSee)-Number(!!a.mustSee)||b.prominence-a.prominence||a.distanceKm-b.distanceKm);
   const balanced=[];const reserve=(rows,n)=>{for(const c of rows.slice(0,n))if(!balanced.includes(c)&&balanced.length<config.maxCandidates)balanced.push(c);};
   reserve(ordered.filter(c=>/\b(museum|galler(?:y|ies))\b/i.test(c.name)),4);
-  const activitiesFirst=ordered.filter(c=>P.familyUse.test(c.text)).sort((a,b)=>Number(!!b.activityOnly)-Number(!!a.activityOnly));
+  const activitiesFirst=ordered.filter(c=>!c.historyOnly&&(P.familyVenue(c.name,c.text)||P.familyUse.test(c.text))).sort((a,b)=>Number(!!b.activityOnly)-Number(!!a.activityOnly));
   const kinds=new Set(),varied=activitiesFirst.filter(c=>{const key=c.activityKind||c.name;if(kinds.has(key))return false;kinds.add(key);return true});
   reserve(varied,4);
   reserve(ordered.filter(c=>c.reviewedPriority||c.mustSee||c.walkOnly),config.maxCandidates);
