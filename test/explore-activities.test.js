@@ -22,7 +22,7 @@ test('private, closed, adult-only, unsafe and far-away records do not become fam
 });
 test('cached and concurrent lookups share one free request, use the boundary and fail briefly without blocking',async()=>{
  let calls=0,time=0,query='';const lookup=createActivityProvider({now:()=>time,fetchImpl:async(url,o)=>{calls++;query=new URL(url).searchParams.get('data');return {ok:true,json:async()=>({elements:[element(1,{leisure:'miniature_golf'})]})}}});
- const [a,b]=await Promise.all([lookup(origin,40),lookup(origin,40)]);assert.equal(calls,1);assert.equal(a.candidates.length,1);assert.deepEqual(a,b);assert.match(query,/around:10000,/);assert.match(query,/out center tags 100/);assert.ok(query.includes('[amenity=cinema]'));assert.ok(query.includes('escape_game'));
+ const [a,b]=await Promise.all([lookup(origin,40),lookup(origin,40)]);assert.equal(calls,1);assert.equal(a.candidates.length,1);assert.deepEqual(a,b);assert.match(query,/around:10000,/);assert.match(query,/out body center 100/);assert.ok(query.includes('[amenity=cinema]'));assert.ok(query.includes('escape_game'));
  time=29*86400000;await lookup(origin,40);assert.equal(calls,1);time=31*86400000;await lookup(origin,40);assert.equal(calls,2);
  let attempts=0;const broken=createActivityProvider({now:()=>time,fetchImpl:async()=>{attempts++;throw Error('offline')}});assert.equal((await broken(origin,10)).unavailable,true);await broken(origin,10);assert.equal(attempts,2);time+=300001;await broken(origin,10);assert.equal(attempts,4);
 });
@@ -78,4 +78,22 @@ test('named aquariums and planetariums qualify without family wording in the sou
  const candidates=examples.map(([name,text],i)=>({id:String(i),name,text,theme:'experience',coord:origin,source:{kind:'wikipedia'}}));
  const guide=sourceCategories({items:[]},{candidates},cfg);
  assert.deepEqual(guide.items.filter(item=>item.section==='family').map(item=>item.name),examples.slice(0,2).map(([name])=>name));
+});
+
+test('coordinate-based discovery lists named family attractions in local scripts', async()=>{
+ for(const [point,name,tags] of [
+  [{lat:13.75,lon:100.5},'พิพิธภัณฑ์สัตว์น้ำ',{tourism:'aquarium'}],
+  [{lat:35.68,lon:139.76},'プラネタリウム',{amenity:'planetarium'}],
+  [{lat:-23.55,lon:-46.63},'Parque Aquático',{leisure:'water_park'}]
+ ]){
+  const provider=createActivityProvider({fetchImpl:async raw=>{
+   const query=new URL(raw).searchParams.get('data');
+   assert.match(query,/out body center 100/);
+   assert.ok(query.includes(Object.values(tags)[0]));
+   return {ok:true,json:async()=>({elements:[element(1,{name,...tags},point)]})};
+  }});
+  const pool=await provider(point,10);
+  const candidates=pool.candidates.map(c=>({...c,id:'mapped'}));
+  assert.deepEqual(sourceCategories({items:[]},{candidates},cfg).items.filter(c=>c.section==='family').map(c=>c.name),[P.plain(name)]);
+ }
 });

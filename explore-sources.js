@@ -262,7 +262,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   const ordered=[...unique.values()].sort((a,b)=>Number(!!b.reviewedPriority)-Number(!!a.reviewedPriority)||Number(!!b.mustSee)-Number(!!a.mustSee)||b.prominence-a.prominence||a.distanceKm-b.distanceKm);
   const balanced=[];const reserve=(rows,n)=>{for(const c of rows.slice(0,n))if(!balanced.includes(c)&&balanced.length<config.maxCandidates)balanced.push(c);};
   reserve(ordered.filter(c=>/\b(museum|galler(?:y|ies))\b/i.test(c.name)),4);
-  const activitiesFirst=ordered.filter(c=>!c.historyOnly&&(P.familyVenue(c.name,c.text)||P.familyUse.test(c.text))).sort((a,b)=>Number(!!b.activityOnly)-Number(!!a.activityOnly));
+  const activitiesFirst=ordered.filter(c=>!c.historyOnly&&(c.activityOnly||P.familyVenue(c.name,c.text)||P.familyUse.test(c.text))).sort((a,b)=>Number(!!b.activityOnly)-Number(!!a.activityOnly));
   const kinds=new Set(),varied=activitiesFirst.filter(c=>{const key=c.activityKind||c.name;if(kinds.has(key))return false;kinds.add(key);return true});
   reserve(varied,4);
   reserve(ordered.filter(c=>c.reviewedPriority||c.mustSee||c.walkOnly),config.maxCandidates);

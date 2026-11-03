@@ -2,6 +2,13 @@
 const P=require('./explore-policy');
 const {publicWebsite}=require('./explore-visitor-info');
 const types={bowling_alley:['bowling','Mapped bowling alley offering games of bowling.'],miniature_golf:['mini golf','Mapped miniature golf course. An option for a round of mini golf.'],laser_game:['laser tag','Mapped laser tag venue offering arena-based games.'],indoor_play:['indoor play','Mapped indoor play venue with play activities.'],trampoline_park:['trampolines','Mapped trampoline park offering trampoline activities.'],escape_game:['escape rooms','Mapped escape room venue offering puzzle-solving games.'],cinema:['cinema','Mapped cinema, an option for watching a film.']};
+const visitorTypes = {
+ aquarium: ['aquarium', 'Aquarium with aquatic exhibits to explore.'],
+ zoo: ['zoo', 'Zoo with animal exhibits to explore.'],
+ theme_park: ['theme park', 'Theme park with attractions to explore.'],
+ water_park: ['water park', 'Water park with aquatic attractions.'],
+ planetarium: ['planetarium', 'Planetarium focused on astronomy and the night sky.']
+};
 function activityRecords(data,location,radiusKm){
  const found=[];
  for(const e of (Array.isArray(data?.elements)?data.elements:[]).slice(0,100)){
@@ -9,7 +16,7 @@ function activityRecords(data,location,radiusKm){
   const t=e.tags||{},coord=P.coordinate(e.lat??e.center?.lat,e.lon??e.center?.lon),name=P.plain(t['name:en']||t.name);
   if(!coord||!name||name.length>140||!['node','way','relation'].includes(e.type)||!Number.isSafeInteger(e.id)||e.id<1||P.distanceKm(location,coord)>radiusKm)continue;
   if(['private','no'].includes(t.access)||['disused','abandoned','demolished','construction'].some(k=>t[k]&& (t[k]==='yes'||t[k]===t.leisure||t[k]===t.tourism||t[k]===t.amenity))||Object.keys(t).some(k=>/^(disused|abandoned|demolished):(?:leisure|tourism|amenity)$/.test(k))||t.opening_hours==='closed'||Number.parseInt(t.min_age,10)>=18)continue;
-  const museum=t.tourism==='museum';let type=types[t.leisure];
+  const museum=t.tourism==='museum';let type=types[t.leisure] || visitorTypes[t.leisure] || visitorTypes[t.tourism] || visitorTypes[t.amenity];
   if(t.amenity==='cinema'){if(t.cinema==='erotic')continue;type=types.cinema;}
   if(!type&&t.sport==='laser_tag')type=types.laser_game;
   if(!museum&&!type)continue;
@@ -39,7 +46,7 @@ function createActivityProvider({fetchImpl=fetch,now=()=>Date.now()}={}){
   const task=(async()=>{
    let value;
    const around=`(around:${Math.round(radius*1000)},${coord.lat},${coord.lon})`;
-   const query=`[out:json][timeout:6];(nwr${around}[leisure~"^(bowling_alley|miniature_golf|laser_game|indoor_play|trampoline_park|escape_game)$"];nwr${around}[sport=laser_tag];nwr${around}[amenity=cinema];nwr${around}[tourism=museum];);out center tags 100;`;
+   const query=`[out:json][timeout:6];(nwr${around}[leisure~"^(bowling_alley|miniature_golf|laser_game|indoor_play|trampoline_park|escape_game|water_park)$"];nwr${around}[sport=laser_tag];nwr${around}[amenity=cinema];nwr${around}[amenity=planetarium];nwr${around}[tourism~"^(museum|aquarium|zoo|theme_park)$"];);out body center 100;`;
    for(const endpoint of ['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter']){
     if(requests.length>=12)break;requests.push(now());
     try{
