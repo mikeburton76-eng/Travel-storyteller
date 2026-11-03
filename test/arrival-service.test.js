@@ -6,7 +6,7 @@ test('arrival leads with its distinctive feature, preserves dated facts and revi
  const item=profile(page,Date.parse('2026-10-31T12:00:00Z'));
  assert.match(item.reason,/You’re near Exampletown\. It is famous/);
  assert.match(item.reason,/founded in 1820/);assert.match(item.reason,/4,100 at the 2021 census/);
- assert.equal(item.reviewAfter,'2027-10-31T12:00:00.000Z');assert.equal(item.arrivalRadiusM,200);
+ assert.equal(item.reviewAfter,'2027-10-31T12:00:00.000Z');assert.equal(item.arrivalRadiusM,500);
  assert.equal(item.audioKey,profile(page).audioKey);assert.equal(item.profileVersion,3);assert.doesNotMatch(item.reason,/places to eat and stay|check details directly|booking/i);
  assert.equal(profile({...page,description:'Museum in a town in Australia'}),null);
  assert.equal(profile({...page,coordinates:[{lat:99,lon:151}]}),null);
