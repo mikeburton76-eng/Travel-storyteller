@@ -10,7 +10,7 @@ const sections={
  history:['📜','History & culture','Stories, museums, galleries and heritage'],
  events:['🎭','What’s on','Festivals, local events and traditions']
 };
-const categoryHelp={events:'Festivals and local events. Exact dates are shown only when checked against the organiser; annual traditions may still be awaiting dates. Check the programme and age guidance before booking.',walks:'Walks and outdoor places. Each card distinguishes a documented walk from a place to visit. Check routes, terrain and access; map distances are not walk lengths.',family:'Ideas for things you could do together. Search for nearby options and choose what suits your group; availability, age guidance and access vary.',history:'Discover local stories, museums, galleries and heritage. Map links for stories may show a related area.',attractions:'Main visitor highlights, landmarks and buildings from the available sources. A town search includes the surrounding area.',gems:'Less obvious places with a source-supported reason to visit.'};
+const categoryHelp={events:'Festivals and local events. Exact dates are shown only when checked against the organiser; annual traditions may still be awaiting dates. Check the programme and age guidance before booking.',walks:'Walks and outdoor places. Each card distinguishes a documented walk from a place to visit. Check routes, terrain and access; map distances are not walk lengths.',family:'Local places to explore together. Check venue details for age guidance and access.',history:'Discover local stories, museums, galleries and heritage. Map links for stories may show a related area.',attractions:'Main visitor highlights, landmarks and buildings from the available sources. A town search includes the surrounding area.',gems:'Less obvious places with a source-supported reason to visit.'};
 const originalNames={attractions:'Place to see',gems:'Hidden gem',walks:'Walk',photos:'Photo spot',family:'Family activity',museums:'Museum or gallery',history:'History & stories',buildings:'Building & architecture',events:'Festival or local tradition'};
 function eventDateLabel(item){
  const t=item.eventTiming;if(!t?.start||!t?.end)return 'Dates to be confirmed — check the organiser';
@@ -29,31 +29,20 @@ function distanceText(item){const km=distanceFromReference(item);return !Number.
 function itemsForCategory(items,category){
  const groups={attractions:['attractions','buildings'],gems:['gems'],walks:['walks'],family:['family'],history:['history','museums','buildings'],events:['events']};
  const matched=items.filter(x=>groups[category].includes(x.section)||(category==='walks'&&outdoorPlace(x)&&!x.historyOnly)||(x.section==='photos'&&category===(outdoorPlace(x)?'walks':'attractions')));
+ if(category==='family'){
+  const removed=/\b(cinemas?|movie theat(?:re|er)s?|bowling|escape rooms?|(?:mini(?:ature)?[ -]?|crazy |adventure )golf)\b/i;
+  for(let i=matched.length-1;i>=0;i--){
+   const item=matched[i];
+   if(removed.test(item.name)||(/^Mapped /i.test(item.background||'')&&removed.test(item.background.split('.')[0])))matched.splice(i,1);
+  }
+ }
  const rank=x=>category==='history'&&x.section==='museums'?-1:groups[category].indexOf(x.section)<0?99:groups[category].indexOf(x.section);
  matched.sort((a,b)=>rank(a)-rank(b));
  const unique=new Map();for(const item of matched)if(!unique.has(item.id))unique.set(item.id,item);
  return [...unique.values()].sort((a,b)=>distanceFromReference(a)-distanceFromReference(b)||a.name.localeCompare(b.name,'en'));
 }
-function hasActivityIdeas(){return !!guide&&mappedPoint(guide.location)}
-function renderActivityIdeas(){
- if(!hasActivityIdeas())return;
- const ideas=[
-  ['🎬','Cinema','A film could be an indoor option. You can look for a film that suits your group and check its age rating.','cinemas'],
-  ['🎳','Bowling','A game of ten-pin bowling is one idea for spending time together. You can see which venues are nearby.','ten pin bowling'],
-  ['🔐','Escape rooms','Clues and puzzles could be a shared challenge. Themes, ages and difficulty vary between rooms.','escape rooms'],
-  ['⛳','Crazy golf','Mini or adventure golf could be a playful option, indoors or outdoors. You can look for nearby courses.','mini golf']
- ];
- const where=guide.location.lat+','+guide.location.lon;
- for(const [icon,name,description,term]of ideas){
-  const card=document.createElement('article');card.className='card activity-idea';
-  const body=document.createElement('div');body.className='body';const kind=node('small','Activity idea');kind.className='kind';
-  const links=document.createElement('div');links.className='links';
-  links.append(link('Find nearby options ↗','https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(term+' near '+where)));
-  body.append(kind,node('h3',icon+' '+name),node('p',description),links);card.append(body);$('cards').append(card);
- }
-}
 function renderCategories(){
- const visible=Object.keys(sections).filter(key=>!guide||guide.complete===false||itemsForCategory(guide.items,key).length||(key==='family'&&hasActivityIdeas()));
+ const visible=Object.keys(sections).filter(key=>!guide||guide.complete===false||itemsForCategory(guide.items,key).length);
  if(!visible.length)$('backToCategories').hidden=true;
  if(!visible.includes(selected))selected=visible[0]||'attractions';
  $('tabs').replaceChildren();
@@ -91,19 +80,17 @@ function render(){
  $('checked').textContent='Sources retrieved '+new Date(guide.checkedAt).toLocaleString('en-GB')+'. Next refresh when in use after '+new Date(guide.cacheUntil).toLocaleString('en-GB')+'.';
  $('areaSources').replaceChildren();for(const source of guide.sources){$('areaSources').append(link(source.kind==='wikivoyage'?'Travel guide ↗':source.kind==='openstreetmap'?'Map data: OpenStreetMap ↗':'Place background ↗',source.url),document.createTextNode(' '))}
  renderCategories();renderVisitorInformation();if($('listenNearby'))$('listenNearby').disabled=!guide.items.length;
- if(!Object.keys(sections).some(key=>itemsForCategory(guide.items,key).length||(key==='family'&&hasActivityIdeas()))&&guide.complete!==false){$('results').hidden=true;return;}
+ if(!Object.keys(sections).some(key=>itemsForCategory(guide.items,key).length)&&guide.complete!==false){$('results').hidden=true;return;}
  $('sectionTitle').textContent=sections[selected][1]+' near '+guide.location.label;$('sectionHelp').textContent=(categoryHelp[selected]||sections[selected][2])+' Nearest first; distances are in a straight line.';
- if(selected==='history'||selected==='family'&&!hasActivityIdeas()){
+ if(selected==='history'){
   const where=mappedPoint(guide.location)?guide.location.lat+','+guide.location.lon:guide.location.label;
-  const query=(selected==='family'?'indoor family activities':'museums and galleries')+' near '+where;
-  $('sectionHelp').append(document.createTextNode(' '),link(selected==='family'?'More activities on Google Maps ↗':'More museums on Google Maps ↗','https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(query)));
+  const query='museums and galleries near '+where;
+  $('sectionHelp').append(document.createTextNode(' '),link('More museums on Google Maps ↗','https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(query)));
  }
  $('cards').replaceChildren();let items=itemsForCategory(guide.items,selected);
- if(selected==='family')renderActivityIdeas();
  const museums=selected==='history'?items.filter(x=>/\b(museum|galler(?:y|ies))\b/i.test(x.name)&&!x.historyOnly):[];
  if(museums.length)items=[...items.filter(x=>!museums.includes(x)),...museums];
  let museumHeading=false;
- if(!items.length&&selected==='family'&&hasActivityIdeas())return;
  if(!items.length){const p=node('p',guide.complete===false?'Suggestions for this category are still being prepared.':selected==='gems'?'No sufficiently supported hidden gems found in this search. We have not filled the list with guesses.':selected==='history'?'No supported history or cultural suggestions found in this search yet. This does not mean the place has no history or culture.':'No sufficiently supported '+sections[selected][1].toLowerCase()+' found in this search yet. You can try another category or a nearby town.');p.className='empty';$('cards').append(p);return}
  for(const item of items){
   if(museums.includes(item)&&!museumHeading){
@@ -196,6 +183,3 @@ try{
   guide=saved.guide;selected=Object.hasOwn(sections,saved.selected)?saved.selected:'attractions';lastInput=saved.lastInput||null;$('place').value=saved.place||'';applyPageMode?.(saved.mode==='go'?'go':'home');render();setTimeout(()=>globalThis.window?.scrollTo?.({top:Number(saved.scroll)||0,behavior:'instant'}),0);
  }
 }catch{/* A missing return point must not prevent a fresh search. */}
-
-
-

@@ -94,7 +94,7 @@ function fallbackSelection(pool,config){
 }
 
 function sourceCategories(chosen,pool,config){
- const items=[...chosen.items];
+ const items=chosen.items.filter(item=>item.section!=='family'||!P.excludedFamilyVenue.test(item.name));
  const add=(c,section,reason)=>{
   if(items.some(x=>x.id===c.id&&x.section===section)||items.filter(x=>x.section===section).length>=config.categoryLimits[section])return;
   const prior=items.filter(x=>x.id===c.id);
@@ -122,6 +122,7 @@ function sourceCategories(chosen,pool,config){
   if(c.historyOnly){const reason=evidence(/\b(invent\w*|discover\w*|tradition\w*|engineer\w*|settlement|settled|grew|founded|festival|craft|community|industry|industrial|changed|transformed|develop\w*)\b/i);if(reason)add(c,'history',reason);continue;}
   for(const section of ['walks','family','museums','gems']){
    if(c.walkOnly&&section!=='walks')continue;
+   if(section==='family'&&P.excludedFamilyVenue.test(c.name))continue;
    const rule=section==='gems'?{test:text=>P.gemEvidence(text,c.name)}:EXTRA_RULES[section];
    if(section==='museums'&&!/\b(museum|galler(?:y|ies))\b/i.test(c.name))continue;
    const reason=evidence(rule)||(section==='family'&&(c.activityOnly||P.familyVenue(c.name,c.text))?evidence(P.familyVenueType):null);
@@ -218,7 +219,7 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
   if(new Set(chosen.items.map(x=>x.id)).size<4)notes.push('There are only a few supported suggestions in this search. This is not a complete list of what the area offers.');
   notes.push('A selection of ideas, rather than a complete directory. Use the travel guide or visitor websites for more options.');
   if(pool.warnings.length)notes.push('Some source coverage is incomplete.');
-  if(pool.warnings.includes('Some indoor activity and museum listings could not be checked.'))notes.push('The free activity listing service is unavailable. Indoor activities may be missing; the More activities link offers a wider search.');
+  if(pool.warnings.includes('Some indoor activity and museum listings could not be checked.'))notes.push('The free activity listing service is unavailable. Some local activities may be missing.');
   return {_fingerprint:fingerprint,visitorInformation:visitorInfo.items,visitorInformationUnavailable:visitorInfo.unavailable,specialistStatus,aiReviewedAt:mode==='ai'?aiReviewedAt:null,version:cfg.version,location:{label:location.label,mode:location.mode,lat:location.lat,lon:location.lon},...chosen,selectionMode:mode,
    coverage:{radiusKm:pool.radiusKm,candidateCount:pool.candidates.length,highlightCount:highlights.length,missingHighlights,notes,warnings:pool.warnings},
    sources:[location.source,pool.travelSource,...(pool.candidates.some(c=>c.source?.kind==='openstreetmap')?[{kind:'openstreetmap',title:'OpenStreetMap contributors',url:'https://www.openstreetmap.org/copyright'}]:[])].filter(Boolean),checkedAt:new Date(now()).toISOString(),cacheUntil:new Date(now()+cfg.cacheMinutes*60000).toISOString()};
@@ -253,6 +254,3 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
  return {explore};
 }
 module.exports={createExploreService,validateSelection,fallbackSelection,sourceCategories,sourceDescription,mergeSpecialists,specialistPrompt,SYSTEM};
-
-
-

@@ -111,24 +111,10 @@ test('a grouped museum uses its visitor description rather than a duplicate hist
 });
 
 
-test('family activity ideas remain available worldwide when the venue feed has no results, without API calls',()=>{
- for(const location of [{label:'Manchester',lat:53.4808,lon:-2.2426,mode:'area'},{label:'Sydney',lat:-33.87,lon:151.21,mode:'area'},{label:'New York',lat:40.71,lon:-74,mode:'area'}]){
-  const a=app(()=>assert.fail('Ideas must not make a network request'));
-  a.run('guide='+JSON.stringify({...fixture,location,items:[],complete:true})+';selected="family";render()');
-  assert.equal(a.nodes.results.hidden,false);assert.equal(a.nodes.tabs.children.length,1);assert.equal(a.nodes.tabs.children[0].attrs['aria-pressed'],'true');
-  const ideas=a.nodes.cards.children.filter(c=>c.className==='card activity-idea');assert.equal(ideas.length,4);
-  assert.deepEqual(ideas.map(c=>c.children[0].children[1].textContent),['🎬 Cinema','🎳 Bowling','🔐 Escape rooms','⛳ Crazy golf']);
-  for(const card of ideas){const body=card.children[0],link=body.children[3].children[0],url=new URL(link.href);assert.equal(url.hostname,'www.google.com');assert.equal(url.searchParams.get('api'),'1');assert.ok(url.searchParams.get('query').endsWith(' near '+location.lat+','+location.lon));assert.equal(link.target,'_blank');assert.equal(body.children[0].textContent,'Activity idea');assert.ok(!body.children.some(c=>c.className==='distance'));}
-  assert.equal(a.run('guide.items.length'),0);assert.equal(a.run('activeItem'),null);
- }
-});
-test('saved older guides show the new ideas immediately without another paid guide request',()=>{
- const saved={guide:{...fixture,version:14,location:{label:'Manchester',mode:'area',lat:53.4808,lon:-2.2426},items:[],complete:true},selected:'family',place:'Manchester',mode:'home'};
- const a=app(()=>assert.fail('Restoring ideas should not rebuild the guide'),'',{DiscoverReturnState:{load:()=>saved}});assert.equal(a.nodes.cards.children.filter(c=>c.className==='card activity-idea').length,4);assert.equal(a.nodes.results.hidden,false);
-});
-test('ideas and sourced places remain distinct and existing reading controls still work',()=>{
- const place={...fixture.items[0],id:'park',section:'family',name:'Family Park',title:'Family Park'};const a=app();
- a.run('guide='+JSON.stringify({...fixture,location:{label:'Manchester',mode:'area',lat:53.4808,lon:-2.2426},items:[place]})+';selected="family";render()');
- assert.equal(a.nodes.cards.children.filter(c=>c.className==='card activity-idea').length,4);assert.equal(a.nodes.cards.children.filter(c=>c.className==='card').length,1);
- a.run('openItem(guide.items[0])');assert.equal(a.nodes.dialog.open,true);assert.equal(a.nodes.detailTitle.textContent,'Family Park');
+test('a saved family guide keeps local attractions and hides retired activity types',()=>{
+ const items=['Family Park','City Cinema','Tenpin Bowling','Escape Rooms','Crazy Golf'].map((name,i)=>({...fixture.items[0],id:String(i),name,title:name,section:'family'}));
+ const saved={guide:{...fixture,version:17,location:{label:'Bangkok',mode:'area',lat:13.75,lon:100.5},items,complete:true},selected:'family',place:'Bangkok',mode:'home'};
+ const a=app(()=>assert.fail('Restoring the guide should not rebuild it'),'',{DiscoverReturnState:{load:()=>saved}});
+ assert.equal(a.nodes.cards.children.length,1);
+ assert.equal(a.run('itemsForCategory(guide.items,"family")[0].name'),'Family Park');
 });
