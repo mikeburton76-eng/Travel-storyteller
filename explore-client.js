@@ -64,7 +64,8 @@ function renderCategories(){
   b.append(symbol,copy);b.onclick=()=>{selected=key;renderCategories();if(guide){render()}else $('categoryMsg').textContent='Choose a location below to explore '+name.toLowerCase()+'.'};$('tabs').append(b);
  }
  for(const [id,path]of [['foodTile','/food-open-test'],['stayTile','/stay']]){if($(id)){const params=new URLSearchParams();if(guide?.location){params.set('place',guide.location.label);if(Number.isFinite(guide.location.lat)&&Number.isFinite(guide.location.lon)){params.set('lat',guide.location.lat);params.set('lon',guide.location.lon);}}$(id).href=path+(params.toString()?'?'+params.toString():'');}}
- $('categoryMsg').textContent=guide?(visible.length?categoryHelp[selected]:'No supported suggestions found for this search yet. Try a nearby town.'):'Choose what interests you, then search a place or use your location.';
+ $('categoryMsg').textContent=guide?(visible.length?'':'No supported suggestions found for this search yet. Try a nearby town.'):'Choose what interests you, then search a place or use your location.';
+ $('categoryMsg').hidden=!!guide&&!!visible.length;
 }
 const icons={nature:'🌿',culture:'🎨',experience:'🎟️',architecture:'🏛️',history:'📜'};
 let activePageMode='home',applyPageMode=null,detailHistory=false;
@@ -97,18 +98,9 @@ function render(){
   const query='museums and galleries near '+where;
   $('sectionHelp').append(document.createTextNode(' '),link('More museums on Google Maps ↗','https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(query)));
  }
- $('cards').replaceChildren();let items=itemsForCategory(guide.items,selected);
- const museums=selected==='history'?items.filter(x=>/\b(museum|galler(?:y|ies))\b/i.test(x.name)&&!x.historyOnly):[];
- if(museums.length)items=[...items.filter(x=>!museums.includes(x)),...museums];
- let museumHeading=false;
+ $('cards').replaceChildren();const items=itemsForCategory(guide.items,selected);
  if(!items.length){const p=node('p',guide.complete===false?'Suggestions for this category are still being prepared.':selected==='history'?'No supported history or cultural suggestions found in this search yet. This does not mean the place has no history or culture.':'No sufficiently supported '+sections[selected][1].toLowerCase()+' found in this search yet. You can try another category or a nearby town.');p.className='empty';$('cards').append(p);return}
  for(const item of items){
-  if(museums.includes(item)&&!museumHeading){
-   museumHeading=true;const heading=document.createElement('header');heading.className='museum-group';heading.style.gridColumn='1 / -1';
-   const subjects=[['natural history',/\b(natural history|fossils?|dinosaurs?)\b/i],['science and industry',/\b(science|industrial|industry)\b/i],['football',/\bfootball\b/i],['art',/\b(art|artwork|paintings?)\b/i]].filter(([,re])=>museums.some(m=>re.test(m.name+' '+m.background))).map(([name])=>name);
-   const intro=subjects.length?'The museums in this selection cover '+subjects.join(', ')+'. Choose a place below to see what it offers.':'Discover the different collections and exhibitions at museums and galleries around '+guide.location.label+'.';
-   heading.append(node('h3','Museums & galleries'),node('p',intro));$('cards').append(heading);
-  }
   const card=document.createElement('article');card.className='card';const photo=node('button',icons[item.theme]||'📍');photo.className='photo';photo.type='button';photo.setAttribute('aria-label','Read about '+item.title);photo.onclick=()=>openItem(item);
   if(item.image){const img=document.createElement('img');img.src=item.image.url;img.alt=item.name;img.loading='lazy';img.referrerPolicy='no-referrer';img.onerror=()=>photo.replaceChildren(document.createTextNode(icons[item.theme]||'📍'));photo.replaceChildren(img)}
   const body=document.createElement('div');body.className='body';const kind=node('small',originalNames[item.section]||'Place to visit');kind.className='kind';body.append(kind);

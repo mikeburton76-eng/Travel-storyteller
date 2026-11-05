@@ -21,10 +21,10 @@ test('specialist trial is explicitly selected and carried with the search reques
  await a.run('explore({place:"Sample Town"})');assert.equal(input.specialists,true);assert.equal(input.progressive,true);
 });
 
-test('categories fold legacy sections, group museums and retain photo labels',()=>{
+test('categories fold legacy sections and retain photo labels',()=>{
  const a=app();const base=fixture.items[0];
  const items=[{...base,id:'building',name:'Town Hall',theme:'architecture',section:'buildings'},{...base,id:'museum',name:'Town Museum',theme:'culture',section:'museums'},{...base,id:'garden',section:'attractions',name:'Town Gardens'},{...base,id:'garden',section:'walks',name:'Town Gardens'},{...base,id:'garden',section:'photos',name:'Town Gardens'}];
- a.run('guide='+JSON.stringify({...fixture,items})+';selected="history";render()');assert.equal(a.nodes.cards.children.filter(x=>x.className==='card').length,2);assert.equal(a.nodes.cards.children.filter(x=>x.className==='museum-group').length,1);
+ a.run('guide='+JSON.stringify({...fixture,items})+';selected="history";render()');assert.equal(a.nodes.cards.children.filter(x=>x.className==='card').length,2);assert.equal(a.nodes.cards.children.length,2);
  a.run('selected="walks";render()');assert.equal(a.nodes.cards.children.length,1);assert.equal(a.nodes.cards.children[0].children[1].children[0].textContent,'Walk');
  assert.ok(a.nodes.cards.children[0].children[1].children.some(x=>x.textContent==='📷 Photo spot'));
  a.run('openItem(guide.items[1])');assert.equal(a.nodes.detailKind.textContent,'Museum or gallery');
@@ -95,16 +95,24 @@ test('a different explored place changes proximity order without relying on an o
 });
 
 
-test('museum grouping has one shared introduction and keeps individual reading and website links',()=>{
- const a=app();const base=fixture.items[0];const items=[{...base,id:'m1',name:'Natural History Museum',title:'Natural History Museum',section:'museums',background:'A museum with natural history collections.',website:'https://example.org/museum'},{...base,id:'m2',name:'Science Museum',title:'Science Museum',section:'museums',background:'A museum exploring science and industry.'},{...base,id:'m3',name:'Football Museum',title:'Football Museum',section:'museums',background:'A museum of football.'}];
- a.run('guide='+JSON.stringify({...fixture,items,sources:[{kind:'wikivoyage',url:'https://en.wikivoyage.org/wiki/Example'}]})+';selected="history";render()');
- const headings=a.nodes.cards.children.filter(c=>c.className==='museum-group'),cards=a.nodes.cards.children.filter(c=>c.className==='card');
- assert.equal(headings.length,1);assert.equal(cards.length,3);assert.equal(headings[0].children[0].textContent,'Museums & galleries');assert.match(headings[0].children[1].textContent,/natural history, science and industry, football/);
+test('history, museums and galleries share one nearest-first grid',()=>{
+ const a=app(),base=fixture.items[0];
+ const items=[
+  {...base,id:'story',name:'Local story',title:'Local story',section:'history',coord:{lat:0,lon:.02}},
+  {...base,id:'museum',name:'City Museum',title:'City Museum',section:'museums',coord:{lat:0,lon:.001},website:'https://example.org/museum'},
+  {...base,id:'gallery',name:'City Gallery',title:'City Gallery',section:'museums',coord:{lat:0,lon:.03}}
+ ];
+ a.run('guide='+JSON.stringify({...fixture,location:{label:'Example city',mode:'area',lat:0,lon:0},items})+';selected="history";render()');
+ assert.deepEqual(a.nodes.cards.children.map(card=>card.children[1].children[1].children[0].textContent),['City Museum','Local story','City Gallery']);
+ assert.equal(a.nodes.sectionTitle.textContent,'History & culture near Example city');
+ assert.equal(a.nodes.categoryMsg.hidden,true);
  assert.ok(a.nodes.sectionHelp.children.some(c=>c.href?.startsWith('https://www.google.com/maps/search/?api=1&query=museums')));
- a.run('openItem(guide.items[0])');assert.ok(a.nodes.detailLinks.children.some(c=>c.href==='https://example.org/museum'));assert.equal(a.nodes.dialog.open,true);
+ a.run('openItem(guide.items[1])');
+ assert.ok(a.nodes.detailLinks.children.some(c=>c.href==='https://example.org/museum'));
+ assert.equal(a.nodes.dialog.open,true);
 });
 
-test('a grouped museum uses its visitor description rather than a duplicate history-story angle',()=>{
+test('a museum uses its visitor description rather than a duplicate history-story angle',()=>{
  const a=app(),base={...fixture.items[0],id:'museum',name:'City Museum',theme:'culture'};
  const rows=[{...base,section:'history',title:'How the town changed',reason:'A historical story about the town.'},{...base,section:'museums',title:'City Museum',reason:'Explore the museum collections and displays.'}];
  a.run('guide='+JSON.stringify({...fixture,items:rows})+';selected="history";render()');
