@@ -7,11 +7,11 @@ const visitor = /\b(manors?|stately homes?|country houses?|historic houses?|mans
 const activityType=/\b(laser[ -](?:tag|quest)|soft play|indoor play|trampoline parks?)\b/i;
 const familyUse=/\b(family[ -]friendly|families|for children|children[’']s|kids|playgrounds?|all ages|laser[ -](?:tag|quest)|soft play|indoor play|trampoline parks?|interactive (?:exhibits|displays)|hands[ -]on (?:exhibits|experiments|activities))\b/i;
 const excludedFamilyVenue=/\b(cinemas?|movie theat(?:re|er)s?|bowling|escape rooms?|(?:mini(?:ature)?[ -]?|crazy |adventure )golf)\b/i;
-const familyVenueType = /\b(aquariums?|planetariums?|science cent(?:re|er)s?|science museums?|zoos?|(?:water|theme|amusement) parks?|children[’']s museums?)\b/i;
+const familyVenueType = /\b(aquariums?|planetariums?|science cent(?:re|er)s?|science museums?|natural history museums?|zoos?|(?:water|theme|amusement) parks?|children[’']s museums?)\b/i;
 function familyVenue(name, text = '') {
  const description = plain(text);
  return familyVenueType.test(name) || familyVenueType.test(description.match(/^[^.\n]{0,150}/)?.[0] || '') &&
-  /^(?:(?:a|an|the) )?(?:public |indoor |outdoor )?(?:aquarium|planetarium|science cent(?:re|er)|science museum|zoo|(?:water|theme|amusement) park)\b|^[^.\n]{1,100}\bis (?:a|an|the) (?:public |indoor |outdoor )?(?:aquarium|planetarium|science cent(?:re|er)|science museum|zoo|(?:water|theme|amusement) park)\b/i.test(description);
+  /^(?:(?:a|an|the) )?(?:public |indoor |outdoor )?(?:aquarium|planetarium|science cent(?:re|er)|science museum|natural history museum|zoo|(?:water|theme|amusement) park)\b|^[^.\n]{1,100}\bis (?:a|an|the) (?:public |indoor |outdoor )?(?:aquarium|planetarium|science cent(?:re|er)|science museum|natural history museum|zoo|(?:water|theme|amusement) park)\b/i.test(description);
 }
 const festival=/\b(festivals?|fringe|wakes?(?: week)?|well[ -]dressings?|carnivals?)\b/i;
 function eventPlace(name,text){return festival.test(name)&&festival.test(name+' '+text)&&!/\b(festival hall|festival theatre|festival theater|festival street)\b/i.test(name)}

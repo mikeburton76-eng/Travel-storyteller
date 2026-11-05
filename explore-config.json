@@ -1,5 +1,5 @@
 {
-  "version": 18,
+  "version": 19,
   "enabled": true,
   "cacheMinutes": 43200,
   "cacheEntries": 32,

@@ -20,3 +20,18 @@ test('refreshing organiser dates does not pay for another unchanged AI summary',
  const svc=createExploreService({now:()=>now,config:{cacheMinutes:1},provider:{resolve:async()=>({label:'Town',mode:'area',lat:51,lon:0}),collect:async location=>({location,candidates:[candidate()],warnings:[],radiusKm:6}),images:async()=>new Map()},aiWriter:async()=>{calls++;return {choices:[{id:'festival',section:'events',reason:'Explore music and performances at this annual arts festival.',evidence:candidate().text,familySuitable:true,confidence:.9,visitorValue:4}]}}});
  await svc.explore({place:'Town'});now=61000;end='2027-07-26';const refreshed=await svc.explore({place:'Town'});assert.equal(calls,1);assert.equal(refreshed.items[0].eventTiming.end,'2027-07-26');
 });
+
+test('a local fair is included only while its organiser confirms upcoming dates',async()=>{
+ const options={
+  now:()=>Date.parse('2026-11-05T12:00Z'),
+  fetchImpl:async url=>({ok:true,text:async()=>url.includes('autumn-fair')?'Saturday 14th November to Sunday 15th November 2026.':''})
+ };
+ const records=await nearbyEvents(location,6,options);
+ const fair=records.find(c=>c.name==='Autumn Fair at Pavilion Gardens');
+ assert.equal(fair.eventTiming.start,'2026-11-14');
+ assert.equal(fair.eventTiming.end,'2026-11-15');
+ assert.equal(fair.eventTiming.venue,true);
+ const result=fallbackSelection({location,candidates:[{...fair,id:'fair',distanceKm:.2}]},cfg);
+ assert.equal(result.items[0].section,'events');
+ assert.ok(!(await nearbyEvents(location,6,{...options,now:()=>Date.parse('2026-11-16T12:00Z')})).some(c=>c.name===fair.name));
+});

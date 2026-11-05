@@ -3,15 +3,14 @@ const $=id=>document.getElementById(id);
 const researchMode=typeof location!=='undefined'&&new URLSearchParams(location.search).get('research')==='1';
 $('researchOptions').hidden=!researchMode;
 const sections={
- attractions:['📍','Must-see sights','The main things to see and do'],
- gems:['💎','Hidden gems','Less obvious places worth finding'],
+ attractions:['📍','Places to see','Landmarks, viewpoints and lesser-known places'],
  walks:['🥾','Walks & outdoors','Walks, gardens, parks and countryside'],
  family:['👨‍👩‍👧','Family activities','Ideas for time together'],
  history:['📜','History & culture','Stories, museums, galleries and heritage'],
- events:['🎭','What’s on','Festivals, local events and traditions']
+ events:['🎭','What’s on','Festivals, fairs and local events']
 };
-const categoryHelp={events:'Festivals and local events. Exact dates are shown only when checked against the organiser; annual traditions may still be awaiting dates. Check the programme and age guidance before booking.',walks:'Walks and outdoor places. Each card distinguishes a documented walk from a place to visit. Check routes, terrain and access; map distances are not walk lengths.',family:'Local places to explore together. Check venue details for age guidance and access.',history:'Discover local stories, museums, galleries and heritage. Map links for stories may show a related area.',attractions:'Main visitor highlights, landmarks and buildings from the available sources. A town search includes the surrounding area.',gems:'Less obvious places with a source-supported reason to visit.'};
-const originalNames={attractions:'Place to see',gems:'Hidden gem',walks:'Walk',photos:'Photo spot',family:'Family activity',museums:'Museum or gallery',history:'History & stories',buildings:'Building & architecture',events:'Festival or local tradition'};
+const categoryHelp={events:'Upcoming and ongoing events with dates checked against the organiser. Check the organiser for the latest programme and age guidance.',walks:'Walks and outdoor places. Each card distinguishes a documented walk from a place to visit. Check routes, terrain and access; map distances are not walk lengths.',family:'Local places to explore together. Check venue details for age guidance and access.',history:'Discover local stories, museums, galleries and heritage. Map links for stories may show a related area.',attractions:'Landmarks, viewpoints and lesser-known places from the available sources. A town search includes the surrounding area.'};
+const originalNames={attractions:'Place to see',gems:'Lesser-known place',walks:'Walk',photos:'Photo spot',family:'Family activity',museums:'Museum or gallery',history:'History & stories',buildings:'Building & architecture',events:'Local event'};
 function eventDateLabel(item){
  const t=item.eventTiming;if(!t?.start||!t?.end)return 'Dates to be confirmed — check the organiser';
  const format=value=>new Date(value+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
@@ -27,8 +26,8 @@ function distanceFromReference(item){
 }
 function distanceText(item){const km=distanceFromReference(item);return !Number.isFinite(km)?'Distance unavailable':km<1?Math.round(km*1000)+' m':km.toFixed(1)+' km';}
 function itemsForCategory(items,category){
- const groups={attractions:['attractions','buildings'],gems:['gems'],walks:['walks'],family:['family'],history:['history','museums','buildings'],events:['events']};
- const matched=items.filter(x=>groups[category].includes(x.section)||(category==='walks'&&outdoorPlace(x)&&!x.historyOnly)||(x.section==='photos'&&category===(outdoorPlace(x)?'walks':'attractions')));
+ const groups={attractions:['attractions','buildings','gems'],walks:['walks'],family:['family'],history:['history','museums','buildings'],events:['events']};
+ let matched=items.filter(x=>groups[category].includes(x.section)||(category==='walks'&&outdoorPlace(x)&&!x.historyOnly)||(x.section==='photos'&&category===(outdoorPlace(x)?'walks':'attractions')));
  if(category==='family'){
   const removed=/\b(cinemas?|movie theat(?:re|er)s?|bowling|escape rooms?|(?:mini(?:ature)?[ -]?|crazy |adventure )golf)\b/i;
   for(let i=matched.length-1;i>=0;i--){
@@ -36,13 +35,24 @@ function itemsForCategory(items,category){
    if(removed.test(item.name)||(/^Mapped /i.test(item.background||'')&&removed.test(item.background.split('.')[0])))matched.splice(i,1);
   }
  }
+ if(category==='events'){
+  matched=matched.filter(item=>item.eventTiming?.start&&Date.parse(item.eventTiming.end+'T23:59:59.999Z')>=Date.now());
+ }
  const rank=x=>category==='history'&&x.section==='museums'?-1:groups[category].indexOf(x.section)<0?99:groups[category].indexOf(x.section);
  matched.sort((a,b)=>rank(a)-rank(b));
  const unique=new Map();for(const item of matched)if(!unique.has(item.id))unique.set(item.id,item);
+ if(category==='family'){
+  const museums=new Map(items.filter(item=>item.section==='museums').map(item=>[item.id,item]));
+  for(const [id,item] of unique){
+   if(museums.has(id))unique.set(id,{...item,...museums.get(id),section:'family'});
+  }
+ }
  return [...unique.values()].sort((a,b)=>distanceFromReference(a)-distanceFromReference(b)||a.name.localeCompare(b.name,'en'));
 }
 function renderCategories(){
- const visible=Object.keys(sections).filter(key=>!guide||guide.complete===false||itemsForCategory(guide.items,key).length);
+ const visible=Object.keys(sections).filter(key=>key==='events'
+  ? guide&&itemsForCategory(guide.items,key).length
+  : !guide||guide.complete===false||itemsForCategory(guide.items,key).length);
  if(!visible.length)$('backToCategories').hidden=true;
  if(!visible.includes(selected))selected=visible[0]||'attractions';
  $('tabs').replaceChildren();
@@ -91,7 +101,7 @@ function render(){
  const museums=selected==='history'?items.filter(x=>/\b(museum|galler(?:y|ies))\b/i.test(x.name)&&!x.historyOnly):[];
  if(museums.length)items=[...items.filter(x=>!museums.includes(x)),...museums];
  let museumHeading=false;
- if(!items.length){const p=node('p',guide.complete===false?'Suggestions for this category are still being prepared.':selected==='gems'?'No sufficiently supported hidden gems found in this search. We have not filled the list with guesses.':selected==='history'?'No supported history or cultural suggestions found in this search yet. This does not mean the place has no history or culture.':'No sufficiently supported '+sections[selected][1].toLowerCase()+' found in this search yet. You can try another category or a nearby town.');p.className='empty';$('cards').append(p);return}
+ if(!items.length){const p=node('p',guide.complete===false?'Suggestions for this category are still being prepared.':selected==='history'?'No supported history or cultural suggestions found in this search yet. This does not mean the place has no history or culture.':'No sufficiently supported '+sections[selected][1].toLowerCase()+' found in this search yet. You can try another category or a nearby town.');p.className='empty';$('cards').append(p);return}
  for(const item of items){
   if(museums.includes(item)&&!museumHeading){
    museumHeading=true;const heading=document.createElement('header');heading.className='museum-group';heading.style.gridColumn='1 / -1';
@@ -102,16 +112,16 @@ function render(){
   const card=document.createElement('article');card.className='card';const photo=node('button',icons[item.theme]||'📍');photo.className='photo';photo.type='button';photo.setAttribute('aria-label','Read about '+item.title);photo.onclick=()=>openItem(item);
   if(item.image){const img=document.createElement('img');img.src=item.image.url;img.alt=item.name;img.loading='lazy';img.referrerPolicy='no-referrer';img.onerror=()=>photo.replaceChildren(document.createTextNode(icons[item.theme]||'📍'));photo.replaceChildren(img)}
   const body=document.createElement('div');body.className='body';const kind=node('small',originalNames[item.section]||'Place to visit');kind.className='kind';body.append(kind);
-  const h=document.createElement('h3'),title=node('button',item.title);title.className='title';title.onclick=()=>openItem(item);h.append(title);body.append(h,node('p',item.reason));if(item.eventArea){const dates=node('small',eventDateLabel(item));dates.className='event-dates';body.append(dates);}if(guide.items.some(x=>x.id===item.id&&x.section==='photos')){const badge=node('small','📷 Photo spot');badge.className='photo-badge';body.append(badge);}const distance=node('small',item.eventArea?distanceText(item)+' to the festival area':item.historyOnly?'Related to this area':distanceText(item)+' from '+(guide.location.mode==='nearby'?'your search location':'the area’s reference point'));distance.className='distance';body.append(distance);
-  const links=document.createElement('div');links.className='links';const listen=node('button','▶ Listen to this place');listen.className='textbutton';listen.onclick=()=>listenToItem(item);const read=node('button','Read about this place');read.className='textbutton';read.onclick=()=>openItem(item);links.append(read,listen,link(item.eventArea?'Festival area ↗':item.historyOnly?'Related area ↗':'View map ↗',mapUrl(item)));if(item.website)links.append(link('Venue website ↗',item.website));body.append(links);card.append(photo,body);$('cards').append(card);
+  const h=document.createElement('h3'),title=node('button',item.title);title.className='title';title.onclick=()=>openItem(item);h.append(title);body.append(h,node('p',item.reason));if(item.eventArea){const dates=node('small',eventDateLabel(item));dates.className='event-dates';body.append(dates);}if(guide.items.some(x=>x.id===item.id&&x.section==='photos')){const badge=node('small','📷 Photo spot');badge.className='photo-badge';body.append(badge);}const distance=node('small',item.eventArea?distanceText(item)+(item.eventTiming?.venue?' to the event venue':' to the event area'):item.historyOnly?'Related to this area':distanceText(item)+' from '+(guide.location.mode==='nearby'?'your search location':'the area’s reference point'));distance.className='distance';body.append(distance);
+  const links=document.createElement('div');links.className='links';const listen=node('button','▶ Listen to this place');listen.className='textbutton';listen.onclick=()=>listenToItem(item);const read=node('button','Read about this place');read.className='textbutton';read.onclick=()=>openItem(item);links.append(read,listen,link(item.eventArea?(item.eventTiming?.venue?'Event venue ↗':'Event area ↗'):item.historyOnly?'Related area ↗':'View map ↗',mapUrl(item)));if(item.website)links.append(link('Venue website ↗',item.website));body.append(links);card.append(photo,body);$('cards').append(card);
  }
 }
 function openItem(item){
  activeItem=item;$('detailTitle').textContent=item.title;$('detailKind').textContent=originalNames[item.section]||'Place to visit';$('detailReason').textContent=item.reason;$('detailBackground').textContent=item.background;$('background').open=false;
- $('detailDistance').textContent=item.eventArea?eventDateLabel(item)+'. The map shows the festival area, not a confirmed venue. Check the programme and individual show age guidance.':item.historyOnly?'This story is associated with the area shown on the map.':distanceText(item)+' in a straight line from the search reference point. Check a suitable route and current access before travelling.';
+ $('detailDistance').textContent=item.eventArea?eventDateLabel(item)+(item.eventTiming?.venue?'. The map shows the listed venue.':'. The map shows the wider event area.')+' Check the organiser’s programme and age guidance.':item.historyOnly?'This story is associated with the area shown on the map.':distanceText(item)+' in a straight line from the search reference point. Check a suitable route and current access before travelling.';
  const image=$('detailImage');image.replaceChildren();image.hidden=!item.image;
  if(item.image){const img=document.createElement('img');img.src=item.image.url;img.alt=item.name;img.referrerPolicy='no-referrer';img.onerror=()=>{image.hidden=true};const credit=document.createElement('figcaption');credit.append(node('small',item.image.creator+' · '+item.image.license+' '),link('Photo and licence ↗',item.image.sourceUrl));image.append(img,credit)}
- $('detailLinks').replaceChildren(link('Source: '+item.source.title+' ↗',item.source.url),link(item.eventArea?'Festival area ↗':item.historyOnly?'Related area ↗':'View map ↗',mapUrl(item)));
+ $('detailLinks').replaceChildren(link('Source: '+item.source.title+' ↗',item.source.url),link(item.eventArea?(item.eventTiming?.venue?'Event venue ↗':'Event area ↗'):item.historyOnly?'Related area ↗':'View map ↗',mapUrl(item)));
  if(item.website)$('detailLinks').append(link('Venue website ↗',item.website));
  if(item.eventTiming?.sourceUrl)$('detailLinks').append(link('Organiser dates ↗',item.eventTiming.sourceUrl));
  for(const source of item.supportingSources||[])$('detailLinks').append(link('Local guide: '+source.title+' ↗',source.url));

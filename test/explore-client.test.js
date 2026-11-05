@@ -31,7 +31,7 @@ test('categories fold legacy sections, group museums and retain photo labels',()
 });
 
 test('empty categories are hidden only when complete and an empty guide has no dead-end buttons',()=>{
- const a=app();a.run('guide='+JSON.stringify({...fixture,complete:false})+';render()');assert.equal(a.nodes.tabs.children.length,6);
+ const a=app();a.run('guide='+JSON.stringify({...fixture,complete:false})+';render()');assert.equal(a.nodes.tabs.children.length,4);
  a.run('guide.complete=true;selected="family";render()');assert.equal(a.nodes.tabs.children.length,2);assert.equal(a.nodes.tabs.children[0].attrs['aria-pressed'],'true');
  a.run('guide.items=[];render()');assert.equal(a.nodes.tabs.children.length,0);assert.equal(a.nodes.results.hidden,true);assert.match(a.nodes.categoryMsg.textContent,/No supported suggestions/);
 });
@@ -43,10 +43,11 @@ test('normal app hides research controls and cannot accidentally enable extra AI
  let input;const a=app(async(url,options)=>{input=JSON.parse(options.body);return {ok:true,json:async()=>({...fixture,complete:true})}});assert.equal(a.nodes.researchOptions.hidden,true);a.nodes.specialists??=new Element();a.nodes.specialists.checked=true;
  await a.run('explore({place:"Sample Town"})');assert.equal(input.specialists,false);
 });
-test('What’s on displays organiser-verified years or an explicit unconfirmed date label',()=>{
+test('What’s on shows confirmed events and hides when dates are unconfirmed or past',()=>{
  const a=app();const event={...fixture.items[0],id:'festival',name:'Town Festival',title:'Town Festival',section:'events',theme:'culture',eventArea:true,eventTiming:{start:'2027-07-07',end:'2027-07-25',sourceUrl:'https://example.org/festival'}};
  a.run('guide='+JSON.stringify({...fixture,items:[event],complete:true})+';selected="events";render()');assert.equal(a.nodes.tabs.children.length,1);assert.ok(a.nodes.cards.children[0].children[1].children.some(c=>c.textContent.includes('2027')));
- a.run('guide.items[0].eventTiming=null;render()');assert.ok(a.nodes.cards.children[0].children[1].children.some(c=>c.textContent.includes('Dates to be confirmed')));
+ a.run('guide.items[0].eventTiming.end="2000-01-01";render()');assert.equal(a.nodes.tabs.children.length,0);
+ a.run('guide.items[0].eventTiming=null;render()');assert.equal(a.nodes.tabs.children.length,0);
 });
 test('Listen passes the chosen card to the shared player and Categories keeps the guide intact',()=>{
  const a=app();a.run('guide='+JSON.stringify(fixture)+';globalThis.played=null;globalThis.ExploreNarration={listen:(item,location)=>globalThis.played={item,location}};render();listenToItem(guide.items[0])');
@@ -82,10 +83,10 @@ test('reading panel has top/bottom close controls and browser Back closes it wit
 test('Places to stay carries the selected location and preserves the return point',()=>{let saved;const a=app(undefined,'',{DiscoverReturnState:{load:()=>null,save:(_key,value)=>saved=value}});a.run('guide='+JSON.stringify({...fixture,location:{label:'Tideswell',mode:'area',lat:53.278,lon:-1.773}})+';render()');const u=new URL(a.nodes.stayTile.href,'https://test.example');assert.equal(u.pathname,'/stay');assert.equal(u.searchParams.get('place'),'Tideswell');assert.equal(u.searchParams.get('lat'),'53.278');a.nodes.stayTile.events.click();assert.equal(saved.guide.location.label,'Tideswell');});
 
 test('every category sorts by real distance after choosing the appropriate duplicate card',()=>{
- const a=app();for(const category of ['attractions','gems','walks','family','history','events']){
- const nearSection=['attractions','history'].includes(category)?'buildings':category==='walks'?'photos':category;
+ const a=app();for(const category of ['attractions','walks','family','history','events']){
+ const nearSection=category==='attractions'?'gems':category==='history'?'buildings':category==='walks'?'photos':category;
  const rows=[{...fixture.items[0],id:'far',name:'Far sight',section:category,coord:{lat:0,lon:.02},distanceKm:.1},{...fixture.items[0],id:'near',name:category==='walks'?'Near garden':'Near sight',section:nearSection,coord:{lat:0,lon:.001},distanceKm:.1},{...fixture.items[0],id:'unknown',name:'Unknown location',section:category,coord:null,distanceKm:0}];
- a.run('guide='+JSON.stringify({...fixture,location:{label:'Search point',mode:'nearby',lat:0,lon:0},items:rows}));
+ a.run('guide='+JSON.stringify({...fixture,location:{label:'Search point',mode:'nearby',lat:0,lon:0},items:rows.map(item=>category==='events'?{...item,eventTiming:{start:'2099-07-01',end:'2099-07-02'}}:item)}));
  assert.deepEqual(JSON.parse(a.run('JSON.stringify(itemsForCategory(guide.items,'+JSON.stringify(category)+').map(x=>x.id))')),['near','far','unknown'],category);
  }
 });
