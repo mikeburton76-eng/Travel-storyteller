@@ -35,3 +35,26 @@ test('a local fair is included only while its organiser confirms upcoming dates'
  assert.equal(result.items[0].section,'events');
  assert.ok(!(await nearbyEvents(location,6,{...options,now:()=>Date.parse('2026-11-16T12:00Z')})).some(c=>c.name===fair.name));
 });
+
+test('nearby guides discover dated events from the organiser’s calendar',async()=>{
+ const card=(name,slug,day)=>`<div class="event-card-body">
+  <div class="event-date-large"><span>${day}</span> Nov</div>
+  <h4 class="card-title">${name}</h4>
+  <a href="${slug}">View event</a>
+ </div>`;
+ const html=card('Christmas Market','/events/christmas-market-2026/',22)
+  +card('Year missing','/events/indoor-market/',12)
+  +card('Past Fair 2026','/events/past-fair/',1)
+  +card('External event 2026','https://example.org/events/external/',18);
+ const options={
+  now:()=>Date.parse('2026-11-05T12:00Z'),
+  fetchImpl:async url=>({ok:url==='https://paviliongardens.co.uk/events/',text:async()=>html})
+ };
+ const records=await nearbyEvents(location,6,options);
+ const dated=records.filter(event=>event.eventTiming);
+ assert.deepEqual(dated.map(event=>event.name),['Christmas Market']);
+ assert.equal(dated[0].eventTiming.start,'2026-11-22');
+ assert.equal(dated[0].eventTiming.end,'2026-11-22');
+ assert.equal(dated[0].sourceOnly,true);
+ assert.equal((await nearbyEvents({lat:40,lon:-70},6,{...options,fetchImpl:()=>assert.fail('Unrelated location')})).length,0);
+});
