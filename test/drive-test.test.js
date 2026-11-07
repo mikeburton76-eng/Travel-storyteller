@@ -17,7 +17,7 @@ test('poor fixes, stationary readings and missing direction cannot auto-play; us
 test('playback stays local at higher speeds; duplicate and area-only locations are omitted',()=>{
  const f=fix({lon:.001});assert.equal(L.approaching(item,f,{speed:10,heading:90}).trigger,false);assert.equal(L.approaching(item,f,{speed:25,heading:90}).trigger,false);
  assert.equal(L.places([item,{...item,id:'duplicate'}, {...item,id:'festival',source:{url:'festival'},eventArea:true},{...item,id:'history',source:{url:'history'},historyOnly:true},{...item,id:'bad',coord:{lat:NaN,lon:0}}]).length,1);
- assert.ok(L.opening({...item,reason:('This is a supported sentence about a place. ').repeat(30)}).length<=480);
+ assert.ok(L.opening({...item,reason:('This is a supported sentence about a place. ').repeat(30)}).length<=700);
 });
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 async function app({tripItems=[item],wakeLock,fetchImpl,online=false,autoStart=true,confirm=true,historyStorage}={}){
@@ -135,4 +135,48 @@ test('a prepared settlement is abandoned immediately when the car turns away bef
 
 test('the journey holds its last moving heading when parked instead of waiting for direction again',async()=>{
  const a=await app();a.position({speed:10,heading:90});await tick();a.advance(2000);a.position({speed:0,heading:null});await tick();assert.match(a.nodes.get('speed').textContent,/last travel direction held/);assert.doesNotMatch(a.nodes.get('decision').textContent,/Direction not established/);a.nodes.get('stop').onclick();
+});
+
+test('three complete clips prepare ahead and play through a signal gap without new requests',async()=>{
+ const places=[0,1,2,3].map(i=>({...item,id:'buffer-'+i,name:'Place '+i,reason:'Place '+i+' was founded by local craftspeople and became known for its stone buildings and historic market.',coord:{lat:0,lon:.006*(i+1)},source:{url:'https://example.org/'+i,title:'Place '+i}}));
+ const speech=[];
+ const a=await app({tripItems:[],online:true,fetchImpl:async(url,options)=>{
+  if(url==='/speech')speech.push(JSON.parse(options.body));
+  return {ok:true,json:async()=>url==='/api/explore'?{complete:true,location:{label:'Town'},items:places}:url==='/api/arrivals'?{items:[]}:{defaultVoice:'pippa'},blob:async()=>new Blob(['wav'])};
+ }});
+ a.position({});for(let i=0;i<25;i++)await tick();
+ assert.equal(speech.length,3);assert.match(a.nodes.get('ahead').textContent,/3 of up to 3/);assert.equal(a.sources.length,0);
+ a.navigator.onLine=false;const previous=a.requests;
+ for(const lon of [.0023,.0085,.0145]){
+  a.advance(21000);a.position({lon});for(let i=0;i<5;i++)await tick();
+  assert.ok(a.sources.length>0);a.sources.at(-1).onended();
+ }
+ assert.equal(a.sources.length,3);assert.equal(a.requests,previous);a.nodes.get('stop').onclick();
+});
+test('a clip being buffered is reused when it becomes the nearest place',async()=>{
+ const second={...item,id:'second',name:'Second landmark',reason:'This second landmark was built by a famous inventor and is known for its unusual historic design.',coord:{lat:0,lon:.012},source:{url:'https://example.org/second'}};
+ let resolveSecond;const held=new Promise(resolve=>{resolveSecond=resolve});let secondRequests=0;
+ const a=await app({tripItems:[],online:true,fetchImpl:async(url,options)=>{
+  if(url==='/speech'&&JSON.parse(options.body).text.includes('famous inventor')){secondRequests++;return held;}
+  return {ok:true,json:async()=>url==='/api/explore'?{complete:true,location:{label:'Town'},items:[item,second]}:url==='/api/arrivals'?{items:[]}:{defaultVoice:'pippa'},blob:async()=>new Blob(['wav'])};
+ }});
+ a.position({});for(let i=0;i<15;i++)await tick();assert.equal(secondRequests,1);
+ a.position({lon:.0085});resolveSecond({ok:true,blob:async()=>new Blob(['wav'])});for(let i=0;i<12;i++)await tick();
+ assert.equal(secondRequests,1);assert.equal(a.sources.length,1);assert.equal(a.nodes.get('placeName').textContent,'Second landmark');a.nodes.get('stop').onclick();
+});
+test('the fuller opening brings a sourced historical detail forward',()=>{
+ const reason='The monument stands near the village. It is built from local stone. It sits beside a road through the valley.';
+ const text=L.opening({...item,reason,background:'A Bronze Age barrow survives beside the monument. The stone was restored in 1920.'});
+ assert.match(text,/Bronze Age barrow/);assert.ok(text.split(/\s+/).length<=75);assert.ok(text.length<=700);
+});
+
+test('stopping cancels background preparation and late audio cannot restart playback',async()=>{
+ const second={...item,id:'second',name:'Second place',coord:{lat:0,lon:.012},source:{url:'https://example.org/second'},reason:'The second place is a medieval monument near the village.'};
+ let finish,signal;const held=new Promise(resolve=>{finish=resolve});
+ const a=await app({tripItems:[],online:true,fetchImpl:async(url,options)=>{
+  if(url==='/speech'&&JSON.parse(options.body).text.includes('second place')){signal=options.signal;return held;}
+  return {ok:true,json:async()=>url==='/api/explore'?{complete:true,location:{label:'Town'},items:[item,second]}:url==='/api/arrivals'?{items:[]}:{defaultVoice:'pippa'},blob:async()=>new Blob(['wav'])};
+ }});
+ a.position({});for(let i=0;i<15;i++)await tick();assert.ok(signal);a.nodes.get('stop').onclick();assert.equal(signal.aborted,true);
+ finish({ok:true,blob:async()=>new Blob(['wav'])});for(let i=0;i<8;i++)await tick();assert.equal(a.sources.length,0);assert.equal(a.nodes.get('start').disabled,false);assert.doesNotMatch(a.nodes.get('log').textContent,/Buffered audio ready: Second place/);
 });

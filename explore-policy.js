@@ -3,7 +3,7 @@
 // they cannot certify semantic or visual suitability.
 const excluded = /\b(massacres?|shootings?|spree[ -]?kill\w*|school[ -]?shoot\w*|killings?|killed|murder\w*|homicid\w*|assassinat\w*|rap(?:e|es|ed|ing|ist|ists)|sexual[ -]?(?:assault|abuse|violence|exploitation)|child[ -]?abuse|molest\w*|terroris\w*|genocid\w*|lynch\w*|tortur\w*|suicid\w*|executions?|atrocit\w*|porn\w*|sex[ -]?club|strip[ -]?club|brothels?|fatal[ -]?accident|serial[ -]?kill\w*|battlefields?|sieges?)\b/iu;
 const closed = /\b(permanently closed|permanently shut|temporarily closed|closed for|closed until|demolished|no longer exists|defunct|disused|was a railway station|former railway station)\b/i;
-const visitor = /\b(manors?|stately homes?|country houses?|historic houses?|mansions?|châteaux|chateaux|château|chateau|wakes week|well[ -]dressing|carnival|fringe|bookshops?|bookstores?|bookbinding|antique shops?|record shops?|craft shops?|tourist information|visitor cent(?:re|er)|visitor information|museum|galler(?:y|ies)|gardens?|parks?|observatory|aquarium|zoo|castle|palace|cathedral|church|abbey|temple|bridge|tower|theat(?:re|er)|concert hall|opera house|librar(?:y|ies)|markets?|arcade|pier|beach|waterfall|caverns?|caves?|botanic\w*|monument|heritage|historic\w*|landmark|archaeolog\w*|ruins|railway|funicular|sculpture|artwork|trail|walk|harbour|harbor|waterfront|festival|tradition|invention|discovery|memorial|hills?|mountains?|ridges?|gorges?|valleys?|viewpoints?|lakes?|reservoirs?|nature reserves?|country parks?|botanical gardens?)\b/i;
+const visitor = /\b(barrows?|burial mounds?|standing stones?|stone circles?|henges?|hillforts?|ancient monuments?|deserted (?:medieval|mediaeval) villages?|manors?|stately homes?|country houses?|historic houses?|mansions?|châteaux|chateaux|château|chateau|wakes week|well[ -]dressing|carnival|fringe|bookshops?|bookstores?|bookbinding|antique shops?|record shops?|craft shops?|tourist information|visitor cent(?:re|er)|visitor information|museum|galler(?:y|ies)|gardens?|parks?|observatory|aquarium|zoo|castle|palace|cathedral|church|abbey|temple|bridge|tower|theat(?:re|er)|concert hall|opera house|librar(?:y|ies)|markets?|arcade|pier|beach|waterfall|caverns?|caves?|botanic\w*|monument|heritage|historic\w*|landmark|archaeolog\w*|ruins|railway|funicular|sculpture|artwork|trail|walk|harbour|harbor|waterfront|festival|tradition|invention|discovery|memorial|hills?|mountains?|ridges?|gorges?|valleys?|viewpoints?|lakes?|reservoirs?|nature reserves?|country parks?|botanical gardens?)\b/i;
 const activityType=/\b(laser[ -](?:tag|quest)|soft play|indoor play|trampoline parks?)\b/i;
 const familyUse=/\b(family[ -]friendly|families|for children|children[’']s|kids|playgrounds?|all ages|laser[ -](?:tag|quest)|soft play|indoor play|trampoline parks?|interactive (?:exhibits|displays)|hands[ -]on (?:exhibits|experiments|activities))\b/i;
 const excludedFamilyVenue=/\b(cinemas?|movie theat(?:re|er)s?|bowling|escape rooms?|(?:mini(?:ature)?[ -]?|crazy |adventure )golf)\b/i;
@@ -26,8 +26,9 @@ function shopGem(name,text){return !/\b(museum|galler(?:y|ies)|librar(?:y|ies))\
 function gemEvidence(text,name=''){return hidden.test(text)||shopGem(name,text)}
 const heritageType=/\b(hotels?|inns?|manors?|stately homes?|country houses?|historic houses?|mansions?|palaces?|chateaux|châteaux)\b/i;
 function heritagePlace(name,text){return heritageType.test(name+' '+text)&&/\b(Grade\s+[I123]+\*?\s+listed|listed building|heritage[ -]listed|national historic landmark|historic (?:house|hotel|inn|manor|mansion|residence)|former royal residence)\b/i.test(text);}
+const ancientSite=/\b(barrows?|burial mounds?|standing stones?|stone circles?|henges?|hillforts?|ancient monuments?|deserted (?:medieval|mediaeval) villages?)\b/i;
 const walkingUse=/\b(walk\w*|hik\w*|footpaths?|trails?|strolls?|promenades?|riverside paths?|public paths?)\b/i;
-function historySubject(text){return /\b(invent\w*|discover\w*|tradition\w*|engineer\w*|settlement|settled|grew|founded|festival|craft|market|people|community|transport|industry|industrial|changed|transformed|develop\w*|scientist)\b/i.test(text)||/\b(?:king|queen|monarch|royal)\b[^.!?]*\b(?:stayed|visited|residence|custody|house arrest)\b|\b(?:home of|residence of|lived here|lived at|stayed here|restored the|restoration of)\b/i.test(text);}
+function historySubject(text){return ancientSite.test(text)||/\b(invent\w*|discover\w*|tradition\w*|engineer\w*|settlement|settled|grew|founded|festival|craft|market|people|community|transport|industry|industrial|changed|transformed|develop\w*|scientist)\b/i.test(text)||/\b(?:king|queen|monarch|royal)\b[^.!?]*\b(?:stayed|visited|residence|custody|house arrest)\b|\b(?:home of|residence of|lived here|lived at|stayed here|restored the|restoration of)\b/i.test(text);}
 function visitorSuitable(name,text,historyOnly=false){
  if(!allowed(name,text)||closed.test(text)||sourceMarkup.test(name+' '+text))return false;
  if(historyOnly)return true;
@@ -37,6 +38,7 @@ function visitorSuitable(name,text,historyOnly=false){
  return true;
 }
 function themeOf(name, text) {
+ if(ancientSite.test(name))return 'history';
  if(activityType.test(name))return 'experience';
  if(shopGem(name,text))return 'culture';
  if(heritageType.test(name)&&heritagePlace(name,text))return 'architecture';
@@ -62,4 +64,4 @@ function coordinate(lat, lon) {
  lat = Number(lat); lon = Number(lon);
  return Number.isFinite(lat)&&Number.isFinite(lon)&&Math.abs(lat)<=90&&Math.abs(lon)<=180 ? {lat,lon} : null;
 }
-module.exports = { excludedFamilyVenue, familyVenue, familyVenueType, activityType,familyUse,heritageType,heritagePlace,historySubject,walkingUse,allowed, cleanParagraphs, plain, visitor, hidden, festival, eventPlace, closed, sourceMarkup, shopType, shopGem, gemEvidence, visitorSuitable, themeOf, distanceKm, coordinate };
+module.exports = { ancientSite, excludedFamilyVenue, familyVenue, familyVenueType, activityType,familyUse,heritageType,heritagePlace,historySubject,walkingUse,allowed, cleanParagraphs, plain, visitor, hidden, festival, eventPlace, closed, sourceMarkup, shopType, shopGem, gemEvidence, visitorSuitable, themeOf, distanceKm, coordinate };

@@ -65,3 +65,10 @@ test('the museum supplement uses current council reopening information and not t
  const c=nearbyHeritage(location,3).find(c=>c.name==='Buxton Museum and Art Gallery');assert.ok(c);assert.equal(c.source.kind,'operator');assert.match(c.text,/15 October 2026/);assert.match(c.text,/Kents Bank Road/);assert.ok(P.distanceKm(c.coord,{lat:53.256993,lon:-1.913040})>.4);assert.equal(c.skipSourceImage,true);const guide=fallbackSelection({location,candidates:[{...c,id:'museum',theme:'culture'}]},cfg);assert.ok(guide.items.some(i=>i.section==='museums'));
 });
 
+test('ancient monuments and deserted medieval villages enter shared historic discovery',()=>{
+ const records=[['Moor Barrow','A Bronze Age burial mound with surviving earthworks.'],['Old Village','The site is a deserted medieval village with surviving earthworks.'],['Stone Circle','An ancient monument with a ring of standing stones.']];
+ const candidates=records.map(([name,text],i)=>({id:'ancient-'+i,name,text,coord:location,theme:P.themeOf(name,text),source:{kind:'wikipedia',title:name,url:'https://example.org/site-'+i}}));
+ for(const c of candidates){assert.ok(P.visitor.test(c.name+' '+c.text));assert.ok(P.visitorSuitable(c.name,c.text));}
+ const result=sourceCategories({items:[]},{location,candidates},cfg);
+ assert.equal(result.items.filter(i=>i.section==='history').length,3);
+});

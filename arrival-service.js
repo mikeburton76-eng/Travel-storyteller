@@ -7,17 +7,19 @@ const ARRIVAL_RADIUS_METRES=500;
 function profile(page,now=Date.now()){
  const coord=P.coordinate(page.coordinates?.[0]?.lat,page.coordinates?.[0]?.lon),name=P.plain(page.title||'');
  if(!coord||!name||!isSettlement(page)||!P.allowed(name,page.description||''))return null;
- const sentences=P.cleanParagraphs(page.extract||'').replace(/\([^)]*pronunciation[^)]*\)/gi,'').match(/[^.!?]+(?:[.!?](?=\s|$)|$)/g)||[];
+ const sentences=P.cleanParagraphs((page.extract||'').slice(0,24000)).replace(/^\s*={2,6}.*?={2,6}\s*$/gm,'').replace(/\([^)]*pronunciation[^)]*\)/gi,'').match(/[^.!?]+(?:[.!?](?=\s|$)|$)/g)||[];
  const safe=sentences.map(s=>s.trim()).filter(s=>s.length>=20&&s.length<=550&&P.allowed(s)&&!P.sourceMarkup.test(s));if(!safe.length)return null;
  const hook=safe.find(s=>/\b(known|famous|notable|cathedral|UNESCO|world heritage|landmark)\b/i.test(s));
- const history=safe.find(s=>s!==hook&&/\b(market charter|founded|medieval|Roman|industrial|developed|established|historic)\b/i.test(s));
+ const history=safe.find(s=>s!==hook&&/\b(battles?|born|lived|poets?|writers?|inventors?|discover\w*|legends?|traditions?|royal|medieval|Bronze Age|Iron Age|barrows?)\b/i.test(s))
+  ||safe.find(s=>s!==hook&&/\b(market charter|founded|Roman|industrial|developed|established|historic)\b/i.test(s));
+ const character=safe.find(s=>s!==hook&&s!==history&&/\b(battles?|born|lived|poets?|writers?|invent\w*|discover\w*|traditions?|royal|ancient|barrows?|archaeolog\w*)\b/i.test(s));
  const stat=page.pageid===456017?'The parish, including Wheston, had 1,827 residents at the 2011 census.':safe.find(s=>/\b(population|residents|inhabitants)\b/i.test(s)&&/\b(?:19|20)\d{2}\b/.test(s));
- const selected=[],add=s=>{if(!s||selected.includes(s))return;const candidate=[...selected,s].join(' ');if(candidate.split(/\s+/).length<=120&&candidate.length<=1200)selected.push(s);};
- add(hook||safe[0]);add(history);add(stat);if(selected.join(' ').split(/\s+/).length<60)add(safe.find(s=>!selected.includes(s)));
+ const selected=[],add=s=>{if(!s||selected.includes(s))return;const candidate=[...selected,s].join(' ');if(candidate.split(/\s+/).length<=140&&candidate.length<=1550)selected.push(s);};
+ add(hook||safe[0]);add(history);add(character);add(stat);if(selected.join(' ').split(/\s+/).length<60)add(safe.find(s=>!selected.includes(s)));
  if(!selected.length)return null;
  const text='You’re near '+name+'. '+selected.join(' ');
  const checkedAt=new Date(now).toISOString(),due=new Date(now);due.setUTCFullYear(due.getUTCFullYear()+1);
- return {id:'arrival:'+page.pageid,profileVersion:3,kind:'arrival',pageId:page.pageid,name:'Introducing '+name,placeName:name,title:name,reason:text,coord,arrivalRadiusM:ARRIVAL_RADIUS_METRES,prepareRadiusM:ARRIVAL_RADIUS_METRES+1800,source:{kind:'wikipedia',title:name,url:'https://en.wikipedia.org/wiki/'+encodeURIComponent(name.replace(/ /g,'_'))},sources:[{title:name,url:'https://en.wikipedia.org/wiki/'+encodeURIComponent(name.replace(/ /g,'_'))},...(page.pageid===456017?[{title:'Peak District National Park — Tideswell and Wheston parish statement (2011 census)',url:'https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0021/344451/Tideswell-and-Wheston.pdf'}]:[])],checkedAt,reviewAfter:due.toISOString(),audioKey:createHash('sha256').update(text).digest('hex').slice(0,16),standout:hook||null,history:history||null,stat:stat||null,selectionBasis:'source',notice:'Source-based introduction; annual review when used. Distances are approximate, and food/stay coverage in this app remains local.'};
+ return {id:'arrival:'+page.pageid,profileVersion:4,kind:'arrival',pageId:page.pageid,name:'Introducing '+name,placeName:name,title:name,reason:text,coord,arrivalRadiusM:ARRIVAL_RADIUS_METRES,prepareRadiusM:ARRIVAL_RADIUS_METRES+1800,source:{kind:'wikipedia',title:name,url:'https://en.wikipedia.org/wiki/'+encodeURIComponent(name.replace(/ /g,'_'))},sources:[{title:name,url:'https://en.wikipedia.org/wiki/'+encodeURIComponent(name.replace(/ /g,'_'))},...(page.pageid===456017?[{title:'Peak District National Park — Tideswell and Wheston parish statement (2011 census)',url:'https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0021/344451/Tideswell-and-Wheston.pdf'}]:[])],checkedAt,reviewAfter:due.toISOString(),audioKey:createHash('sha256').update(text).digest('hex').slice(0,16),standout:hook||null,history:history||null,stat:stat||null,selectionBasis:'source',notice:'Source-based introduction; annual review when used. Distances are approximate, and food/stay coverage in this app remains local.'};
 }
 function createArrivalService({fetchImpl=fetch,now=()=>Date.now()}={}){
  const profiles=new Map(),geocache=new Map(),pending=new Map();let calls=[];
@@ -37,7 +39,7 @@ function createArrivalService({fetchImpl=fetch,now=()=>Date.now()}={}){
   }
   const wanted=pages.pages.filter(p=>!known.has(p.pageid)),items=[];const missing=[];
   for(const p of wanted){const hit=profiles.get(p.pageid);if(hit&&Date.parse(hit.reviewAfter)>now())items.push(hit);else missing.push(p.pageid);}
-  if(missing.length){const full=await api({pageids:missing.join('|'),prop:'extracts|coordinates|description',exintro:1,explaintext:1,exlimit:'max',colimit:'max'});for(const p of full){const item=profile(p,now());if(!item)continue;if(profiles.size>=64)profiles.delete(profiles.keys().next().value);profiles.set(p.pageid,item);items.push(item);}}
+  if(missing.length){const full=await api({pageids:missing.join('|'),prop:'extracts|coordinates|description',explaintext:1,exlimit:'max',colimit:'max'});for(const p of full){const item=profile(p,now());if(!item)continue;if(profiles.size>=64)profiles.delete(profiles.keys().next().value);profiles.set(p.pageid,item);items.push(item);}}
   return {items,reviewPolicy:'annually-when-used',source:'Wikipedia',note:'Introductions depend on source coverage. No paid AI request is made by this lookup.'};
  }
  return {lookup};

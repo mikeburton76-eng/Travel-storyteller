@@ -7,7 +7,7 @@ test('arrival leads with its distinctive feature, preserves dated facts and revi
  assert.match(item.reason,/You’re near Exampletown\. It is famous/);
  assert.match(item.reason,/founded in 1820/);assert.match(item.reason,/4,100 at the 2021 census/);
  assert.equal(item.reviewAfter,'2027-10-31T12:00:00.000Z');assert.equal(item.arrivalRadiusM,500);
- assert.equal(item.audioKey,profile(page).audioKey);assert.equal(item.profileVersion,3);assert.doesNotMatch(item.reason,/places to eat and stay|check details directly|booking/i);
+ assert.equal(item.audioKey,profile(page).audioKey);assert.equal(item.profileVersion,4);assert.doesNotMatch(item.reason,/places to eat and stay|check details directly|booking/i);
  assert.equal(profile({...page,description:'Museum in a town in Australia'}),null);
  assert.equal(profile({...page,coordinates:[{lat:99,lon:151}]}),null);
  assert.equal(profile({...page,extract:''}),null);
@@ -40,4 +40,9 @@ test('Tideswell uses the explicitly dated parish statistic with its primary sour
 test('former and Roman settlements are excluded from current-place arrival introductions',()=>{
  for(const description of ['Roman town in England','Former settlement in Australia','Archaeological site of a city'])assert.equal(profile({...page,description}),null);
  assert.ok(profile({...page,description:'Historic town in England'}));
+});
+
+test('arrival introductions prefer local history and people over extra administrative facts',()=>{
+ const item=profile({...page,extract:page.extract+' A famous poet lived in the town and wrote several early works here. A medieval battle took place near the old bridge.'});
+ assert.match(item.reason,/famous poet/);assert.match(item.reason,/medieval battle/);assert.ok(item.reason.split(/\s+/).length<=150);
 });

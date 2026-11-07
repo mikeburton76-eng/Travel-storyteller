@@ -18,13 +18,13 @@
   if(speed===null||speed<1||speed>55||heading===null)return null;
   return {speed,heading};
  }
- function approaching(item,fix,movement,played=new Set()){
+ function approaching(item,fix,movement,played=new Set(),prepareMetres=Math.min(3000,Math.max(1000,movement?.speed*90))){
   if(!valid(item.coord)||!valid(fix)||!Number.isFinite(fix.accuracy)||fix.accuracy<0||fix.accuracy>75||played.has(key(item)))return null;
   if(!movement)return null;
   const metres=distance(fix,item.coord),delta=angle(movement.heading,bearing(fix,item.coord));
   if(delta>65||metres<20)return null;
   const cross=metres*Math.sin(rad(delta)),ahead=metres*Math.cos(rad(delta));
-  if(cross>250||ahead>Math.min(3000,Math.max(1000,movement.speed*90)))return null;
+  if(cross>250||ahead>prepareMetres)return null;
   return {item,metres,ahead,cross,eta:movement.speed>0?ahead/movement.speed:null,trigger:metres<=PLAYBACK_METRES,arrival:item.kind==='arrival'};
  }
  function choose(items,fix,movement,played){return items.map(i=>approaching(i,fix,movement,played)).filter(Boolean).sort((a,b)=>Number(b.trigger)-Number(a.trigger)||a.metres-b.metres||Number(!!a.arrival)-Number(!!b.arrival))[0]||null;}
@@ -36,7 +36,24 @@
   for(let i=0;i<frames;i++){const t=i/rate,start=t<.2?0:.3,local=t-start,active=local>=0&&local<.2,gain=active?Math.min(1,local/.01,(.2-local)/.01):0,freq=start===0?600:800;view.setInt16(44+i*2,Math.round(Math.sin(2*Math.PI*freq*local)*gain*.3*32767),true);}
   return new Blob([data],{type:'audio/wav'});
  }
- function opening(item){if(item.kind==='arrival'&&item.reason.length<=1500)return item.reason;const sentences=item.reason.match(/[^.!?]+(?:[.!?](?=\s|$)|$)/g)||[item.reason];let text='';for(const sentence of sentences){if((text+' '+sentence).trim().length>480)break;text=(text+' '+sentence).trim();if(text.split(/\s+/).length>=40)break;}return text||item.reason.slice(0,450).replace(/\s+\S*$/,'')+'…';}
+ function opening(item){
+  if(item.kind==='arrival'&&item.reason.length<=1700)return item.reason;
+  const sentences=text=>String(text||'').match(/[^.!?]+(?:[.!?](?=\s|$)|$)/g)||[];
+  const main=sentences(item.reason),background=sentences(item.background);
+  const interest=/\b(battles?|born|lived|poets?|writers?|invent\w*|discover\w*|traditions?|royal|medieval|Bronze Age|Iron Age|barrows?|ancient|archaeolog\w*)\b/i;
+  const detail=[...main.slice(1),...background].find(sentence=>interest.test(sentence));
+  const selected=[];
+  const words=text=>new Set(text.toLowerCase().split(/\W+/).filter(word=>word.length>3));
+  for(const sentence of [main[0],detail,...main.slice(1)]){
+   if(!sentence)continue;
+   const candidate=sentence.trim(),tokens=words(candidate);
+   if(selected.some(previous=>{const old=words(previous);return [...tokens].filter(word=>old.has(word)).length/Math.max(1,Math.min(tokens.size,old.size))>.7;}))continue;
+   const next=[...selected,candidate].join(' ');
+   if(next.length<=700&&next.split(/\s+/).length<=75)selected.push(candidate);
+  }
+  return selected.join(' ')||String(item.reason||'').split(/\s+/).slice(0,75).join(' ').slice(0,697).replace(/\s+\S*$/,'')+'…';
+ }
+
  const api={PLAYBACK_METRES,movingAway,startChime,distance,bearing,angle,valid,key,places,motion,approaching,choose,opening};
  if(typeof module!=='undefined')module.exports=api;else globalThis.DriveLogic=api;
 })();

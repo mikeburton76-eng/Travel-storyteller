@@ -118,6 +118,7 @@ function sourceCategories(chosen,pool,config){
   const sentences=c.text.match(/[^.!?\n]+(?:[.!?](?=\s|$)|$)/g)||[c.text];
   const evidence=re=>sentences.map(s=>s.trim()).find(s=>s.length>=25&&s.length<=400&&re.test(s)&&P.allowed(s));
   if(c.eventArea||P.eventPlace(c.name,c.text)){const reason=evidence({test:()=>true});if(reason)add(c,'events',reason);continue;}
+  if(P.ancientSite.test(c.name+' '+c.text)){const reason=evidence(P.ancientSite);if(reason)add(c,'history',reason);}
   if(P.heritagePlace(c.name,c.text)){const reason=evidence({test:P.historySubject});if(reason)add(c,'history',reason);}
   if(c.historyOnly){const reason=evidence(/\b(invent\w*|discover\w*|tradition\w*|engineer\w*|settlement|settled|grew|founded|festival|craft|community|industry|industrial|changed|transformed|develop\w*)\b/i);if(reason)add(c,'history',reason);continue;}
   for(const section of ['walks','family','museums','gems']){
