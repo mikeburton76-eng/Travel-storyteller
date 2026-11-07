@@ -180,3 +180,38 @@ test('stopping cancels background preparation and late audio cannot restart play
  a.position({});for(let i=0;i<15;i++)await tick();assert.ok(signal);a.nodes.get('stop').onclick();assert.equal(signal.aborted,true);
  finish({ok:true,blob:async()=>new Blob(['wav'])});for(let i=0;i<8;i++)await tick();assert.equal(a.sources.length,0);assert.equal(a.nodes.get('start').disabled,false);assert.doesNotMatch(a.nodes.get('log').textContent,/Buffered audio ready: Second place/);
 });
+
+test('a failed guide refresh cannot delay audio already downloaded on the phone',async()=>{
+ const a=await app({online:true,fetchImpl:async url=>{if(url==='/api/explore')throw Error('No signal');return {ok:true,json:async()=>({items:[]})};}});
+ a.position({});for(let i=0;i<8;i++)await tick();assert.match(a.nodes.get('log').textContent,/Nearby guide unavailable/);
+ a.position({lon:.0023});for(let i=0;i<5;i++)await tick();assert.equal(a.sources.length,1);a.nodes.get('stop').onclick();
+});
+test('a foreground audio timeout releases the queue and allows a downloaded clip to play',async()=>{
+ const near={...item,id:'near',reason:'Near place.',coord:{lat:0,lon:.003},source:{url:'https://example.org/near'}};
+ let signal;
+ const a=await app({tripItems:[item],online:true,fetchImpl:async(url,options)=>{
+  if(url==='/speech'){signal=options.signal;return new Promise((resolve,reject)=>{signal.addEventListener('abort',()=>reject(new DOMException('Timed out','AbortError')),{once:true});});}
+  return {ok:true,json:async()=>url==='/api/explore'?{complete:true,items:[near,item]}:url==='/api/arrivals'?{items:[]}:{defaultVoice:'pippa'}};
+ }});
+ a.position({});for(let i=0;i<8;i++)await tick();assert.ok(signal);a.runTimer(190000);for(let i=0;i<8;i++)await tick();
+ a.position({lon:.0023});for(let i=0;i<8;i++)await tick();assert.equal(a.sources.length,1);assert.equal(a.nodes.get('placeName').textContent,item.name);a.nodes.get('stop').onclick();
+});
+test('slowing down does not cancel a clip that is still being prepared ahead',async()=>{
+ const far={...item,coord:{lat:0,lon:.014},source:{url:'https://example.org/far'}};let signal,calls=0;
+ const a=await app({tripItems:[],online:true,fetchImpl:async(url,options)=>{
+  if(url==='/speech'){calls++;signal=options.signal;return new Promise(()=>{});}
+  return {ok:true,json:async()=>url==='/api/explore'?{complete:true,items:[far]}:url==='/api/arrivals'?{items:[]}:{defaultVoice:'pippa'}};
+ }});
+ a.position({speed:20});for(let i=0;i<8;i++)await tick();assert.equal(calls,1);
+ a.position({speed:5,lon:.0001});for(let i=0;i<8;i++)await tick();assert.equal(signal.aborted,false);assert.equal(calls,1);a.nodes.get('stop').onclick();
+});
+
+test('one failed preload does not stop the other two clips from being downloaded',async()=>{
+ const places=[0,1,2].map(i=>({...item,id:'retry-'+i,name:'Place '+i,reason:'Place number '+i+' has a medieval church.',coord:{lat:0,lon:.02+.006*i},source:{url:'https://example.org/retry-'+i}}));const calls=[];
+ const a=await app({tripItems:[],online:true,fetchImpl:async(url,options)=>{
+  if(url==='/speech'){const text=JSON.parse(options.body).text;calls.push(text);if(text.includes('number 0'))throw Error('Clip unavailable');}
+  return {ok:true,json:async()=>url==='/api/explore'?{complete:true,items:places}:url==='/api/arrivals'?{items:[]}:{defaultVoice:'pippa'},blob:async()=>new Blob(['wav'])};
+ }});
+ a.position({});for(let i=0;i<25;i++)await tick();assert.equal(calls.length,3);assert.match(a.nodes.get('ahead').textContent,/2 of up to 3/);
+ a.navigator.onLine=false;a.position({lon:.022});for(let i=0;i<8;i++)await tick();assert.equal(a.sources.length,1);assert.equal(a.nodes.get('placeName').textContent,'Place 1');a.nodes.get('stop').onclick();
+});
