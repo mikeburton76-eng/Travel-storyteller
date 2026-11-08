@@ -70,7 +70,7 @@ test('ambiguous preparation offers place choices before any guide or voice downl
 });
 test('audio prepared online can be reused after turning away and losing signal',async()=>{
  const a=await app({tripItems:[],online:true,fetchImpl:async url=>({ok:true,json:async()=>url==='/api/explore'?{complete:true,location:{label:'Town'},items:[item]}:url==='/api/arrivals'?{items:[]}:{defaultVoice:'pippa'},blob:async()=>new Blob(['wav'])})});
- a.position({});for(let i=0;i<6;i++)await tick();assert.match(a.nodes.get('timing').textContent,/ready/);a.position({heading:270});await tick();a.navigator.onLine=false;const previous=a.requests;a.position({heading:90});await tick();a.position({lon:.0023});await tick();assert.equal(a.sources.length,1);assert.equal(a.requests,previous);assert.match(a.nodes.get('log').textContent,/Reusing prepared audio/);a.nodes.get('stop').onclick();
+ a.position({});for(let i=0;i<6;i++)await tick();assert.match(a.nodes.get('timing').textContent,/ready/i);a.position({heading:270});await tick();a.navigator.onLine=false;const previous=a.requests;a.position({heading:90});await tick();a.position({lon:.0023});await tick();assert.equal(a.sources.length,1);assert.equal(a.requests,previous);assert.match(a.nodes.get('log').textContent,/Reusing prepared audio/);a.nodes.get('stop').onclick();
 });
 
 test('an in-range landmark takes priority over a distant arrival introduction',()=>{
@@ -214,4 +214,37 @@ test('one failed preload does not stop the other two clips from being downloaded
  }});
  a.position({});for(let i=0;i<25;i++)await tick();assert.equal(calls.length,3);assert.match(a.nodes.get('ahead').textContent,/2 of up to 3/);
  a.navigator.onLine=false;a.position({lon:.022});for(let i=0;i<8;i++)await tick();assert.equal(a.sources.length,1);assert.equal(a.nodes.get('placeName').textContent,'Place 1');a.nodes.get('stop').onclick();
+});
+
+
+test('a road bend does not cancel an active preload, and the completed clip remains reusable',async()=>{
+ const far={...item,id:'bend',name:'Bend landmark',reason:'A medieval monument beside the valley.',coord:{lat:0,lon:.02},source:{url:'https://example.org/bend'}};
+ let finish,signal,calls=0;const held=new Promise(resolve=>{finish=resolve});
+ const a=await app({tripItems:[],online:true,fetchImpl:async(url,options)=>{
+  if(url==='/speech'){calls++;signal=options.signal;return held;}
+  return {ok:true,json:async()=>url==='/api/explore'?{complete:true,items:[far]}:url==='/api/arrivals'?{items:[]}:{defaultVoice:'pippa'}};
+ }});
+ a.position({});for(let i=0;i<8;i++)await tick();assert.equal(calls,1);
+ a.position({heading:120});for(let i=0;i<5;i++)await tick();assert.equal(signal.aborted,false);
+ finish({ok:true,blob:async()=>new Blob(['wav'])});for(let i=0;i<8;i++)await tick();
+ a.navigator.onLine=false;a.position({lon:.016,heading:90});for(let i=0;i<8;i++)await tick();assert.equal(a.sources.length,1);assert.equal(calls,1);a.nodes.get('stop').onclick();
+});
+test('a nearer candidate waits for the active download rather than cancelling it or sending overlapping speech requests',async()=>{
+ const far={...item,id:'active',name:'Active download',reason:'An ancient monument on the hill.',coord:{lat:0,lon:.02},source:{url:'https://example.org/active'}};
+ const near={...arrival,id:'new-near',name:'New nearby place',reason:'A historic village church.',coord:{lat:0,lon:.004},source:{url:'https://example.org/new-near'}};
+ let finish,signal;const held=new Promise(resolve=>{finish=resolve});let deliverArrival;const arrivalResponse=new Promise(resolve=>{deliverArrival=resolve});const calls=[];
+ const a=await app({tripItems:[],online:true,fetchImpl:async(url,options)=>{
+  if(url==='/speech'){const text=JSON.parse(options.body).text;calls.push(text);if(text===L.opening(far)){signal=options.signal;return held;}return {ok:true,blob:async()=>new Blob(['wav'])};}
+  return {ok:true,json:async()=>url==='/api/explore'?{complete:true,items:[far]}:url==='/api/arrivals'?await arrivalResponse:{defaultVoice:'pippa'}};
+ }});
+ a.position({});for(let i=0;i<8;i++)await tick();assert.equal(calls.length,1);
+ deliverArrival({items:[near]});for(let i=0;i<8;i++)await tick();assert.equal(signal.aborted,false);assert.equal(calls.length,1);
+ finish({ok:true,blob:async()=>new Blob(['wav'])});for(let i=0;i<15;i++)await tick();assert.equal(calls.length,2);assert.equal(a.sources.length,1);assert.equal(a.nodes.get('placeName').textContent,near.name);a.nodes.get('stop').onclick();
+});
+test('a guide refresh cannot lose the location of an audio clip already buffered',async()=>{
+ let searches=0;
+ const a=await app({tripItems:[],online:true,fetchImpl:async url=>({ok:true,json:async()=>url==='/api/explore'?{complete:true,items:++searches===1?[item]:[]}:url==='/api/arrivals'?{items:[]}:{defaultVoice:'pippa'},blob:async()=>new Blob(['wav'])})});
+ a.position({});for(let i=0;i<10;i++)await tick();
+ a.advance(91000);a.position({lat:.012,heading:180});for(let i=0;i<10;i++)await tick();assert.equal(searches,2);
+ a.navigator.onLine=false;a.position({lat:0,lon:.0023,heading:90});for(let i=0;i<10;i++)await tick();assert.equal(a.sources.length,1);a.nodes.get('stop').onclick();
 });
