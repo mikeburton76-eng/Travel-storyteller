@@ -272,3 +272,41 @@ test('a queued clip waits if the car leaves the 400 m area before playback start
  assert.equal(a.sources.length,1);
  a.nodes.get('stop').onclick();
 });
+
+test('the drive plays a sourced highlight and offers distinct details after stopping',async()=>{
+ const landmark={
+  ...item,
+  reason:'The observatory sits on a hill overlooking the town.',
+  background:'The observatory was the first in the region to open to the public. The dome is made of copper and turns on a circular track. The circular copper dome rotates on a track.'
+ };
+ const speech=[];
+ const a=await app({tripItems:[],online:true,fetchImpl:async(url,options)=>{
+  if(url==='/speech'){
+   speech.push(JSON.parse(options.body).text);
+   return {ok:true,blob:async()=>new Blob(['wav'])};
+  }
+  return {ok:true,json:async()=>url==='/api/explore'?{complete:true,items:[landmark]}:url==='/api/arrivals'?{items:[]}:{defaultVoice:'pippa'}};
+ }});
+ a.position({lon:.0025});for(let i=0;i<8;i++)await tick();
+ assert.equal(a.sources.length,1);
+ assert.match(speech[0],/Did you know\? The observatory was the first/);
+ assert.equal(a.nodes.get('moreStory').hidden,true);
+ const requestsWhileDriving=a.requests;
+ a.nodes.get('tellMore').onclick();
+ assert.equal(a.requests,requestsWhileDriving);
+ a.nodes.get('stop').onclick();
+ assert.equal(a.nodes.get('moreStory').hidden,false);
+ assert.equal(a.nodes.get('morePlace').textContent,landmark.name);
+ a.navigator.onLine=false;
+ a.nodes.get('tellMore').onclick();
+ const extra=a.nodes.get('moreText').textContent;
+ assert.match(extra,/The dome is made of copper/);
+ assert.doesNotMatch(extra,/first in the region|overlooking the town|rotates on a track/);
+ await a.nodes.get('moreListen').onclick();
+ assert.match(a.nodes.get('moreStatus').textContent,/Reconnect/);
+ assert.equal(speech.length,1);
+ a.navigator.onLine=true;
+ await a.nodes.get('moreListen').onclick();
+ assert.equal(speech[1],extra);
+ assert.equal(a.sources.length,2);
+});

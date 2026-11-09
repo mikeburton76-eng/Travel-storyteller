@@ -36,31 +36,73 @@
   for(let i=0;i<frames;i++){const t=i/rate,start=t<.2?0:.3,local=t-start,active=local>=0&&local<.2,gain=active?Math.min(1,local/.01,(.2-local)/.01):0,freq=start===0?600:800;view.setInt16(44+i*2,Math.round(Math.sin(2*Math.PI*freq*local)*gain*.3*32767),true);}
   return new Blob([data],{type:'audio/wav'});
  }
+ const notableFact=/\b(?:first|oldest|only|unusual|secret|legend\w*|tradition\w*|invent\w*|discover\w*|designed|restored|buried|built|opened|born|lived|wrote|poet\w*|medieval|Bronze Age|Iron Age|barrow\w*|archaeolog\w*)\b/i;
+ const standoutFact=/\b(?:first|oldest|only|unusual|secret|legend\w*|tradition\w*|invent\w*|discover\w*|born|lived|wrote|poet\w*)\b/i;
+ const factRank=sentence=>standoutFact.test(sentence)?2:Number(notableFact.test(sentence));
+ const sentences=text=>String(text||'').match(/[^.!?\n]+(?:[.!?](?=\s|$)|$)/g)||[];
+ const words=text=>new Set(text.toLowerCase().match(/[\p{L}\p{N}]+/gu)?.filter(word=>word.length>3)||[]);
+ function repeats(candidate,previous){
+  const tokens=words(candidate),old=words(previous);
+  const shared=[...tokens].filter(word=>old.has(word)).length;
+  return candidate.toLowerCase()===previous.toLowerCase()||shared/Math.max(1,Math.min(tokens.size,old.size))>.7;
+ }
  function opening(item){
   if(item.kind==='arrival'&&item.reason.length<=1700)return item.reason;
-  const sentences=text=>String(text||'').match(/[^.!?]+(?:[.!?](?=\s|$)|$)/g)||[];
   const main=sentences(item.reason),background=sentences(item.background);
   const interest=/\b(battles?|born|lived|poets?|writers?|invent\w*|discover\w*|traditions?|royal|medieval|Bronze Age|Iron Age|barrows?|ancient|archaeolog\w*)\b/i;
   const detail=[...main.slice(1),...background].find(sentence=>interest.test(sentence));
   const selected=[];
-  const words=text=>new Set(text.toLowerCase().split(/\W+/).filter(word=>word.length>3));
   for(const sentence of [main[0],detail,...main.slice(1)]){
    if(!sentence)continue;
-   const candidate=sentence.trim(),tokens=words(candidate);
-   if(selected.some(previous=>{const old=words(previous);return [...tokens].filter(word=>old.has(word)).length/Math.max(1,Math.min(tokens.size,old.size))>.7;}))continue;
+   const candidate=sentence.trim();
+   if(selected.some(previous=>repeats(candidate,previous)))continue;
    const next=[...selected,candidate].join(' ');
    if(next.length<=700&&next.split(/\s+/).length<=75)selected.push(candidate);
   }
   return selected.join(' ')||String(item.reason||'').split(/\s+/).slice(0,75).join(' ').slice(0,697).replace(/\s+\S*$/,'')+'…';
  }
 
+ function extraFacts(item,alreadySpoken){
+  const used=sentences(alreadySpoken).map(sentence=>sentence.trim());
+  const candidates=[...sentences(item.reason),...sentences(item.background)]
+   .map(sentence=>sentence.trim())
+   .filter(sentence=>sentence.length>=35&&sentence.length<=420&&/[.!?]$/.test(sentence)
+    &&!/^(?:You[’']re near|Local tourism context:|Walking context:|See also|References|External links|Sources)\b/i.test(sentence));
+  candidates.sort((a,b)=>factRank(b)-factRank(a));
+  return candidates.filter(sentence=>{
+   if(used.some(previous=>repeats(sentence,previous)))return false;
+   used.push(sentence);return true;
+  });
+ }
  function narration(item){
-  const story=opening(item);
-  if(item.kind==='arrival')return story;
+  const base=opening(item);
+  if(item.kind==='arrival'&&!item.name)return base; // Parked sound check.
   const name=item.name.split(' — ')[0].trim().replace(/[.!?]+$/,'');
-  return 'You’re near '+name+'. '+story;
+  const story=item.kind==='arrival'?base:'You’re near '+name+'. '+base;
+  const limit=item.kind==='arrival'?1700:900,wordLimit=item.kind==='arrival'?145:95;
+  const fact=extraFacts(item,story).find(sentence=>notableFact.test(sentence)
+   &&story.length+sentence.length+15<=limit
+   &&(story+' Did you know? '+sentence).split(/\s+/).length<=wordLimit);
+  if(fact)return story+' Did you know? '+fact;
+  // If the opening already includes a distinctive fact, introduce it in place.
+  const parts=sentences(story).map(sentence=>sentence.trim());
+  const index=parts.findIndex((sentence,i)=>i>=2&&notableFact.test(sentence)&&sentence.length>=35);
+  if(index>=0&&story.length+14<=limit&&story.split(/\s+/).length+3<=wordLimit){
+   parts[index]='Did you know? '+parts[index];
+   return parts.join(' ');
+  }
+  return story;
+ }
+ function followUp(item,spoken=narration(item)){
+  const facts=[];
+  for(const sentence of extraFacts(item,spoken)){
+   if([...facts,sentence].join(' ').length>900)continue;
+   facts.push(sentence);
+   if(facts.length===3)break;
+  }
+  return facts.join(' ');
  }
 
- const api={narration,PLAYBACK_METRES,movingAway,startChime,distance,bearing,angle,valid,key,places,motion,approaching,choose,opening};
+ const api={narration,followUp,PLAYBACK_METRES,movingAway,startChime,distance,bearing,angle,valid,key,places,motion,approaching,choose,opening};
  if(typeof module!=='undefined')module.exports=api;else globalThis.DriveLogic=api;
 })();
