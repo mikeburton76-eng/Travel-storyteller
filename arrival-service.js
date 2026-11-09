@@ -3,7 +3,7 @@ const P=require('./explore-policy'),{createHash}=require('node:crypto');
 const settlement=/\b(village|town|city|hamlet|suburb|neighbou?rhood|settlement|municipality)\b/i;
 const formerSettlement=/\b(?:ancient|former|abandoned|deserted|defunct|ruined|Roman)\s+(?:(?:Roman|spa|market|port|bathing|fortified)\s+)*(?:town|city|village|settlement|hamlet|site)\b|\barchaeological site\b/i;
 const isSettlement=p=>!formerSettlement.test(p.description||'')&&settlement.test(p.description||'')&&!/\b(hotel|church|cathedral|museum|gallery|company|university|school|hospital|airport|railway station|town hall|film|album|sports team|national park|monument|battlefield)\b/i.test(p.description||'');
-const ARRIVAL_RADIUS_METRES=500;
+const {PLAYBACK_METRES:ARRIVAL_RADIUS_METRES}=require('./drive-logic');
 function profile(page,now=Date.now()){
  const coord=P.coordinate(page.coordinates?.[0]?.lat,page.coordinates?.[0]?.lon),name=P.plain(page.title||'');
  if(!coord||!name||!isSettlement(page)||!P.allowed(name,page.description||''))return null;
