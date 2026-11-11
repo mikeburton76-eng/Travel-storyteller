@@ -109,7 +109,12 @@ function render(){
  }
 }
 function openItem(item){
- activeItem=item;$('detailTitle').textContent=item.title;$('detailKind').textContent=originalNames[item.section]||'Place to visit';$('detailReason').textContent=item.reason;$('detailBackground').textContent=item.background;$('background').open=false;
+ activeItem=item;$('detailTitle').textContent=item.title;$('detailKind').textContent=originalNames[item.section]||'Place to visit';const opening=globalThis.DriveLogic.narration(item,{nearby:false});
+ $('detailReason').textContent=opening;
+ const more=globalThis.DriveLogic.followUp(item,opening);
+ $('detailBackground').textContent=more;
+ $('background').hidden=!more;
+ $('background').open=false;
  $('detailDistance').textContent=item.eventArea?eventDateLabel(item)+(item.eventTiming?.venue?'. The map shows the listed venue.':'. The map shows the wider event area.')+' Check the organiser’s programme and age guidance.':item.historyOnly?'This story is associated with the area shown on the map.':distanceText(item)+' in a straight line from the search reference point. Check a suitable route and current access before travelling.';
  const image=$('detailImage');image.replaceChildren();image.hidden=!item.image;
  if(item.image){const img=document.createElement('img');img.src=item.image.url;img.alt=item.name;img.referrerPolicy='no-referrer';img.onerror=()=>{image.hidden=true};const credit=document.createElement('figcaption');credit.append(node('small',item.image.creator+' · '+item.image.license+' '),link('Photo and licence ↗',item.image.sourceUrl));image.append(img,credit)}
@@ -185,3 +190,4 @@ try{
   guide=saved.guide;selected=Object.hasOwn(sections,saved.selected)?saved.selected:'attractions';lastInput=saved.lastInput||null;$('place').value=saved.place||'';applyPageMode?.(saved.mode==='go'?'go':'home');render();setTimeout(()=>globalThis.window?.scrollTo?.({top:Number(saved.scroll)||0,behavior:'instant'}),0);
  }
 }catch{/* A missing return point must not prevent a fresh search. */}
+

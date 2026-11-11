@@ -9,6 +9,10 @@
  const valid=c=>c&&Number.isFinite(c.lat)&&Number.isFinite(c.lon)&&Math.abs(c.lat)<=90&&Math.abs(c.lon)<=180;
  const key=item=>item.kind==='arrival'?item.id+':'+(item.audioKey||'legacy'):(item.source?.url||item.id);
  function places(items){const seen=new Set();return items.filter(i=>{const k=i.kind==='arrival'?i.id:key(i);if(!k||seen.has(k)||!valid(i.coord)||i.eventArea||i.historyOnly||!i.reason||!i.name)return false;seen.add(k);return true;});}
+ function nearbyPlaces(items,fix,radius=PLAYBACK_METRES){
+  if(!valid(fix))return [];
+  return places(items).filter(item=>distance(fix,item.coord)<=radius);
+ }
  function motion(fix,previous,lastHeading=null){
   if(!valid(fix)||!Number.isFinite(fix.accuracy)||fix.accuracy>75||fix.accuracy<0)return null;
   let speed=Number.isFinite(fix.speed)&&fix.speed>=0?fix.speed:null,heading=Number.isFinite(fix.heading)&&fix.heading>=0&&fix.heading<360?fix.heading:null;
@@ -74,24 +78,17 @@
    used.push(sentence);return true;
   });
  }
- function narration(item){
+ function narration(item,{nearby=true}={}){
+  if(item.eventArea)return item.reason;
   const base=opening(item);
   if(item.kind==='arrival'&&!item.name)return base; // Parked sound check.
   const name=item.name.split(' — ')[0].trim().replace(/[.!?]+$/,'');
-  const story=item.kind==='arrival'?base:'You’re near '+name+'. '+base;
+  const story=item.kind==='arrival'||!nearby?base:'You’re near '+name+'. '+base;
   const limit=item.kind==='arrival'?1700:900,wordLimit=item.kind==='arrival'?145:95;
   const fact=extraFacts(item,story).find(sentence=>notableFact.test(sentence)
-   &&story.length+sentence.length+15<=limit
-   &&(story+' Did you know? '+sentence).split(/\s+/).length<=wordLimit);
-  if(fact)return story+' Did you know? '+fact;
-  // If the opening already includes a distinctive fact, introduce it in place.
-  const parts=sentences(story).map(sentence=>sentence.trim());
-  const index=parts.findIndex((sentence,i)=>i>=2&&notableFact.test(sentence)&&sentence.length>=35);
-  if(index>=0&&story.length+14<=limit&&story.split(/\s+/).length+3<=wordLimit){
-   parts[index]='Did you know? '+parts[index];
-   return parts.join(' ');
-  }
-  return story;
+   &&story.length+sentence.length+1<=limit
+   &&(story+' '+sentence).split(/\s+/).length<=wordLimit);
+  return fact?story+' '+fact:story;
  }
  function followUp(item,spoken=narration(item)){
   const facts=[];
@@ -103,6 +100,6 @@
   return facts.join(' ');
  }
 
- const api={narration,followUp,PLAYBACK_METRES,movingAway,startChime,distance,bearing,angle,valid,key,places,motion,approaching,choose,opening};
+ const api={narration,followUp,PLAYBACK_METRES,movingAway,startChime,distance,bearing,angle,valid,key,places,nearbyPlaces,motion,approaching,choose,opening};
  if(typeof module!=='undefined')module.exports=api;else globalThis.DriveLogic=api;
 })();

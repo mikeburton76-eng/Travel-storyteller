@@ -6,7 +6,7 @@ const location={label:'Buxton',title:'Buxton',lat:53.258,lon:-1.916,mode:'area',
 test('Buxton supplements stay local even when a caller requests a wide city radius',()=>{
  assert.equal(nearbyHeritage({lat:53.4808,lon:-2.2426,label:'Manchester'},40).length,0);
  assert.equal(nearbyHeritage({...location,lat:53.35},40).length,0);
- assert.equal(nearbyHeritage(location,cfg.townRadiusKm).length,3);
+ assert.equal(nearbyHeritage(location,cfg.townRadiusKm).length,4);
  assert.equal(nearbyHeritage(location,.01).length,0);
 });
 test('Manchester collection rejects distant Buxton places from search and travel listings',async()=>{
@@ -71,4 +71,17 @@ test('ancient monuments and deserted medieval villages enter shared historic dis
  for(const c of candidates){assert.ok(P.visitor.test(c.name+' '+c.text));assert.ok(P.visitorSuitable(c.name,c.text));}
  const result=sourceCategories({items:[]},{location,candidates},cfg);
  assert.equal(result.items.filter(i=>i.section==='history').length,3);
+});
+
+test('the Crescent is in the first nearby preview and survives a full guide selection',async()=>{
+ const provider=createSourceProvider({fetchImpl:async()=>({ok:false,status:503})});
+ let first;
+ const pool=await provider.collect({...location,mode:'nearby'},cfg,preview=>{first??=preview;});
+ const crescent=pool.candidates.find(c=>c.name==='Buxton Crescent');
+ assert.ok(crescent);
+ assert.ok(first.candidates.some(c=>c.id===crescent.id));
+ const full=Array.from({length:cfg.categoryLimits.attractions},(_,i)=>({id:'regular-'+i,name:'Regular sight',section:'attractions'}));
+ const guide=sourceCategories({items:full},pool,cfg);
+ assert.ok(guide.items.some(item=>item.id===crescent.id&&item.section==='attractions'));
+ assert.ok(guide.items.filter(item=>item.section==='attractions').length<=cfg.categoryLimits.attractions);
 });

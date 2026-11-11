@@ -23,9 +23,9 @@ const tick=()=>new Promise(resolve=>setImmediate(resolve));
 async function app({tripItems=[item],wakeLock,fetchImpl,online=false,autoStart=true,confirm=true,historyStorage}={}){
  const nodes=new Map(),events={},windowEvents={},sources=[],chimes=[],timers=new Map(),intervals=[];let gps,requests=0,timerId=0,nowMs=Date.now(),chimePlaying=false;
  class Clock extends Date{constructor(...args){super(...(args.length?args:[nowMs]));}static now(){return nowMs;}}
- const node=()=>({disabled:false,textContent:'',value:'Buxton',children:[],append(...items){this.children.push(...items);},replaceChildren(...items){this.children=items;},removeAttribute(name){delete this[name];},pause(){this.paused=true;this.onpause?.();},currentTime:0,async play(){this.paused=false;this.ended=false;this.currentTime=0;this.onplaying?.();this.currentTime=1;this.ontimeupdate?.();(chimePlaying?chimes:sources).push(this);}});
+ const node=()=>({disabled:false,textContent:'',value:'Buxton',children:[],setAttribute(){},append(...items){this.children.push(...items);},replaceChildren(...items){this.children=items;},removeAttribute(name){delete this[name];},pause(){this.paused=true;this.onpause?.();},currentTime:0,async play(){this.paused=false;this.ended=false;this.currentTime=0;this.onplaying?.();this.currentTime=1;this.ontimeupdate?.();(chimePlaying?chimes:sources).push(this);}});
  const historyData=new Map(),historyStore=historyStorage||{getItem:key=>historyData.get(key)||null,setItem:(key,value)=>historyData.set(key,value)};
- const document={hidden:false,getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id);},createElement:node,addEventListener(k,f){events[k]=f;}};
+ const document={hidden:false,createTextNode(text){return text;},getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id);},createElement:node,addEventListener(k,f){events[k]=f;}};
  const trip={label:'Tideswell',items:tripItems,audio:Object.fromEntries(tripItems.map(i=>[L.key(i),new Blob(['wav'])])),savedAt:new Date().toISOString()};
  const indexedDB={open(){const request={};queueMicrotask(()=>{request.result={close(){},transaction(){const tx={objectStore(){return {get(){const r={};queueMicrotask(()=>{r.result=trip;r.onsuccess();tx.oncomplete();});return r;}};}};return tx;}};request.onsuccess();});return request;}};
  class AudioContext{constructor(){this.state='running';this.sampleRate=24000;this.destination={};}resume(){return Promise.resolve();}createBuffer(){return {duration:.0001};}createBufferSource(){const s={connect(){},disconnect(){},start(){sources.push(this);},stop(){}};return s;}async decodeAudioData(){return {duration:22};}}
@@ -289,7 +289,8 @@ test('the drive plays a sourced highlight and offers distinct details after stop
  }});
  a.position({lon:.0025});for(let i=0;i<8;i++)await tick();
  assert.equal(a.sources.length,1);
- assert.match(speech[0],/Did you know\? The observatory was the first/);
+ assert.match(speech[0],/overlooking the town\. The observatory was the first/);
+ assert.doesNotMatch(speech[0],/did you know/i);
  assert.equal(a.nodes.get('moreStory').hidden,true);
  const requestsWhileDriving=a.requests;
  a.nodes.get('tellMore').onclick();
@@ -309,4 +310,16 @@ test('the drive plays a sourced highlight and offers distinct details after stop
  await a.nodes.get('moreListen').onclick();
  assert.equal(speech[1],extra);
  assert.equal(a.sources.length,2);
+});
+
+test('Explore cards within 400 m show their images even behind the car and leave the list outside the radius',async()=>{
+ const crescent={...item,name:'Buxton Crescent',theme:'architecture',image:{url:'https://upload.wikimedia.org/example.jpg'},coord:{lat:0,lon:.002}};
+ const a=await app({tripItems:[crescent]});
+ a.position({heading:270});await tick();
+ const cards=a.nodes.get('nearbyPlaceCards');
+ assert.equal(cards.children.length,1);
+ assert.ok(cards.children[0].children.some(child=>child.src===crescent.image.url));
+ assert.equal(a.sources.length,0);
+ a.position({lon:-.002,heading:270});await tick();
+ assert.equal(cards.children.length,0);
 });

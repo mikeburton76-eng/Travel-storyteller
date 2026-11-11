@@ -2,6 +2,11 @@
 const P=require('./explore-policy');
 // Small, source-reviewed supplements. Scope by coordinates, never by a town name.
 const reviewed=[{
+ name:'Buxton Crescent',wikipedia:'Buxton Crescent',coord:{lat:53.25912,lon:-1.91443},reviewedPriority:true,mustSee:true,guideListed:true,
+ text:'Buxton Crescent is a Grade I listed Georgian landmark designed by John Carr for the fifth Duke of Devonshire. The curved building was the centrepiece of the duke’s plans to develop Buxton as a fashionable spa town. Its original design combined a hotel, an assembly room and five lodging houses. After restoration, the hotel and thermal spa reopened in October 2020.',
+ source:{kind:'wikipedia',title:'Buxton Crescent',url:'https://en.wikipedia.org/wiki/Buxton_Crescent'},
+ supportingSources:[{title:'Historic England — The Crescent',url:'https://historicengland.org.uk/listing/the-list/list-entry/1257876'},{title:'Historic England — restoration and reopening',url:'https://historicengland.org.uk/whats-new/news/heritage-at-risk-2020/'}],reviewedAt:'2026-11-11'
+},{
  name:'Old Hall Hotel',wikipedia:'Old Hall Hotel',coord:{lat:53.2582,lon:-1.9153},reviewedPriority:true,guideListed:true,
  text:'The Old Hall Hotel is a Grade II* listed historic building in Buxton. Mary Queen of Scots stayed here during visits to take the waters in the sixteenth century. The present building incorporates an earlier fortified tower and reflects the town’s long association with its warm springs. It is reputed to be England’s oldest hotel.',
  source:{kind:'wikipedia',title:'Old Hall Hotel',url:'https://en.wikipedia.org/wiki/Old_Hall_Hotel'},
@@ -20,4 +25,3 @@ const reviewed=[{
 // These fill gaps in a local guide, rather than promoting Buxton to nearby cities.
 function nearbyHeritage(location,radiusKm){const localRadius=Math.min(radiusKm,3);return reviewed.filter(c=>P.distanceKm(location,c.coord)<=localRadius).map(c=>({...c,coord:{...c.coord},supportingSources:c.supportingSources.map(s=>({...s}))}));}
 module.exports={nearbyHeritage};
-

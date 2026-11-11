@@ -120,21 +120,25 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    const d=await api('wikipedia',{generator:'geosearch',ggscoord:`${location.lat}|${location.lon}`,ggsradius:Math.min(10000,radiusKm*1000),ggslimit:50,prop:'description|coordinates|pageprops'});
    return pages(d).filter(p=>p.title&&p.title!==location.title&&p.pageprops?.disambiguation===undefined&&P.allowed(p.title,p.description||'')&&visitorPage(p)&&!/^List of |^Timeline of /i.test(p.title));
   };
-  const activityTask=nearbyActivities(location,location.mode==='nearby'?config.nearbyWiderRadiusKm:radius);
+  const limit=location.mode==='nearby'?config.nearbyWiderRadiusKm:radius;
+  const heritage=nearbyHeritage(location,limit);
+  const placeId=(name,coord)=>'place-'+createHash('sha256').update(name+'|'+coord.lat.toFixed(3)+'|'+coord.lon.toFixed(3)).digest('hex').slice(0,12);
+  const localPreview=heritage.map(c=>({...c,id:placeId(c.name,c.coord),distanceKm:Number(P.distanceKm(location,c.coord).toFixed(1)),theme:P.themeOf(c.name,c.text)}));
+  if(localPreview.length)onProgress?.({location,candidates:localPreview,warnings:[],radiusKm:limit,travelSource:null});
+  const activityTask=nearbyActivities(location,limit);
   let near=[];try{near=await base(radius)}catch{warnings.push('Nearby encyclopedia coverage could not be loaded.');}
   if(location.mode==='nearby'&&near.length<4){try{near=await base(config.nearbyWiderRadiusKm);warnings.push('The search includes a wider area because nearby results were limited.');}catch{}}
-  const limit=location.mode==='nearby'?config.nearbyWiderRadiusKm:radius;
-  candidates.push(...nearbyHeritage(location,limit),...nearbyWalks(location,limit));
+  candidates.push(...heritage,...nearbyWalks(location,limit));
   const eventTask=nearbyEvents(location,limit,{fetchImpl}).catch(()=>[]);
   // Small, explicitly provisional cards can arrive before the broader searches.
   const first=near.flatMap(p=>{
    const q=p.coordinates?.[0],text=p.description||'';
-   if(!q||text.length<20||!P.visitorSuitable(p.title,text))return [];
+   if(!q||text.length<20||!P.visitorSuitable(p.title,text)||heritage.some(c=>c.wikipedia===p.title))return [];
    const coord={lat:q.lat,lon:q.lon},distance=P.distanceKm(location,coord);
    if(distance>limit)return [];
-   return [{id:'place-'+createHash('sha256').update(p.title+'|'+coord.lat.toFixed(3)+'|'+coord.lon.toFixed(3)).digest('hex').slice(0,12),name:p.title,text,coord,distanceKm:Number(distance.toFixed(1)),theme:P.themeOf(p.title,text),source:{kind:'wikipedia',title:p.title,url:pageUrl('wikipedia',p.title)}}];
+   return [{id:placeId(p.title,coord),name:p.title,text,coord,distanceKm:Number(distance.toFixed(1)),theme:P.themeOf(p.title,text),source:{kind:'wikipedia',title:p.title,url:pageUrl('wikipedia',p.title)}}];
   }).slice(0,4);
-  if(first.length)onProgress?.({location,candidates:first,warnings:[],radiusKm:limit,travelSource:null});
+  if(first.length)onProgress?.({location,candidates:[...localPreview,...first],warnings:[],radiusKm:limit,travelSource:null});
 
   async function voyagePage(title) {
    const d=await api('wikivoyage',{action:'parse',page:title,prop:'wikitext',redirects:1});
@@ -272,7 +276,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   for(const lens of lenses)for(const c of [...unique.values()].filter(c=>!c.historyOnly&&lens.test(c.text)).slice(0,4))if(!balanced.includes(c)&&balanced.length<config.maxCandidates)balanced.push(c);
   for(const g of groups)for(let i=g.length-1;i>=0;i--)if(balanced.includes(g[i]))g.splice(i,1);
   while(groups.some(g=>g.length)&&balanced.length<config.maxCandidates)for(const g of groups)if(g.length&&balanced.length<config.maxCandidates)balanced.push(g.shift());
-  balanced.forEach(c=>c.id='place-'+createHash('sha256').update(c.name+'|'+c.coord.lat.toFixed(3)+'|'+c.coord.lon.toFixed(3)).digest('hex').slice(0,12));
+  balanced.forEach(c=>c.id=placeId(c.name,c.coord));
   return {location,candidates:balanced,warnings:[...new Set(warnings)],radiusKm:limit,travelSource:travelRoot?{kind:'wikivoyage',title:travelRoot.title,url:pageUrl('wikivoyage',travelRoot.title)}:null};
  }
  async function images(candidates) {

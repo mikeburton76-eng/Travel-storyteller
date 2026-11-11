@@ -96,10 +96,15 @@ function fallbackSelection(pool,config){
 function sourceCategories(chosen,pool,config){
  const items=chosen.items.filter(item=>item.section!=='family'||!P.excludedFamilyVenue.test(item.name));
  const add=(c,section,reason)=>{
-  if(items.some(x=>x.id===c.id&&x.section===section)||items.filter(x=>x.section===section).length>=config.categoryLimits[section])return;
+  if(items.some(x=>x.id===c.id&&x.section===section))return;
+  const sectionFull=items.filter(x=>x.section===section).length>=config.categoryLimits[section];
+  const highlight=c.reviewedPriority&&c.mustSee&&section==='attractions';
+  const replacement=sectionFull&&highlight?items.findLastIndex(x=>x.section===section&&!x.mustSee):-1;
+  if(sectionFull&&replacement<0)return;
   const prior=items.filter(x=>x.id===c.id);
   reason=sourceDescription(c.text,reason,section==='events');if(!reason)return;
   if(prior.length>=config.maxCategoriesPerPlace||(prior.length&&items.length-new Set(items.map(x=>x.id)).size>=config.maxRepeatedAppearances))return;
+  if(replacement>=0)items.splice(replacement,1);
   // Retain reviewed local gaps within the same result budget, without evicting must-sees.
   const reserved=['family','museums'].includes(section)&&items.filter(x=>x.section===section).length<3;
   if(items.length>=config.maxResults&&(c.reviewedPriority||reserved)){
@@ -115,6 +120,7 @@ function sourceCategories(chosen,pool,config){
  // Read literal descriptive sentences, without manufacturing an AI endorsement.
  for(const c of [...pool.candidates].sort((a,b)=>Number(!!b.reviewedPriority)-Number(!!a.reviewedPriority)||Number(!!b.activityOnly)-Number(!!a.activityOnly))){
   if(!P.visitorSuitable(c.name,c.text,c.historyOnly))continue;
+  if(c.reviewedPriority&&c.mustSee&&!items.some(x=>x.id===c.id&&!x.historyOnly&&!x.eventArea))add(c,'attractions');
   const sentences=c.text.match(/[^.!?\n]+(?:[.!?](?=\s|$)|$)/g)||[c.text];
   const evidence=re=>sentences.map(s=>s.trim()).find(s=>s.length>=25&&s.length<=400&&re.test(s)&&P.allowed(s));
   if(c.eventArea||P.eventPlace(c.name,c.text)){const reason=evidence({test:()=>true});if(reason)add(c,'events',reason);continue;}

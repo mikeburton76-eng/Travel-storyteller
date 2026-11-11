@@ -34,7 +34,7 @@
   if(!current){
    const canonical=item.source?.kind==='wikipedia'?item.source.title:item.name;
    const query=(canonical===location.label||location.mode==='nearby'?canonical:canonical+', '+location.label);
-   current={title:item.title,place:query.length<=100?query:canonical.slice(0,100),parts:[item.reason],sources:[item.source,...(item.supportingSources||[])].filter(Boolean),complete:false};
+   current={title:item.title,place:query.length<=100?query:canonical.slice(0,100),item,parts:[globalThis.DriveLogic.narration(item,{nearby:false})],sources:[item.source,...(item.supportingSources||[])].filter(Boolean),complete:false};
    if(sessions.size>=8)sessions.delete(sessions.keys().next().value);sessions.set(key,current);
   }
   panel.hidden=false;renderText();setState('loading','Preparing the opening narration…');
@@ -43,7 +43,15 @@
  el('storyMore').addEventListener('click',async()=>{
   if(!current||state!=='idle'||current.complete||current.parts.length>=3)return;
   stop();const id=epoch,session=current;player?.prime();const controller=request=new AbortController(),timer=setTimeout(()=>controller.abort(),90000);setState('loading','Finding more of this story…');
-  try{const response=await fetch('/story',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({place:session.place,previousStories:[...session.parts]}),signal:controller.signal});const data=await response.json();if(id!==epoch)return;if(!response.ok)throw Error(data.error||'More of this story could not be loaded.');
+  try{
+   const extra=globalThis.DriveLogic.followUp(session.item,session.parts.join(' '));
+   let data={story:extra};
+   if(!extra){
+    const response=await fetch('/story',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({place:session.place,previousStories:[...session.parts]}),signal:controller.signal});
+    data=await response.json();
+    if(id!==epoch)return;
+    if(!response.ok)throw Error(data.error||'More of this story could not be loaded.');
+   }
    const text=typeof data.story==='string'?data.story.trim():'';session.complete=!!data.complete||!text;
    if(!text){setState('idle','No further distinct details are available for this story.');return;}
    if(text.length>2500)throw Error('The extra story was too long. Please try again.');
@@ -62,3 +70,4 @@
  window.addEventListener('pagehide',stop);
  globalThis.ExploreNarration={listen,reset,stop};setState('idle','');
 })();
+
