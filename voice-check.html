@@ -2,9 +2,9 @@
 <html lang="en-GB"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Crescent voice check</title>
 <style>body{font:18px/1.5 system-ui;background:#edf3f5;color:#203440;margin:0}main{max-width:620px;margin:auto;padding:24px}section{background:white;border-radius:18px;padding:22px;margin:20px 0}button{font:inherit;background:#286079;color:white;border:0;border-radius:12px;padding:16px;margin:6px 0;width:100%}button:disabled{opacity:.5}a{color:#286079}textarea{box-sizing:border-box;width:100%;height:190px;font:14px/1.5 monospace}#status{font-weight:600}</style>
-<main><a href="/explore">← Discover Places</a><h1>Crescent voice check</h1>
-<p>While parked or at home, listen to A, then B. Tell us whether either is the clear voice you prefer. Existing recordings and your narrator choice stay intact.</p>
-<section><p id="passage">The curved building was the centrepiece of the duke’s plans to develop Buxton as a fashionable spa town. Its original design combined a hotel, an assembly room and five lodging houses.</p>
+<main><a href="/explore">← Discover Places</a><h1>Crescent voice check · v2</h1>
+<p>While parked or at home, listen to A, then B. Tell us whether either is the clear voice you prefer. Both buttons read the same full paragraph, including 2020. Only one sample plays at a time. Existing recordings and your narrator choice stay intact.</p>
+<section><p id="passage">Buxton Crescent is a Grade I listed Georgian landmark designed by John Carr for the fifth Duke of Devonshire. The curved building was the centrepiece of the duke’s plans to develop Buxton as a fashionable spa town. Its original design combined a hotel, an assembly room and five lodging houses. After restoration, the hotel and thermal spa reopened in October 2020.</p>
 <button id="normal">A · Listen with normal audio reuse</button>
 <button id="fresh">B · Listen to freshly generated Pippa</button>
 <button id="stop" disabled>Stop</button><p id="status" role="status">Ready. Each sample may take a little time to prepare.</p></section>
@@ -13,20 +13,21 @@
 </main><script src="/narration-player.js"></script><script>
 const el=id=>document.getElementById(id), text=el('passage').textContent;
 let active=false,started=0,first=false,label='',mode=false;
-const lines=['Crescent voice check v1'];
+const lines=['Crescent voice check v2 · full paragraph including October 2020'];
 function log(s){lines.push(s);el('report').value=lines.join('\n');}
 function busy(v){active=v;el('normal').disabled=v;el('fresh').disabled=v;el('stop').disabled=!v;}
 const player=NarrationPlayer.supported?new NarrationPlayer({
  fetchAudio:(url,options)=>fetch(url,{...options,cache:'no-store',body:JSON.stringify({...JSON.parse(options.body),fresh:mode})}),
  onState:(state,message)=>{
- el('status').textContent=message;
+ el('status').textContent=label+' — '+(state==='speaking'?'Playing this sample. ': '')+message;
  if(state==='speaking'&&!first){first=true;log(label+' playback scheduled after '+((performance.now()-started)/1000).toFixed(1)+' s (sound output not verified).');}
  if(state==='idle'){log(label+' '+message);busy(false);}
  }
 }):null;
 function run(fresh){
+ if(active)return;
  if(!player){el('status').textContent='This browser cannot run this comparison. Please open it in Safari.';return;}
- mode=fresh;label=fresh?'B fresh':'A normal';first=false;started=performance.now();busy(true);
+ mode=fresh;label=fresh?'Sample B (fresh)':'Sample A (normal reuse)';first=false;started=performance.now();busy(true);
  globalThis.speechSynthesis?.cancel();log(label+' requested '+new Date().toISOString());
  player.start(text,'en_GB-southern_english_female-low',r=>{
  log(label+' server: '+['X-Discover-Voice-Engine','X-Discover-Voice-Model','X-Discover-Voice-Speed','X-Discover-Audio-Mode'].map(k=>k+'='+ (r.headers.get(k)||'not supplied')).join('; '));
@@ -34,7 +35,7 @@ function run(fresh){
  }).catch(e=>{el('status').textContent=e.message;log(label+' '+e.message);busy(false);});
 }
 el('normal').onclick=()=>run(false);el('fresh').onclick=()=>run(true);
-el('stop').onclick=()=>{player?.stop();log(label+' stopped by user');el('status').textContent='Stopped.';busy(false);};
+el('stop').onclick=()=>{player?.stop();log(label+' stopped by user');el('status').textContent=label+' — Stopped.';busy(false);};
 el('copy').onclick=async()=>{try{await navigator.clipboard.writeText(el('report').value);el('copy').textContent='Copied';}catch{el('report').focus();el('report').select();el('copy').textContent='Select and copy the results above';}};
 window.addEventListener('pagehide',()=>player?.stop());
 </script></html>
