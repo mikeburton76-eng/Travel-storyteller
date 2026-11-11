@@ -232,6 +232,11 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 200, speech.config);
   }
 
+  if (req.method === "GET" && req.url === "/voice-check") {
+    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
+    return res.end(fs.readFileSync(path.join(__dirname, "voice-check.html"), "utf8"));
+  }
+
   if (req.method === "GET" && req.url === "/voice-test") {
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" });
     return res.end(fs.readFileSync(path.join(__dirname, "voice-test.html"), "utf8"));
@@ -253,6 +258,7 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 400, { error: "Please provide up to 1,800 characters and a supported narrator." });
       }
       const voiceHeaders = {
+        'X-Discover-Audio-Mode': body.fresh === true ? 'fresh-generation' : 'normal-cache-policy',
         'X-Discover-Voice-Engine': 'Piper',
         'X-Discover-Voice-Model': body.voice ?? speech.config.defaultVoice,
         'X-Discover-Voice-Speed': String(speech.config.speed)
@@ -263,7 +269,7 @@ const server = http.createServer(async (req, res) => {
         // Flush each complete WAV section immediately; proxies must not buffer it.
         res.writeHead(200, { 'Content-Type': 'application/x-ndjson', 'Cache-Control': 'private, no-store, no-transform', 'X-Accel-Buffering': 'no', ...voiceHeaders });
         res.flushHeaders();
-        await speech.generate(body.text, body.voice, { signal: controller.signal, onChunk: wav => {
+        await speech.generate(body.text, body.voice, { signal: controller.signal, bypassCache: body.fresh === true, onChunk: wav => {
           if (controller.signal.aborted) throw Error('Narration cancelled.');
           if (++sections === 1) console.log('Voice first section ready in', Date.now() - started, 'ms');
           res.write(JSON.stringify({ wav: wav.toString('base64') }) + '\n');
@@ -272,7 +278,7 @@ const server = http.createServer(async (req, res) => {
         console.log('Voice complete in', Date.now() - started, 'ms; sections:', sections);
         return res.end(JSON.stringify({ done: true }) + '\n');
       }
-      const wav = await speech.generate(body.text, body.voice, { signal: controller.signal });
+      const wav = await speech.generate(body.text, body.voice, { signal: controller.signal, bypassCache: body.fresh === true });
       if (res.destroyed) return;
       res.writeHead(200, { "Content-Type": "audio/wav", "Content-Length": wav.length, "Cache-Control": "private, no-store", ...voiceHeaders });
       return res.end(wav);
