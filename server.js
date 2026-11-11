@@ -252,11 +252,16 @@ const server = http.createServer(async (req, res) => {
           (body.voice !== undefined && !Object.hasOwn(speech.config.voices, body.voice))) {
         return sendJson(res, 400, { error: "Please provide up to 1,800 characters and a supported narrator." });
       }
+      const voiceHeaders = {
+        'X-Discover-Voice-Engine': 'Piper',
+        'X-Discover-Voice-Model': body.voice ?? speech.config.defaultVoice,
+        'X-Discover-Voice-Speed': String(speech.config.speed)
+      };
       if (req.url === '/speech-stream') {
         const started = Date.now();
         let sections = 0;
         // Flush each complete WAV section immediately; proxies must not buffer it.
-        res.writeHead(200, { 'Content-Type': 'application/x-ndjson', 'Cache-Control': 'private, no-store, no-transform', 'X-Accel-Buffering': 'no' });
+        res.writeHead(200, { 'Content-Type': 'application/x-ndjson', 'Cache-Control': 'private, no-store, no-transform', 'X-Accel-Buffering': 'no', ...voiceHeaders });
         res.flushHeaders();
         await speech.generate(body.text, body.voice, { signal: controller.signal, onChunk: wav => {
           if (controller.signal.aborted) throw Error('Narration cancelled.');
@@ -269,7 +274,7 @@ const server = http.createServer(async (req, res) => {
       }
       const wav = await speech.generate(body.text, body.voice, { signal: controller.signal });
       if (res.destroyed) return;
-      res.writeHead(200, { "Content-Type": "audio/wav", "Content-Length": wav.length, "Cache-Control": "private, no-store" });
+      res.writeHead(200, { "Content-Type": "audio/wav", "Content-Length": wav.length, "Cache-Control": "private, no-store", ...voiceHeaders });
       return res.end(wav);
     } catch (error) {
       console.error("Voice error:", error.message);
@@ -453,6 +458,3 @@ server.on("request", (req, res) => {
     listener.call(server, req, res);
   }
 });
-
-
-

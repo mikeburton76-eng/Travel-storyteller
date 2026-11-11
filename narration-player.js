@@ -54,7 +54,7 @@ class NarrationPlayer {
     this.userPaused = false;
     this.context?.resume().then(() => this.refresh()).catch(() => this.refresh());
   }
-  async start(text, voice) {
+  async start(text, voice, onAudioSource = () => {}) {
     this.stop();
     if (!this.prime()) throw Error('Audio playback is unavailable in this browser.');
     const epoch = this.epoch;
@@ -71,6 +71,7 @@ class NarrationPlayer {
       if (epoch !== this.epoch) return;
       if (!response.ok) { const data = await response.json(); throw Error(data.error || 'Narration failed.'); }
       if (!response.body) throw Error('The audio connection did not open.');
+      onAudioSource(response);
       reader = response.body.getReader();
       const decoder = new TextDecoder();
       let pending = '', bytes = 0;

@@ -5,9 +5,22 @@
  const setState=(next,message)=>{state=next;el('storyPause').disabled=next!=='speaking';el('storyResume').disabled=next!=='paused';el('storyStop').disabled=next==='idle';el('storyReplay').disabled=next!=='idle'||!current||current.parts.at(-1).length>1800;el('storyMore').disabled=next!=='idle'||!current||current.complete||current.parts.length>=3;el('storyPause').hidden=next!=='speaking';el('storyResume').hidden=next!=='paused';el('storyStop').hidden=next==='idle';el('storyReplay').hidden=next!=='idle';el('storyMore').hidden=next!=='idle'||!!current?.complete||current?.parts.length>=3;if(message!==undefined)el('storyStatus').textContent=message;};
  const player=globalThis.NarrationPlayer?.supported?new NarrationPlayer({onState:(next,message)=>{if(streaming)setState(next,message)}}):null;
  const voiceConfig=fetch('/voices').then(async r=>{if(!r.ok)throw Error('The narrator could not be loaded.');const c=await r.json();let saved;try{saved=localStorage.getItem('travelStoryteller.narrator')}catch{}return Object.hasOwn(c.voices||{},saved)?saved:c.defaultVoice;}).then(voice=>({voice}),error=>({error}));
- function stop(){epoch++;if(phoneActive)globalThis.speechSynthesis?.cancel();phoneActive=false;request?.abort();request=null;streaming=false;player?.stop();audio.pause();audio.removeAttribute('src');audio.load();audio.hidden=true;if(audioURL)URL.revokeObjectURL(audioURL);audioURL=null;setState('idle','Stopped.');}
+ function stop(){epoch++;const diagnostic=el('storyVoice');diagnostic.textContent='';diagnostic.hidden=true;if(phoneActive)globalThis.speechSynthesis?.cancel();phoneActive=false;request?.abort();request=null;streaming=false;player?.stop();audio.pause();audio.removeAttribute('src');audio.load();audio.hidden=true;if(audioURL)URL.revokeObjectURL(audioURL);audioURL=null;setState('idle','Stopped.');}
  function reset(){stop();current=null;panel.hidden=true;setState('idle','');}
  function renderText(){el('storyText').replaceChildren(...current.parts.map((text,i)=>{const p=document.createElement('p');p.textContent=(i?'More: ':'')+text;return p}));el('storyName').textContent=current.title;el('storySources').replaceChildren(...current.sources.filter(s=>/^https:\/\//.test(s.url||'')).map(s=>{const a=document.createElement('a');a.href=s.url;a.target='_blank';a.rel='noopener';a.textContent=s.title+' ↗';return a}));}
+ function showVoice(text){
+  const diagnostic=el('storyVoice');
+  diagnostic.textContent=text;
+  diagnostic.hidden=false;
+ }
+ function reportServerVoice(response,path){
+  const engine=response.headers.get('X-Discover-Voice-Engine');
+  const model=response.headers.get('X-Discover-Voice-Model');
+  const speed=response.headers.get('X-Discover-Voice-Speed');
+  if(!engine||!model){showVoice(path+' · the server did not identify its voice');return;}
+  const name=engine==='Piper'&&model==='en_GB-southern_english_female-low'?'Pippa':model;
+  showVoice(name+' · '+engine+' · '+path+(speed?' · speed '+speed:''));
+ }
  async function speak(text,id){
   if(text.length>1800){setState('idle','This longer part is ready to read below; it exceeds the audio length limit.');return;}
   if(globalThis.DiscoverNarrator)await globalThis.DiscoverNarrator.ready();
@@ -17,14 +30,15 @@
    const voice=speechSynthesis.getVoices().find(v=>v.voiceURI===preference.uri);if(!voice)throw Error('The chosen phone voice is unavailable. Please choose another narrator.');
    const utterance=new SpeechSynthesisUtterance(text);utterance.voice=voice;utterance.lang=voice.lang;utterance.rate=.85;phoneActive=true;
    utterance.onstart=()=>{if(id===epoch)setState('speaking','Reading aloud…')};utterance.onend=()=>{if(id===epoch){phoneActive=false;setState('idle','Finished.')}};utterance.onerror=e=>{if(id===epoch&&e.error!=='canceled'&&e.error!=='interrupted'){phoneActive=false;setState('idle','Phone audio could not play. Choose another narrator.')}};
+   showVoice(voice.name+' · iPhone voice · '+voice.lang);
    speechSynthesis.speak(utterance);return;
   }
   const config=await voiceConfig;if(id!==epoch)return;if(config.error)throw config.error;
   if(preference?.voice)config.voice=preference.voice;
-  if(player){streaming=true;await player.start(text,config.voice);return;}
+  if(player){streaming=true;await player.start(text,config.voice,response=>{if(id===epoch)reportServerVoice(response,'Streamed audio');});return;}
   const controller=request=new AbortController(),timer=setTimeout(()=>controller.abort(),190000);
   try{const response=await fetch('/speech',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text,voice:config.voice}),signal:controller.signal});if(!response.ok){const data=await response.json();throw Error(data.error||'Audio could not be prepared.')}
-   const blob=await response.blob();if(id!==epoch)return;audioURL=URL.createObjectURL(blob);audio.src=audioURL;audio.hidden=false;
+   const blob=await response.blob();if(id!==epoch)return;reportServerVoice(response,'Full recording');audioURL=URL.createObjectURL(blob);audio.src=audioURL;audio.hidden=false;
    try{await audio.play();if(id===epoch)setState('speaking','Reading aloud…');}catch{if(id===epoch)setState('idle','Your audio is ready. Press play below.');}
   }finally{clearTimeout(timer);if(id===epoch)request=null;}
  }
@@ -70,4 +84,3 @@
  window.addEventListener('pagehide',stop);
  globalThis.ExploreNarration={listen,reset,stop};setState('idle','');
 })();
-
