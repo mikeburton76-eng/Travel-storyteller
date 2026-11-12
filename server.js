@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const { createSpeechService } = require("./speech-service");
 const speech = createSpeechService();
+const voiceComparison = require('./voice-compare-service').createComparison();
 const speechSettings = require('./speech-settings.json');
 
 const PORT = process.env.PORT || 3000;
@@ -160,6 +161,32 @@ let placeSearchService;
 const server = http.createServer(async (req, res) => {
   if (req.method === "OPTIONS") {
     return sendJson(res, 204, {});
+  }
+
+  const comparisonPath = req.url.split('?')[0];
+  if (req.method === 'GET' && ['/voice-compare', '/voice-compare.js'].includes(comparisonPath)) {
+    const file = comparisonPath === '/voice-compare' ? 'voice-compare.html' : 'voice-compare.js';
+    res.writeHead(200, {'Content-Type':file.endsWith('.html')?'text/html; charset=utf-8':'text/javascript; charset=utf-8','Cache-Control':'private, no-store'});
+    return res.end(fs.readFileSync(path.join(__dirname,file)));
+  }
+  if (req.method === 'GET' && comparisonPath === '/api/voice-compare/config') {
+    res.setHeader('Cache-Control','private, no-store');
+    return sendJson(res,200,voiceComparison.config());
+  }
+  if (req.method === 'POST' && comparisonPath === '/api/voice-compare/google') {
+    const controller = new AbortController();
+    const disconnected = () => { if (!res.writableEnded) controller.abort(); };
+    res.on('close',disconnected);
+    try {
+      if (req.headers.origin && new URL(req.headers.origin).host !== req.headers.host) return sendJson(res,403,{error:'Open the voice test on Discover Places.'});
+      if (!String(req.headers['content-type'] || '').startsWith('application/json')) return sendJson(res,415,{error:'Use the voice comparison page.'});
+      const audio = await voiceComparison.generate(JSON.parse(await readBody(req)),controller.signal);
+      if (res.destroyed) return;
+      res.writeHead(200,{'Content-Type':'audio/mpeg','Content-Length':audio.length,'Cache-Control':'private, no-store','X-Discover-Voice-Engine':'Google'});
+      return res.end(audio);
+    } catch(error) {
+      if (!res.destroyed) return sendJson(res,error instanceof SyntaxError?400:error.status||502,{error:error instanceof SyntaxError?'Invalid test request.':error.status?error.message:'Google could not finish preparing audio. Please try again.'});
+    } finally { res.off('close',disconnected); }
   }
 
 // Isolated food layout experiment: static assets only, behind existing auth.
@@ -464,3 +491,4 @@ server.on("request", (req, res) => {
     listener.call(server, req, res);
   }
 });
+
