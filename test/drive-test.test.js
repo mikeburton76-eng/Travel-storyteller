@@ -25,12 +25,12 @@ async function app({tripItems=[item],wakeLock,fetchImpl,online=false,autoStart=t
  class Clock extends Date{constructor(...args){super(...(args.length?args:[nowMs]));}static now(){return nowMs;}}
  const node=()=>({disabled:false,textContent:'',value:'Buxton',children:[],setAttribute(){},append(...items){this.children.push(...items);},replaceChildren(...items){this.children=items;},removeAttribute(name){delete this[name];},pause(){this.paused=true;this.onpause?.();},currentTime:0,async play(){this.paused=false;this.ended=false;this.currentTime=0;this.onplaying?.();this.currentTime=1;this.ontimeupdate?.();(chimePlaying?chimes:sources).push(this);}});
  const historyData=new Map(),historyStore=historyStorage||{getItem:key=>historyData.get(key)||null,setItem:(key,value)=>historyData.set(key,value)};
- const document={hidden:false,createTextNode(text){return text;},getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id);},createElement:node,addEventListener(k,f){events[k]=f;}};
+ const document={hidden:false,querySelectorAll(){return [];},createTextNode(text){return text;},getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id);},createElement:node,addEventListener(k,f){events[k]=f;}};
  const trip={label:'Tideswell',items:tripItems,audio:Object.fromEntries(tripItems.map(i=>[L.key(i),new Blob(['wav'])])),savedAt:new Date().toISOString()};
  const indexedDB={open(){const request={};queueMicrotask(()=>{request.result={close(){},transaction(){const tx={objectStore(){return {get(){const r={};queueMicrotask(()=>{r.result=trip;r.onsuccess();tx.oncomplete();});return r;}};}};return tx;}};request.onsuccess();});return request;}};
  class AudioContext{constructor(){this.state='running';this.sampleRate=24000;this.destination={};}resume(){return Promise.resolve();}createBuffer(){return {duration:.0001};}createBufferSource(){const s={connect(){},disconnect(){},start(){sources.push(this);},stop(){}};return s;}async decodeAudioData(){return {duration:22};}}
  const navigator={onLine:online,wakeLock,geolocation:{watchPosition(success){gps=success;return 7;},clearWatch(){gps=null;}}};
- vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../drive-client.js'),'utf8'),{document,navigator,window:{addEventListener(k,f){windowEvents[k]=f;}},DriveLogic:L,DriveHistory:{createDriveHistory:options=>require('../drive-history').createDriveHistory({...options,storage:historyStore})},createDrivePlayer:options=>require('../drive-player').createDrivePlayer({...options,schedule:()=>1,cancel(){},url:{createObjectURL:blob=>{chimePlaying=blob.type==='audio/wav';return 'blob:fixture';},revokeObjectURL(){}}}),AudioContext,indexedDB,Blob,AbortController,DOMException,URL:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}},Date:Clock,performance,setTimeout(fn,ms){timers.set(++timerId,{fn,ms});return timerId;},clearTimeout(id){timers.delete(id);},setInterval(fn){intervals.push(fn);return intervals.length;},clearInterval(id){intervals[id-1]=null;},fetch(...args){requests++;if(fetchImpl)return fetchImpl(...args);throw Error('Offline fetch must not occur');}});
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../drive-client.js'),'utf8'),{document,navigator,localStorage:historyStore,window:{addEventListener(k,f){windowEvents[k]=f;}},DriveLogic:L,DriveHistory:{createDriveHistory:options=>require('../drive-history').createDriveHistory({...options,storage:historyStore})},createDrivePlayer:options=>require('../drive-player').createDrivePlayer({...options,schedule:()=>1,cancel(){},url:{createObjectURL:blob=>{chimePlaying=blob.type==='audio/wav';return 'blob:fixture';},revokeObjectURL(){}}}),AudioContext,indexedDB,Blob,AbortController,DOMException,URL:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}},Date:Clock,performance,setTimeout(fn,ms){timers.set(++timerId,{fn,ms});return timerId;},clearTimeout(id){timers.delete(id);},setInterval(fn){intervals.push(fn);return intervals.length;},clearInterval(id){intervals[id-1]=null;},fetch(...args){requests++;if(fetchImpl)return fetchImpl(...args);throw Error('Offline fetch must not occur');}});
  await tick();if(autoStart){await nodes.get('start').onclick();if(confirm)nodes.get('savedPreview').onended?.();}await tick();
  return {nodes,events,document,sources,chimes,navigator,async startJourney(){await nodes.get('start').onclick();nodes.get('savedPreview').onended?.();await tick();},timers,historyStore,runIntervals(){for(const fn of intervals)fn?.();},advance(ms){nowMs+=ms;},runTimer(ms){const entry=[...timers].find(([,t])=>t.ms===ms);if(entry){timers.delete(entry[0]);entry[1].fn();}},get gps(){return gps;},get requests(){return requests;},position(overrides){const f=fix({time:Clock.now(),...overrides});gps({timestamp:f.time,coords:{latitude:f.lat,longitude:f.lon,accuracy:f.accuracy,speed:f.speed,heading:f.heading}});}};
 }
@@ -322,4 +322,34 @@ test('Explore cards within 400 m show their images even behind the car and leave
  assert.equal(a.sources.length,0);
  a.position({lon:-.002,heading:270});await tick();
  assert.equal(cards.children.length,0);
+});
+
+test('distance options set matching playback and nearby-card boundaries',()=>{
+ const f=fix(),m=L.motion(f);
+ try{
+ for(const radius of [100,200,400,500,1000]){
+ L.setPlaybackMetres(radius);
+ const inside={...item,coord:{lat:0,lon:(radius-5)/111195}};
+ const outside={...item,coord:{lat:0,lon:(radius+5)/111195}};
+ assert.equal(L.approaching(inside,f,m).trigger,true);
+ assert.equal(L.approaching(outside,f,m).trigger,false);
+ assert.equal(L.nearbyPlaces([inside],f).length,1);
+ assert.equal(L.nearbyPlaces([outside],f).length,0);
+ assert.ok(L.approaching({...item,coord:{lat:0,lon:.015}},f,m,new Set(),5000));
+ }
+ for(const value of [null,'bad',0,99999])assert.equal(L.setPlaybackMetres(value),400);
+ }finally{L.setPlaybackMetres(400);}
+});
+test('distance choice persists and cannot change during a journey',async()=>{
+ const saved=new Map(),storage={getItem:k=>saved.get(k)||null,setItem:(k,v)=>saved.set(k,v)};
+ const a=await app({autoStart:false,historyStorage:storage});
+ const select=a.nodes.get('journeyDistance');
+ select.value='1000';select.onchange();assert.equal(L.PLAYBACK_METRES,1000);
+ assert.equal(saved.get('discoverPlaces.drivingDistance'),'1000');
+ await a.startJourney();assert.equal(select.disabled,true);
+ select.value='100';select.onchange();assert.equal(L.PLAYBACK_METRES,1000);
+ a.nodes.get('stop').onclick();assert.equal(select.disabled,false);
+ const b=await app({autoStart:false,historyStorage:storage});
+ assert.equal(b.nodes.get('journeyDistance').value,'1000');
+ L.setPlaybackMetres(400);
 });
