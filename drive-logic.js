@@ -1,7 +1,9 @@
 'use strict';
 // Straight-line approach estimates, deliberately independent of road navigation.
 (()=>{
- const PLAYBACK_METRES=400;
+ const DISTANCE_OPTIONS=Object.freeze([100,200,400,500,1000]);
+ let PLAYBACK_METRES=400;
+ function setPlaybackMetres(value){const metres=Number(value);PLAYBACK_METRES=DISTANCE_OPTIONS.includes(metres)?metres:400;return PLAYBACK_METRES;}
  const rad=x=>x*Math.PI/180;
  function distance(a,b){const p=rad(b.lat-a.lat),q=rad(b.lon-a.lon);return 6371000*2*Math.asin(Math.min(1,Math.sqrt(Math.sin(p/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(q/2)**2)));}
  function bearing(a,b){const p=rad(a.lat),q=rad(b.lat),d=rad(b.lon-a.lon);return (Math.atan2(Math.sin(d)*Math.cos(q),Math.cos(p)*Math.sin(q)-Math.sin(p)*Math.cos(q)*Math.cos(d))*180/Math.PI+360)%360;}
@@ -28,7 +30,7 @@
   const metres=distance(fix,item.coord),delta=angle(movement.heading,bearing(fix,item.coord));
   if(delta>65||metres<20)return null;
   const cross=metres*Math.sin(rad(delta)),ahead=metres*Math.cos(rad(delta));
-  if(cross>250||ahead>prepareMetres)return null;
+  if(cross>Math.max(250,PLAYBACK_METRES*.625)||ahead>prepareMetres)return null;
   return {item,metres,ahead,cross,eta:movement.speed>0?ahead/movement.speed:null,trigger:metres<=PLAYBACK_METRES,arrival:item.kind==='arrival'};
  }
  function choose(items,fix,movement,played){return items.map(i=>approaching(i,fix,movement,played)).filter(Boolean).sort((a,b)=>Number(b.trigger)-Number(a.trigger)||a.metres-b.metres||Number(!!a.arrival)-Number(!!b.arrival))[0]||null;}
@@ -100,6 +102,6 @@
   return facts.join(' ');
  }
 
- const api={narration,followUp,PLAYBACK_METRES,movingAway,startChime,distance,bearing,angle,valid,key,places,nearbyPlaces,motion,approaching,choose,opening};
+ const api={narration,followUp,DISTANCE_OPTIONS,setPlaybackMetres,get PLAYBACK_METRES(){return PLAYBACK_METRES;},movingAway,startChime,distance,bearing,angle,valid,key,places,nearbyPlaces,motion,approaching,choose,opening};
  if(typeof module!=='undefined')module.exports=api;else globalThis.DriveLogic=api;
 })();
