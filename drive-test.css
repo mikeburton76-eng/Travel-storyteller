@@ -10,3 +10,14 @@
 .nearby-place-card img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}
 .nearby-place-card img[hidden]{display:none}
 .nearby-place-card a{display:block;margin:4px 12px}
+
+/* A full-width native picker: readable text and a generous tap target on iPhone. */
+.journey-settings summary{font-size:20px;font-weight:700;min-height:48px;padding:8px 0}
+.journey-settings label{display:block;font-size:20px;font-weight:650;margin:18px 0 4px}
+#distanceHelp{margin:4px 0 12px}
+#journeyDistance{display:block;width:100%;max-width:100%;min-height:64px;padding:16px 12px;font:600 22px/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#23343e;background:#f3f8fa;border:2px solid #17617c;border-radius:12px}
+#journeyDistance option{font-size:22px}
+#journeyDistance:focus-visible{outline:3px solid #ce9126;outline-offset:3px}
+#journeyDistance:disabled{opacity:1;color:#526573;-webkit-text-fill-color:#526573;background:#e8eef1;border-color:#9cabb3;cursor:not-allowed}
+.distance-locked{display:none;font-size:16px;line-height:1.5;padding:12px;background:#fff2dc;border-radius:10px}
+#journeyDistance:disabled + .distance-locked{display:block}
