@@ -1,5 +1,6 @@
 'use strict';
 const crypto = require('node:crypto');
+const FORM_COOKIE = '__Host-discover_login';
 const COOKIE = '__Host-discover_session';
 const TTL = 12 * 60 * 60 * 1000;
 const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -24,8 +25,8 @@ function valid(token,password,now) {
   return expiry>now && expiry<=now+TTL && equal(bits[2],signature(bits[0]+'.'+bits[1],password));
 }
 function cookie(req) {return String(req.headers.cookie||'').split(';').map(x=>x.trim()).find(x=>x.startsWith(COOKIE+'='))?.slice(COOKIE.length+1);}
-function page(next,message='') {
-  return `<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sign in · Discover Places</title><style>body{font:18px system-ui,sans-serif;background:#edf3f5;color:#233640;margin:0;padding:24px}main{max-width:440px;margin:6vh auto;background:white;border-radius:20px;padding:26px}h1{font-size:1.8rem}p{line-height:1.5}label{display:block;margin:18px 0 8px;font-weight:600}input,button{font:inherit;box-sizing:border-box;width:100%;padding:14px;border-radius:10px;border:1px solid #8ba1ad}button{margin-top:24px;background:#2e6077;color:white;border:0;cursor:pointer}.error{background:#fff0df;border-radius:10px;padding:14px}small{display:block;margin-top:20px;line-height:1.5;color:#536672}</style></head><body><main><h1>Discover Places</h1><p>Sign in to continue to your app.</p>${message?`<p class="error" role="alert">${escape(message)}</p>`:''}<form method="post" action="/login"><input type="hidden" name="next" value="${escape(destination(next))}"><label for="username">Username</label><input id="username" name="username" value="traveller" autocomplete="username" autocapitalize="none" spellcheck="false" required><label for="password">App password</label><input id="password" name="password" type="password" autocomplete="current-password" required><button type="submit">Sign in</button></form><small>Use your Discover Places app password, not your Render, Google or ChatGPT password. If you need to check it, it is stored as APP_PASSWORD in your Render service’s Environment settings. Please do not share it in chat.</small><small>Sign-in page v2 · successful sign-in lasts up to 12 hours in this browser.</small></main></body></html>`;
+function page(next,message='',formToken='') {
+  return `<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sign in · Discover Places</title><style>body{font:18px system-ui,sans-serif;background:#edf3f5;color:#233640;margin:0;padding:24px}main{max-width:440px;margin:6vh auto;background:white;border-radius:20px;padding:26px}h1{font-size:1.8rem}p{line-height:1.5}label{display:block;margin:18px 0 8px;font-weight:600}input,button{font:inherit;box-sizing:border-box;width:100%;padding:14px;border-radius:10px;border:1px solid #8ba1ad}button{margin-top:24px;background:#2e6077;color:white;border:0;cursor:pointer}.error{background:#fff0df;border-radius:10px;padding:14px}small{display:block;margin-top:20px;line-height:1.5;color:#536672}</style></head><body><main><h1>Discover Places</h1><p>Sign in to continue to your app.</p>${message?`<p class="error" role="alert">${escape(message)}</p>`:''}<form method="post" action="/login"><input type="hidden" name="formToken" value="${escape(formToken)}"><input type="hidden" name="next" value="${escape(destination(next))}"><label for="username">Username</label><input id="username" name="username" value="traveller" autocomplete="username" autocapitalize="none" spellcheck="false" required><label for="password">App password</label><input id="password" name="password" type="password" autocomplete="current-password" required><button type="submit">Sign in</button></form><small>Use your Discover Places app password, not your Render, Google or ChatGPT password. If you need to check it, it is stored as APP_PASSWORD in your Render service’s Environment settings. Please do not share it in chat.</small><small>Sign-in page v3 · successful sign-in lasts up to 12 hours in this browser.</small></main></body></html>`;
 }
 function createAppAuth({readPassword=()=>process.env.APP_PASSWORD,now=Date.now}={}) {
   let failed=0, windowStart=now();
@@ -33,7 +34,14 @@ function createAppAuth({readPassword=()=>process.env.APP_PASSWORD,now=Date.now}=
     res.setHeader('Cache-Control','private, no-store');
     const password=readPassword();
     const send=(status,type,body,extra={})=>{res.writeHead(status,{'Content-Type':type,...extra});res.end(body);return false;};
-    const html=(status,next,message)=>send(status,'text/html; charset=utf-8',page(next,message),{'Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",'X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'});
+    const html=(status,next,message)=>{
+      const formToken=crypto.randomBytes(32).toString('base64url');
+      return send(status,'text/html; charset=utf-8',page(next,message,formToken),{
+        'Set-Cookie':`${FORM_COOKIE}=${formToken}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=1800`,
+        'Content-Security-Policy':"default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
+        'X-Content-Type-Options':'nosniff','Referrer-Policy':'strict-origin-when-cross-origin'
+      });
+    };
     if (!password) return send(503,'text/plain; charset=utf-8','The app password is not configured on Render. Set APP_PASSWORD, then redeploy.');
     let url;
     try {url=new URL(req.url,'https://app.invalid');}catch{return send(400,'text/plain','Invalid request.');}
@@ -46,7 +54,9 @@ function createAppAuth({readPassword=()=>process.env.APP_PASSWORD,now=Date.now}=
       if(req.method==='GET')return html(200,url.searchParams.get('next'));
       if(req.method!=='POST')return send(405,'text/plain','Use the sign-in form.');
       if(req.headers['sec-fetch-site']==='cross-site')return html(403,'/','Please open the app directly before signing in.');
-      if(req.headers.origin) {
+      // Privacy-restricted browsers can send the literal Origin: null.
+      // The cookie-bound form token below protects these requests too.
+      if(req.headers.origin && req.headers.origin !== 'null') {
         try {if(new URL(req.headers.origin).host!==req.headers.host)return html(403,'/','Please open the app directly before signing in.');}
         catch{return html(403,'/','Invalid sign-in origin.');}
       }
@@ -59,6 +69,11 @@ function createAppAuth({readPassword=()=>process.env.APP_PASSWORD,now=Date.now}=
       catch{return send(400,'text/plain','The sign-in request was interrupted. Please reload.');}
       if(tooLarge)return html(413,'/','The sign-in form was too large.');
       const form=new URLSearchParams(body),next=destination(form.get('next'));
+      const expectedForm=String(req.headers.cookie||'').split(';').map(x=>x.trim()).find(x=>x.startsWith(FORM_COOKIE+'='))?.slice(FORM_COOKIE.length+1);
+      const suppliedForm=form.get('formToken');
+      if(!expectedForm || !suppliedForm || !/^[A-Za-z0-9_-]{43}$/.test(expectedForm) || !equal(expectedForm,suppliedForm)) {
+        return html(403,next,'This sign-in form expired or its cookie was blocked. Please try the refreshed form below. If this repeats, open the page in Safari with cookies allowed.');
+      }
       // Username is not secret; allow keyboard-added spaces and capitals. Password stays exact.
       if(form.get('username')?.trim().toLowerCase()!=='traveller' || !equal(form.get('password')||'',password)) {
         failed++;return html(401,next,'Sign-in was not accepted. The username is traveller. Check the app password stored as APP_PASSWORD in Render, then try again.');
