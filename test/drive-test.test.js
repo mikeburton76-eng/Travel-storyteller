@@ -20,19 +20,20 @@ test('playback stays local at higher speeds; duplicate and area-only locations a
  assert.ok(L.opening({...item,reason:('This is a supported sentence about a place. ').repeat(30)}).length<=700);
 });
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
-async function app({tripItems=[item],wakeLock,fetchImpl,online=false,autoStart=true,confirm=true,historyStorage}={}){
+async function app({tripItems=[item],wakeLock,fetchImpl,online=false,autoStart=true,confirm=true,historyStorage,initialRecord,failPut}={}){
  const nodes=new Map(),events={},windowEvents={},sources=[],chimes=[],timers=new Map(),intervals=[];let gps,requests=0,timerId=0,nowMs=Date.now(),chimePlaying=false;
  class Clock extends Date{constructor(...args){super(...(args.length?args:[nowMs]));}static now(){return nowMs;}}
  const node=()=>({disabled:false,textContent:'',value:'Buxton',children:[],setAttribute(){},append(...items){this.children.push(...items);},replaceChildren(...items){this.children=items;},removeAttribute(name){delete this[name];},pause(){this.paused=true;this.onpause?.();},currentTime:0,async play(){this.paused=false;this.ended=false;this.currentTime=0;this.onplaying?.();this.currentTime=1;this.ontimeupdate?.();(chimePlaying?chimes:sources).push(this);}});
  const historyData=new Map(),historyStore=historyStorage||{getItem:key=>historyData.get(key)||null,setItem:(key,value)=>historyData.set(key,value)};
  const document={hidden:false,querySelectorAll(){return [];},createTextNode(text){return text;},getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id);},createElement:node,addEventListener(k,f){events[k]=f;}};
  const trip={label:'Tideswell',items:tripItems,audio:Object.fromEntries(tripItems.map(i=>[L.key(i),new Blob(['wav'])])),savedAt:new Date().toISOString()};
- const indexedDB={open(){const request={};queueMicrotask(()=>{request.result={close(){},transaction(){const tx={objectStore(){return {get(){const r={};queueMicrotask(()=>{r.result=trip;r.onsuccess();tx.oncomplete();});return r;}};}};return tx;}};request.onsuccess();});return request;}};
+ const records=new Map([['trip',initialRecord===undefined?trip:initialRecord]]);
+ const indexedDB={open(){const request={};queueMicrotask(()=>{request.result={close(){},transaction(namespace){const tx={objectStore(){const perform=(action,value)=>{const r={};queueMicrotask(()=>{if(action==='put'&&failPut?.(value)){tx.error=Error('Storage full');tx.onerror();return;}if(action==='put')records.set(namespace,structuredClone(value));if(action==='delete')records.delete(namespace);r.result=records.get(namespace);r.onsuccess?.();tx.oncomplete?.();});return r;};return {get:()=>perform('get'),put:value=>perform('put',value),delete:()=>perform('delete')};}};return tx;}};request.onsuccess();});return request;}};
  class AudioContext{constructor(){this.state='running';this.sampleRate=24000;this.destination={};}resume(){return Promise.resolve();}createBuffer(){return {duration:.0001};}createBufferSource(){const s={connect(){},disconnect(){},start(){sources.push(this);},stop(){}};return s;}async decodeAudioData(){return {duration:22};}}
- const navigator={onLine:online,wakeLock,geolocation:{watchPosition(success){gps=success;return 7;},clearWatch(){gps=null;}}};
+ const navigator={serviceWorker:{register:async()=>({active:{state:'activated'}})},onLine:online,wakeLock,geolocation:{watchPosition(success){gps=success;return 7;},clearWatch(){gps=null;}}};
  vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../drive-client.js'),'utf8'),{document,navigator,localStorage:historyStore,window:{addEventListener(k,f){windowEvents[k]=f;}},DriveLogic:L,DriveHistory:{createDriveHistory:options=>require('../drive-history').createDriveHistory({...options,storage:historyStore})},createDrivePlayer:options=>require('../drive-player').createDrivePlayer({...options,schedule:()=>1,cancel(){},url:{createObjectURL:blob=>{chimePlaying=blob.type==='audio/wav';return 'blob:fixture';},revokeObjectURL(){}}}),AudioContext,indexedDB,Blob,AbortController,DOMException,URL:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}},Date:Clock,performance,setTimeout(fn,ms){timers.set(++timerId,{fn,ms});return timerId;},clearTimeout(id){timers.delete(id);},setInterval(fn){intervals.push(fn);return intervals.length;},clearInterval(id){intervals[id-1]=null;},fetch(...args){requests++;if(fetchImpl)return fetchImpl(...args);throw Error('Offline fetch must not occur');}});
  await tick();if(autoStart){await nodes.get('start').onclick();if(confirm)nodes.get('savedPreview').onended?.();}await tick();
- return {nodes,events,document,sources,chimes,navigator,async startJourney(){await nodes.get('start').onclick();nodes.get('savedPreview').onended?.();await tick();},timers,historyStore,runIntervals(){for(const fn of intervals)fn?.();},advance(ms){nowMs+=ms;},runTimer(ms){const entry=[...timers].find(([,t])=>t.ms===ms);if(entry){timers.delete(entry[0]);entry[1].fn();}},get gps(){return gps;},get requests(){return requests;},position(overrides){const f=fix({time:Clock.now(),...overrides});gps({timestamp:f.time,coords:{latitude:f.lat,longitude:f.lon,accuracy:f.accuracy,speed:f.speed,heading:f.heading}});}};
+ return {nodes,events,document,sources,chimes,navigator,records,async startJourney(){await nodes.get('start').onclick();nodes.get('savedPreview').onended?.();await tick();},timers,historyStore,runIntervals(){for(const fn of intervals)fn?.();},advance(ms){nowMs+=ms;},runTimer(ms){const entry=[...timers].find(([,t])=>t.ms===ms);if(entry){timers.delete(entry[0]);entry[1].fn();}},get gps(){return gps;},get requests(){return requests;},position(overrides){const f=fix({time:Clock.now(),...overrides});gps({timestamp:f.time,coords:{latitude:f.lat,longitude:f.lon,accuracy:f.accuracy,speed:f.speed,heading:f.heading}});}};
 }
 test('offline session prepares saved audio before approach, plays once and makes no network calls',async()=>{
  const a=await app();a.position({});await tick();await tick();assert.match(a.nodes.get('timing').textContent,/saved on this phone/);assert.equal(a.sources.filter(s=>s.currentTime>0).length,0);
@@ -352,4 +353,48 @@ test('distance choice persists and cannot change during a journey',async()=>{
  const b=await app({autoStart:false,historyStorage:storage});
  assert.equal(b.nodes.get('journeyDistance').value,'1000');
  L.setPlaybackMetres(400);
+});
+
+
+function downloadFetch({count=12,failSpeech=()=>false,onSpeech=()=>{}}={}){
+ let label='Buxton',speech=0;
+ return async(url,options={})=>{
+  if(url.startsWith('/api/place-matches')){label=decodeURIComponent(url.split('q=')[1]);return {ok:true,json:async()=>({choices:[{title:label}]})};}
+  if(url==='/api/explore')return {ok:true,json:async()=>({complete:true,location:{label},items:Array.from({length:count},(_,n)=>({...item,id:label+n,name:label+' '+n,source:{url:'https://example.org/'+label+'/'+n}}))})};
+  if(url==='/api/arrivals')return {ok:true,json:async()=>({items:[]})};
+  if(url==='/voices')return {ok:true,json:async()=>({defaultVoice:'pippa'})};
+  if(url==='/speech'){speech++;onSpeech(speech,options);if(failSpeech(speech))throw Error('Load failed');return {ok:true,blob:async()=>new Blob(['complete audio'],{type:'audio/mpeg'})};}
+  throw Error('Unexpected fetch '+url);
+ };
+}
+test('downloads migrate the old trip, keep separate areas, respect choices, and browse without GPS',async()=>{
+ const a=await app({autoStart:false,online:true,fetchImpl:downloadFetch()});
+ assert.equal(a.nodes.get('downloadCount').value,'8');
+ await a.nodes.get('prepare').onclick();
+ let record=a.records.get('trip');assert.equal(record.version,2);assert.equal(record.areas.length,2);assert.equal(record.areas.find(x=>x.label==='Buxton').items.length,8);assert.equal(record.areas.find(x=>x.label==='Tideswell').items.length,1);
+ a.nodes.get('downloadCount').value='5';a.nodes.get('downloadCount').onchange();a.nodes.get('destination').value='Stirling';await a.nodes.get('prepare').onclick();
+ record=a.records.get('trip');assert.equal(record.areas.length,3);assert.equal(record.areas.find(x=>x.label==='Stirling').items.length,5);
+ const offline=await app({autoStart:false,initialRecord:record});const cards=offline.nodes.get('savedAreasList').children;const entry=cards[1].children[2];entry.children[2].onclick();await tick();assert.equal(offline.sources.length,1);assert.equal(offline.gps,undefined);assert.equal(offline.requests,0);
+ await cards[0].children.at(-1).onclick();assert.equal(offline.records.get('trip').areas.length,2);assert.ok(offline.records.get('trip').areas.find(x=>x.label==='Stirling'));
+});
+test('fewer available places are reported and failed clips never count as saved',async()=>{
+ const a=await app({autoStart:false,tripItems:[],fetchImpl:downloadFetch({count:5,failSpeech:n=>n===2})});a.nodes.get('downloadCount').value='20';a.nodes.get('downloadCount').onchange();await a.nodes.get('prepare').onclick();
+ const area=a.records.get('trip').areas[0];assert.equal(area.items.length,4);assert.equal(Object.keys(area.audio).length,4);assert.equal(area.partial,true);assert.match(a.nodes.get('savedStatus').textContent,/Only 5 suitable/);
+});
+test('cancelling keeps every committed clip and the old area during a refresh',async()=>{
+ let a;const fetchImpl=downloadFetch({onSpeech:n=>{if(n===3)a.nodes.get('cancelPrepare').onclick();}});
+ a=await app({autoStart:false,fetchImpl});await a.nodes.get('prepare').onclick();
+ const record=a.records.get('trip');assert.equal(record.areas.find(x=>x.label==='Buxton').items.length,2);assert.equal(record.areas.find(x=>x.label==='Buxton').partial,true);assert.equal(record.areas.find(x=>x.label==='Tideswell').items.length,1);
+ assert.match(a.nodes.get('savedStatus').textContent,/cancelled/);
+});
+test('a failed refresh preserves older clips; a successful smaller refresh replaces only its own area',async()=>{
+ const a=await app({autoStart:false,fetchImpl:downloadFetch()});await a.nodes.get('prepare').onclick();const previous=a.records.get('trip');
+ const b=await app({autoStart:false,initialRecord:previous,fetchImpl:downloadFetch({failSpeech:()=>true})});await b.nodes.get('prepare').onclick();assert.deepEqual(b.records.get('trip'),previous);
+ const c=await app({autoStart:false,initialRecord:previous,fetchImpl:downloadFetch()});c.nodes.get('downloadCount').value='3';c.nodes.get('downloadCount').onchange();await c.nodes.get('prepare').onclick();assert.equal(c.records.get('trip').areas.find(x=>x.label==='Buxton').items.length,3);assert.equal(c.records.get('trip').areas.find(x=>x.label==='Tideswell').items.length,1);
+});
+test('storage failure cannot mark an unsaved clip ready or replace previous data',async()=>{
+ const a=await app({autoStart:false,fetchImpl:downloadFetch(),failPut:()=>true});await a.nodes.get('prepare').onclick();assert.equal(a.records.get('trip').label,'Tideswell');assert.match(a.nodes.get('savedStatus').textContent,/Storage full/);assert.equal(a.nodes.get('savedAreasList').children.length,1);
+});
+test('download and manual listening controls lock during a journey',async()=>{
+ const a=await app();assert.equal(a.nodes.get('downloadCount').disabled,true);const area=a.nodes.get('savedAreasList').children[0];assert.equal(area.children.at(-1).disabled,true);assert.equal(area.children[2].children[2].disabled,true);await area.children[2].children[2].onclick();assert.equal(a.sources.length,0);a.nodes.get('stop').onclick();assert.equal(a.nodes.get('downloadCount').disabled,false);
 });
