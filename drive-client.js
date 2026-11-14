@@ -97,7 +97,11 @@
   }));
  }
 
- const nativePlayer=globalThis.createDrivePlayer({element:$('savedPreview'),log:message=>log(message)});let voiceCheckBlob=null,parkedCheck=false,parkedTimer=null,historyReplay=null,starting=false;
+ const mediaPlayer=globalThis.createDrivePlayer({element:$('savedPreview'),log:message=>log(message)});
+ const phoneMode=()=>globalThis.DiscoverNarrator?.get().provider==='phone';
+ const textClip=text=>({phoneText:String(text),size:String(text).length*2});
+ const nativePlayer={stop(options){globalThis.DiscoverNarrator?.stop();mediaPlayer.stop(options);},resume(){return phoneMode()?globalThis.DiscoverNarrator.resume():mediaPlayer.resume();},play(clip,callbacks={}){if(clip?.phoneText){mediaPlayer.stop();$('savedPreview').hidden=true;globalThis.DiscoverNarrator?.speak(clip.phoneText,{...callbacks,onTiming:(name,seconds)=>log(name+' phone voice started after '+seconds.toFixed(1)+' seconds.')});}else{globalThis.DiscoverNarrator?.stop();mediaPlayer.play(clip,callbacks);}}};
+ globalThis.DiscoverNarrator?.addChangeListener(()=>{nativePlayer.stop();voiceCheckBlob=null;buffers.clear();preparedItems.clear();rebuild();saved();});let voiceCheckBlob=null,parkedCheck=false,parkedTimer=null,historyReplay=null,starting=false;
  const history=globalThis.DriveHistory.createDriveHistory({onWarning:message=>{$('historyWarning').textContent=message;}});
  function log(message){events.push(new Date().toLocaleTimeString('en-GB')+' '+message);if(events.length>100)events.shift();$('log').textContent=events.join('\n');}
  function status(message){$('status').textContent=message;}
@@ -126,14 +130,14 @@
   for(const area of savedAreas){
    const card=document.createElement('details'),heading=document.createElement('summary'),info=document.createElement('p'),remove=document.createElement('button');
    heading.textContent=area.label+' · '+area.items.length+' saved';
-   info.className='small';info.textContent=(areaBytes([area])/1024/1024).toFixed(1)+' MB · '+(area.partial?'Download incomplete. Completed clips below are available.':'Ready on this phone.')+(area.requested?' Requested '+area.requested+'; found '+area.available+'.':'');
+   info.className='small';info.textContent=(area.items.some(i=>area.audio[L.key(i)]?.phoneText)?'Includes saved text for a phone voice; this is not an audio recording. ':'')+(areaBytes([area])/1024/1024).toFixed(1)+' MB · '+(area.partial?'Download incomplete. Completed clips below are available.':'Ready on this phone.')+(area.requested?' Requested '+area.requested+'; found '+area.available+'.':'');
    remove.type='button';remove.className='secondary';remove.textContent='Delete '+area.label;remove.disabled=locked;
    remove.onclick=async()=>{if(running||preparing||starting||!savedLoaded)return;preparing=true;renderHistory();try{nativePlayer.stop({release:true});await commitAreas(savedAreas.filter(a=>a.id!==area.id));buffers.clear();preparedItems.clear();rebuild();saved();}catch(error){$('savedStatus').textContent='Could not delete this area: '+error.message;}finally{preparing=false;renderHistory();}};
    card.append(heading,info);
    for(const item of area.items){
     const entry=document.createElement('details'),name=document.createElement('summary'),text=document.createElement('p'),listen=document.createElement('button');
-    name.textContent=item.name;text.textContent=item.spokenText||L.narration(item,{nearby:false});listen.type='button';listen.textContent='Listen';listen.disabled=locked;
-    listen.onclick=()=>{if(running||preparing||starting)return;prime();$('previewLabel').hidden=false;$('previewLabel').textContent=item.name;nativePlayer.play(area.audio[L.key(item)],{onError:message=>{$('savedListenStatus').textContent=message;},onProgress:()=>{$('savedListenStatus').textContent='Playing: '+item.name;},onEnd:()=>{$('savedListenStatus').textContent='Finished: '+item.name;}});};
+    name.textContent=item.name;text.textContent=item.spokenText||L.narration(item,{nearby:false});listen.type='button';listen.textContent='Listen';listen.disabled=locked||(!phoneMode()&&!!area.audio[L.key(item)]?.phoneText);
+    listen.onclick=()=>{if(running||preparing||starting)return;prime();$('previewLabel').hidden=false;$('previewLabel').textContent=item.name;nativePlayer.play(phoneMode()?textClip(item.spokenText||L.narration(item,{nearby:false})):area.audio[L.key(item)],{onError:message=>{$('savedListenStatus').textContent=message;},onProgress:()=>{$('savedListenStatus').textContent='Playing: '+item.name;},onEnd:()=>{$('savedListenStatus').textContent='Finished: '+item.name;}});};
     entry.append(name,text,listen);
     if(/^https:\/\//.test(item.source?.url||'')){const link=document.createElement('a');link.href=item.source.url;link.target='_blank';link.rel='noopener';link.textContent='Source (connection needed)';entry.append(link);}
     card.append(entry);
@@ -143,12 +147,12 @@
   $('savedAreasEmpty').hidden=!!savedAreas.length;
  }
  $('stopSavedAudio').onclick=()=>{if(running||starting)return;nativePlayer.stop();$('savedListenStatus').textContent='Stopped.';};
- function saved(){renderSavedAreas();const sample=trip.items.find(i=>trip.audio[L.key(i)]&&(i.kind!=='arrival'||currentArrival(i)));if(previewURL)URL.revokeObjectURL(previewURL);$('savedPreview').hidden=!sample;$('previewLabel').hidden=!sample;if(sample){previewURL=URL.createObjectURL(trip.audio[L.key(sample)]);$('savedPreview').src=previewURL;}else $('savedPreview').removeAttribute('src');const count=trip.items.filter(i=>trip.audio[L.key(i)]).length;$('savedStatus').textContent=trip.savedAt?`${count} clips saved on this phone for ${trip.label}. Saved ${new Date(trip.savedAt).toLocaleString('en-GB')}.`:'No offline clips saved yet.';if(trip.savedAt&&!trip.items.some(i=>i.kind==='arrival'))$('savedStatus').textContent+=' No town arrival introduction is saved; individual place clips are available.';if(trip.items.some(i=>i.kind==='arrival'&&!currentArrival(i)))$('savedStatus').textContent+=' An arrival introduction needs updating or its annual review. Prepare again while connected.';}
+ function saved(){renderSavedAreas();const sample=trip.items.find(i=>!phoneMode()&&trip.audio[L.key(i)]&&!trip.audio[L.key(i)].phoneText&&(i.kind!=='arrival'||currentArrival(i)));if(previewURL)URL.revokeObjectURL(previewURL);$('savedPreview').hidden=!sample;$('previewLabel').hidden=!sample;if(sample){previewURL=URL.createObjectURL(trip.audio[L.key(sample)]);$('savedPreview').src=previewURL;}else $('savedPreview').removeAttribute('src');const count=trip.items.filter(i=>trip.audio[L.key(i)]).length;$('savedStatus').textContent=trip.savedAt?`${count} places saved on this phone for ${trip.label}. Saved ${new Date(trip.savedAt).toLocaleString('en-GB')}.`:'No offline places saved yet.';if(trip.savedAt&&!trip.items.some(i=>i.kind==='arrival'))$('savedStatus').textContent+=' No town arrival introduction is saved; individual place clips are available.';if(trip.items.some(i=>i.kind==='arrival'&&!currentArrival(i)))$('savedStatus').textContent+=' An arrival introduction needs updating or its annual review. Prepare again while connected.';}
  async function shell(){if(!('serviceWorker'in navigator))throw Error('Offline page saving is unavailable in this browser.');const r=await navigator.serviceWorker.register('/drive-test-sw.js',{scope:'/drive-test'});const worker=r.installing||r.waiting||r.active;if(!worker)throw Error('Offline page could not be saved.');if(worker.state!=='activated')await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Offline page setup took too long. Try again.')),30000);worker.addEventListener('statechange',()=>{if(worker.state==='activated'){clearTimeout(timer);resolve();}if(worker.state==='redundant'){clearTimeout(timer);reject(Error('Offline page saving failed.'));}});});$('offlineStatus').textContent='The driving test page is saved for offline reopening at this address.';}
  async function json(url,body,signal){const r=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal});const data=await r.json();if(!r.ok)throw Error(data.error||'Request failed ('+r.status+').');return data;}
  async function guide(input,signal,onPreview=()=>{}){const end=Date.now()+120000;while(true){const data=await json('/api/explore',{...input,progressive:true,specialists:false},signal);onPreview(data);if(data.complete!==false)return data;if(Date.now()>end)throw Error('Guide preparation took too long. Try again while connected.');await new Promise((resolve,reject)=>{const abort=()=>{clearTimeout(timer);reject(new DOMException('Cancelled','AbortError'))},timer=setTimeout(()=>{signal.removeEventListener('abort',abort);resolve();},1500);signal.addEventListener('abort',abort,{once:true});if(signal.aborted)abort();});}}
  let voice;
- async function audio(item,signal,text=L.narration(item)){const started=performance.now();if(!voice){const r=await fetch('/voices',{signal});if(!r.ok)throw Error('Pippa is unavailable.');voice=(await r.json()).defaultVoice;}
+ async function audio(item,signal,text=L.narration(item)){const started=performance.now();if(phoneMode()){if(!globalThis.DiscoverNarrator.get().voice)throw Error('Choose an available phone voice first.');return {blob:textClip(text),seconds:0};}if(!voice){const r=await fetch('/voices',{signal});if(!r.ok)throw Error('Pippa is unavailable.');voice=(await r.json()).defaultVoice;}
  const r=await fetch('/speech',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({text,voice}),signal});if(!r.ok){const data=await r.json();throw Error(data.error||'Pippa could not prepare this clip.');}const blob=await r.blob();if(blob.size>6*1024*1024||!blob.size)throw Error('Unexpected audio size.');return {blob,seconds:(performance.now()-started)/1000};}
  function timeout(controller,ms){return setTimeout(()=>controller.abort(),ms);}
  let chosenDestination='';
@@ -178,13 +182,13 @@
   next.items.push({...item,spokenText:L.narration(item,{nearby:false})});next.audio[L.key(item)]=a.blob;
   await commitAreas([...savedAreas.filter(area=>area.id!==id),snapshot()]);if(isRoute)selectRoute(id);
   $('savedStatus').textContent=`${next.items.length} of ${items.length} saved on this phone.`;
-  log('Downloaded '+item.name+' · '+a.seconds.toFixed(1)+' seconds');
+  log((phoneMode()?'Saved text: ':'Downloaded ')+item.name+' · '+a.seconds.toFixed(1)+' seconds');
  }
  if(!next.items.length)throw Error('No new audio could be saved.');
  next.partial=failures.length>0;
  await commitAreas([...savedAreas.filter(area=>area.id!==id),failures.length?snapshot():next]);
  buffers.clear();preparedItems.clear();rebuild();saved();
- $('savedStatus').textContent+=` ${next.items.length} of ${items.length} selected clips downloaded.`+(available.length<downloadCount?` Only ${available.length} suitable places were available for the requested ${downloadCount}.`:'')+(failures.length?` ${failures.length} failed; completed downloads and older clips were kept.`:'');
+ $('savedStatus').textContent+=` ${next.items.length} of ${items.length} selected places saved.`+(available.length<downloadCount?` Only ${available.length} suitable places were available for the requested ${downloadCount}.`:'')+(failures.length?` ${failures.length} failed; completed downloads and older clips were kept.`:'');
  log('Offline area saved: '+next.items.length+' clips.');
  }catch(error){$('savedStatus').textContent=(controller.signal.aborted?'Download cancelled or timed out.':error.message)+' Completed downloads and previous saved clips remain available.';log('Preparation stopped: '+error.message);}
  finally{clearTimeout(timer);downloadController=null;preparing=false;renderHistory();$('testVoice').disabled=false;$('testAutomatic').disabled=false;$('prepare').disabled=false;$('start').disabled=false;$('forget').disabled=false;$('cancelPrepare').disabled=true;}
@@ -202,7 +206,7 @@
  const AHEAD_CLIPS=3;
  let aheadJob=null;
  const audioRetries=new Map();
- const audioReady=item=>buffers.has(L.key(item))||!!trip.audio[L.key(item)];
+ const audioReady=item=>phoneMode()?!!globalThis.DiscoverNarrator.get().voice:!!((buffers.get(L.key(item))&&!buffers.get(L.key(item)).phoneText)||(trip.audio[L.key(item)]&&!trip.audio[L.key(item)].phoneText));
  const audioEligible=item=>audioReady(item)||Date.now()>=(audioRetries.get(L.key(item))||0);
  function aheadPlaces(){
   if(!fix||Date.now()-fix.time>10000||!movement)return [];
@@ -246,7 +250,7 @@
   $('ahead').textContent=ready+' ready · '+items.length+(items.length===1?' place':' places')+' ahead (up to '+AHEAD_CLIPS+')';
   const rows=items.map(item=>{
    const row=document.createElement('li');
-   const state=audioReady(item)?'Ready':job?.key===L.key(item)?'Downloading':
+   const state=audioReady(item)?(phoneMode()?'Text ready to speak':'Ready'):job?.key===L.key(item)?'Downloading':
     navigator.onLine===false?'Needs signal':audioEligible(item)?'Waiting to download':'Waiting to retry';
    row.textContent=item.name+' — '+state;
    return row;
@@ -286,10 +290,10 @@
    if(aheadJob===job)aheadJob=null;
   }
   if(!current())return;
-  buffer=buffers.get(key)||await decoded(item,trip.audio[key]);
+  buffer=phoneMode()?textClip(spokenText(item)):buffers.get(key)||await decoded(item,trip.audio[key]);
   if(!current())return;
-  $('timing').textContent=trip.audio[key]?'Ready · saved on this phone':'Ready · prepared earlier this session';
-  log('Reusing prepared audio: '+item.name);$('play').disabled=false;evaluate();
+  $('timing').textContent=phoneMode()?'Text ready · phone voice, no server audio preparation':trip.audio[key]?'Ready · saved on this phone':'Ready · prepared earlier this session';
+  log((phoneMode()?'Phone narration ready: ':'Reusing prepared audio: ')+item.name);$('play').disabled=false;evaluate();
  }catch(error){
   if(id===epoch&&running&&pending===item&&(!controller.signal.aborted||timedOut)){
    log('Audio unavailable: '+item.name+' · '+(timedOut?'Preparation timed out':error.message));audioRetries.set(key,Date.now()+30000);pending=null;buffer=null;status('Waiting for downloaded audio or a connection.');
@@ -298,6 +302,7 @@
  }
 
  function renderHistory(){
+  globalThis.DiscoverNarrator?.setLocked(running||starting||preparing);
   renderRouteControls();
   renderSavedAreas();
   if(distanceChoice)distanceChoice.disabled=running||starting;
@@ -307,9 +312,9 @@
  }
  function replayPlace(key){
   if(running||preparing)return;history.allowOnce(key);for(const item of [...trip.items,...arrivalItems,...nearbyItems])if(history.key(item)===key)played.delete(L.key(item));renderHistory();
-  const item=[...trip.items,...arrivalItems,...nearbyItems].find(i=>history.key(i)===key&&(i.kind!=='arrival'||currentArrival(i))&&(trip.audio[L.key(i)]||buffers.has(L.key(i))));
+  const item=[...trip.items,...arrivalItems,...nearbyItems].find(i=>history.key(i)===key&&(i.kind!=='arrival'||currentArrival(i))&&audioReady(i));
   if(!item){status('One replay is allowed when this place is next available and you pass within '+L.PLAYBACK_METRES+' metres.');return;}
-  nativePlayer.stop();prime();running=true;parkedCheck=true;historyReplay=item;++epoch;source=null;pending=item;buffer=trip.audio[L.key(item)]||buffers.get(L.key(item));lastEnd=-Infinity;retryAt=0;
+  nativePlayer.stop();prime();running=true;parkedCheck=true;historyReplay=item;++epoch;source=null;pending=item;buffer=phoneMode()?textClip(spokenText(item)):buffers.get(L.key(item))||trip.audio[L.key(item)];lastEnd=-Infinity;retryAt=0;
   $('start').disabled=true;$('stop').disabled=false;$('prepare').disabled=true;$('testVoice').disabled=true;$('testAutomatic').disabled=true;$('forget').disabled=true;renderHistory();log('Listener requested a replay: '+item.name);play(true);
  }
  $('skipFamiliar').onchange=()=>{if(running||preparing)return;history.setSkipFamiliar($('skipFamiliar').checked);renderHistory();};
@@ -380,7 +385,7 @@
   if(!parkedCheck&&!history.check(pending).allowed){const reason=history.check(pending).reason;waiting(reason,'Skipping '+pending.name+': '+reason+'. Use Hear this place again while parked to allow a replay.');pending=null;buffer=null;$('play').disabled=true;return;}
   if(!manual&&!parkedCheck&&(!fix||Date.now()-fix.time>10000||L.distance(fix,pending.coord)>L.PLAYBACK_METRES||L.movingAway(pending,fix,movement)))return;
   if(!manual&&!parkedCheck&&!isLatched(pending)&&(!fix||Date.now()-fix.time>10000||!L.approaching(pending,fix,movement,played)?.trigger))return;
-  const item=pending,clip=buffer,id=epoch,token=source={item};prime();show(item);$('play').disabled=false;$('previewLabel').hidden=false;$('previewLabel').textContent='Journey audio — this uses the same player as the Pippa check:';
+  const item=pending,clip=phoneMode()?textClip(spokenText(item)):buffer,id=epoch,token=source={item};prime();show(item);$('play').disabled=false;$('previewLabel').hidden=false;$('previewLabel').textContent='Journey narration · '+(globalThis.DiscoverNarrator?.get().name||'Pippa');
   const distanceLabel=!manual&&!parkedCheck?' · '+Math.round(L.distance(fix,item.coord))+' m from reference point':'';
   log((manual?'Manual playback requested: ':'Automatic playback requested: ')+item.name+distanceLabel);status('Starting the audio player for '+item.name+'…');
   nativePlayer.play(clip,{
@@ -434,12 +439,12 @@
  function position(p,id){if(!running||id!==epoch)return;const c=p.coords,current={lat:c.latitude,lon:c.longitude,accuracy:c.accuracy,speed:c.speed,heading:c.heading,time:p.timestamp};$('accuracy').textContent=Number.isFinite(c.accuracy)?'±'+Math.round(c.accuracy)+' m':'Unavailable';if(Date.now()-current.time>10000||current.time>Date.now()+5000||!L.valid(current)||!Number.isFinite(current.accuracy)||current.accuracy>75){fix=null;movement=null;renderAhead();renderNearbyPlaces();waiting('GPS accuracy or age','Waiting for a fresh GPS fix accurate to about 75 metres or better.');return;}
  fix=current;movement=L.motion(current,lastGood,lastHeading);if(movement&&!movement.stationary)lastHeading=movement.heading;if(!lastGood||L.distance(lastGood,current)>Math.max(12,current.accuracy,lastGood.accuracy)||current.time-lastGood.time>30000)lastGood=current;
  $('speed').textContent=movement?(movement.stationary?'0 mph · last travel direction held':Math.round(movement.speed*2.23694)+' mph'):'Waiting for movement';refreshGuide(current,id);refreshArrivals(current,id);evaluate();}
- async function startTracking(){if(running||preparing)return;if(!navigator.geolocation){status('Location is unavailable in this browser.');return;}try{prime();}catch(error){status(error.message);return;}nativePlayer.stop();$('savedPreview').hidden=true;$('previewLabel').hidden=true;running=true;renderHistory();const id=++epoch;played.clear();latchedPlaces.clear();closestDistances.clear();pending=null;buffer=null;lastHeading=null;lastGood=null;fix=null;movement=null;lastSearch=null;lastSearchTime=0;lastEnd=-Infinity;retryAt=0;arrivalRetry=0;lastArrivalSearch=null;lastArrivalTime=0;guideRetryAt=0;audioRetries.clear();nearbyItems=[];rebuild();renderNearbyPlaces();$('start').disabled=true;$('stop').disabled=false;$('prepare').disabled=true;$('testVoice').disabled=true;$('testAutomatic').disabled=true;$('forget').disabled=true;status('Waiting for precise location permission…');log('V19 · up to 3 clips ahead · '+L.PLAYBACK_METRES+' m forward selection · Driving session started · '+(navigator.onLine===false?'offline':'online'));shell().catch(error=>{$('offlineStatus').textContent=error.message});try{navigator.wakeLock?.request('screen').then(lock=>{if(running&&id===epoch)wakeLock=lock;else lock.release();}).catch(()=>{});}catch{}watch=navigator.geolocation.watchPosition(p=>position(p,id),error=>{if(id!==epoch)return;fix=null;movement=null;renderAhead();renderNearbyPlaces();status('Location unavailable: '+(error.code===1?'allow precise location in your browser settings.':'waiting for GPS.'));log('GPS error '+error.code);},{enableHighAccuracy:true,maximumAge:0,timeout:15000});staleTimer=setInterval(()=>{if(running){if(fix&&Date.now()-fix.time>10000){movement=null;renderAhead();renderNearbyPlaces();if(!source&&!latchedPlaces.size)waiting('GPS fix is old','GPS fix is old. Waiting before selecting another place.');}if(latchedPlaces.size)evaluate();}},2000);}
+ async function startTracking(){if(running||preparing)return;if(!navigator.geolocation){status('Location is unavailable in this browser.');return;}try{prime();}catch(error){status(error.message);return;}nativePlayer.stop();$('savedPreview').hidden=true;$('previewLabel').hidden=true;running=true;renderHistory();const id=++epoch;played.clear();latchedPlaces.clear();closestDistances.clear();pending=null;buffer=null;lastHeading=null;lastGood=null;fix=null;movement=null;lastSearch=null;lastSearchTime=0;lastEnd=-Infinity;retryAt=0;arrivalRetry=0;lastArrivalSearch=null;lastArrivalTime=0;guideRetryAt=0;audioRetries.clear();nearbyItems=[];rebuild();renderNearbyPlaces();$('start').disabled=true;$('stop').disabled=false;$('prepare').disabled=true;$('testVoice').disabled=true;$('testAutomatic').disabled=true;$('forget').disabled=true;status('Waiting for precise location permission…');log('V20 · up to 3 clips ahead · '+L.PLAYBACK_METRES+' m forward selection · Driving session started · '+(navigator.onLine===false?'offline':'online'));shell().catch(error=>{$('offlineStatus').textContent=error.message});try{navigator.wakeLock?.request('screen').then(lock=>{if(running&&id===epoch)wakeLock=lock;else lock.release();}).catch(()=>{});}catch{}watch=navigator.geolocation.watchPosition(p=>position(p,id),error=>{if(id!==epoch)return;fix=null;movement=null;renderAhead();renderNearbyPlaces();status('Location unavailable: '+(error.code===1?'allow precise location in your browser settings.':'waiting for GPS.'));log('GPS error '+error.code);},{enableHighAccuracy:true,maximumAge:0,timeout:15000});staleTimer=setInterval(()=>{if(running){if(fix&&Date.now()-fix.time>10000){movement=null;renderAhead();renderNearbyPlaces();if(!source&&!latchedPlaces.size)waiting('GPS fix is old','GPS fix is old. Waiting before selecting another place.');}if(latchedPlaces.size)evaluate();}},2000);}
  function stop(message='Driving test stopped.'){clearTimeout(parkedTimer);parkedTimer=null;parkedCheck=false;historyReplay=null;latchedPlaces.clear();closestDistances.clear();starting=false;running=false;aheadJob?.controller.abort();aheadJob=null;lastHeading=null;downloadController?.abort();renderHistory();epoch++;if(watch!==null)navigator.geolocation.clearWatch(watch);watch=null;clearInterval(staleTimer);guideController?.abort();audioController?.abort();arrivalController?.abort();arrivalController=null;arrivalBusy=false;guideController=null;audioController=null;guideBusy=false;audioBusy=false;source=null;nativePlayer.stop();pending=null;buffer=null;$('play').disabled=true;wakeLock?.release().catch(()=>{});wakeLock=null;$('start').disabled=false;$('start').textContent='Start journey with sound';$('stop').disabled=true;$('prepare').disabled=false;$('testVoice').disabled=false;$('testAutomatic').disabled=false;$('forget').disabled=false;$('decision').textContent='Stopped';renderAhead();renderNearbyPlaces();renderMore();status(message);log(message);}
  function start(){
-  if(running||preparing||starting)return;if(!navigator.geolocation){status('Location is unavailable in this browser.');return;}
-  starting=true;renderMore();const id=++epoch;prime();$('start').disabled=true;$('stop').disabled=false;$('prepare').disabled=true;$('testVoice').disabled=true;$('testAutomatic').disabled=true;$('forget').disabled=true;renderHistory();$('previewLabel').hidden=false;$('previewLabel').textContent='Journey sound';status('You should hear two short notes. GPS starts after the chime. Stay parked if you hear nothing.');log('V19 Start tapped: local chime requested directly from the button gesture; no download required.');
-  nativePlayer.play(L.startChime(),{onProgress(){if(id===epoch&&starting)status('Start chime player is active. Stay parked if the notes are silent.');},onEnd(){if(id!==epoch||!starting)return;starting=false;log('Start chime finished; starting GPS automatically.');startTracking();},onPaused(){if(id===epoch&&starting)status('Startup was paused. Stop, then tap Start journey again while parked.');},onError(message){if(id!==epoch||!starting)return;starting=false;stop('Sound could not start: '+message);}});
+  log('Start tapped · '+(globalThis.DiscoverNarrator?.get().name||'Pippa'));if(running||preparing||starting){log('Start blocked: another session or download is active.');status('Wait for preparation to finish, or cancel it, before starting.');return;}if(phoneMode()&&!globalThis.DiscoverNarrator.get().voice){status('Choose an available phone voice and preview it before starting.');return;}if(!navigator.geolocation){status('Location is unavailable in this browser.');return;}
+  starting=true;renderMore();const id=++epoch;prime();$('start').disabled=true;$('stop').disabled=false;$('prepare').disabled=true;$('testVoice').disabled=true;$('testAutomatic').disabled=true;$('forget').disabled=true;renderHistory();$('previewLabel').hidden=false;$('previewLabel').textContent='Journey sound';status('You should hear a short sound confirmation. GPS starts when it finishes. Stay parked if you hear nothing.');log('V20 Start tapped: '+(phoneMode()?'phone voice confirmation':'local chime')+' requested directly from the button gesture.');
+  nativePlayer.play(phoneMode()?textClip('Your journey is ready.'):L.startChime(),{onProgress(){if(id===epoch&&starting)status('Sound confirmation is playing. Stay parked if you cannot hear it.');},onEnd(){if(id!==epoch||!starting)return;starting=false;log('Sound confirmation finished; starting GPS automatically.');startTracking();},onPaused(){if(id===epoch&&starting)status('Startup was paused. Stop, then tap Start journey again while parked.');},onError(message){if(id!==epoch||!starting)return;starting=false;stop('Sound could not start: '+message);}});
  }
  $('start').onclick=start;$('stop').onclick=()=>stop();$('play').onclick=()=>{prime();play(true);};
  document.addEventListener('visibilitychange',()=>{if(document.hidden&&(running||starting))stop('Test paused because the page was hidden. Tap Start when safely parked to resume.');});
@@ -455,16 +460,16 @@
   finally{clearTimeout(timer);if(arrivalController===controller){arrivalBusy=false;arrivalController=null;}}
  }
  $('testVoice').onclick=async()=>{
-  if(running||preparing)return;prime();preparing=true;renderHistory();$('testVoice').disabled=true;$('testAutomatic').disabled=true;$('prepare').disabled=true;$('start').disabled=true;const controller=downloadController=new AbortController(),timer=timeout(controller,190000);$('cancelPrepare').disabled=false;status('Checking Pippa. The first preparation can take a while…');
-  try{const result=await audio({kind:'arrival',reason:'Hello Mike. Discover Places is ready for your Buxton test. Please confirm you can hear Pippa before driving.'},controller.signal);voiceCheckBlob=result.blob;$('previewLabel').hidden=false;$('previewLabel').textContent='Pippa check — use these same controls for the journey:';nativePlayer.play(result.blob,{onError:message=>status(message),onProgress:()=>status('The preview player is active. When finished, use Start journey with sound; no separate confirmation is needed.')});status('Pippa is prepared. Press Play on the audio controls if needed. Confirm below only when you hear her.');log('Pippa check prepared in '+result.seconds.toFixed(1)+' seconds. Native media player; audibility not yet confirmed.');}
-  catch(error){status('Pippa check failed: '+error.message);log('Pippa check failed: '+error.message);}
+  if(running||preparing)return;if(phoneMode()){$('narratorPreview').onclick();return;}prime();preparing=true;renderHistory();$('testVoice').disabled=true;$('testAutomatic').disabled=true;$('prepare').disabled=true;$('start').disabled=true;const controller=downloadController=new AbortController(),timer=timeout(controller,190000);$('cancelPrepare').disabled=false;status('Preparing the selected narrator…');
+  try{const result=await audio({kind:'arrival',reason:'Discover Places is ready. The Crescent opened in October 2020. You are 400 metres away.'},controller.signal);voiceCheckBlob=result.blob;$('previewLabel').hidden=false;$('previewLabel').textContent='Selected voice check:';nativePlayer.play(result.blob,{onError:message=>status(message),onProgress:()=>status('The preview player is active. When finished, use Start journey with sound; no separate confirmation is needed.')});status('Voice preview requested. Check that you can hear it before starting.');log('Selected voice check prepared in '+result.seconds.toFixed(1)+' seconds. Native media player; audibility not yet confirmed.');}
+  catch(error){status('Voice check failed: '+error.message);log('Voice check failed: '+error.message);}
   finally{clearTimeout(timer);downloadController=null;preparing=false;renderHistory();$('testVoice').disabled=false;$('testAutomatic').disabled=false;$('prepare').disabled=false;$('start').disabled=false;$('cancelPrepare').disabled=true;}
  };
  $('testAutomatic').onclick=()=>{
   if(running||preparing||starting)return;
-  const savedItem=trip.items.find(i=>trip.audio[L.key(i)]&&(i.kind!=='arrival'||currentArrival(i))),clip=savedItem?trip.audio[L.key(savedItem)]:voiceCheckBlob;
-  if(!clip){status('Prepare a saved trip or run Check Pippa first, then try this parked check.');return;}
-  nativePlayer.stop();prime();running=true;parkedCheck=true;historyReplay=null;renderHistory();++epoch;played.clear();latchedPlaces.clear();closestDistances.clear();source=null;pending={...(savedItem||{}),id:'parked-automatic-check',kind:'arrival',name:'Parked check: '+(savedItem?.name||'Pippa'),reason:savedItem?.reason||'Pippa automatic playback check',coord:savedItem?.coord||{lat:0,lon:0},arrivalRadiusM:100,prepareRadiusM:500};buffer=clip;movement=null;lastEnd=-Infinity;retryAt=0;
+  const savedItem=trip.items.find(i=>(phoneMode()||trip.audio[L.key(i)]&&!trip.audio[L.key(i)].phoneText)&&(i.kind!=='arrival'||currentArrival(i))),clip=savedItem?(phoneMode()?textClip(spokenText(savedItem)):trip.audio[L.key(savedItem)]):voiceCheckBlob;
+  if(!clip){status('Prepare a saved trip or preview your selected voice first, then try this parked check.');return;}
+  nativePlayer.stop();prime();running=true;parkedCheck=true;historyReplay=null;renderHistory();++epoch;played.clear();latchedPlaces.clear();closestDistances.clear();source=null;pending={...(savedItem||{}),id:'parked-automatic-check',kind:'arrival',name:'Parked check: '+(savedItem?.name||'Selected narrator'),reason:savedItem?.reason||'Selected voice automatic playback check',coord:savedItem?.coord||{lat:0,lon:0},arrivalRadiusM:100,prepareRadiusM:500};buffer=clip;movement=null;lastEnd=-Infinity;retryAt=0;
   $('start').disabled=true;$('stop').disabled=false;$('prepare').disabled=true;$('testVoice').disabled=true;$('testAutomatic').disabled=true;$('forget').disabled=true;$('play').disabled=true;
   log('Parked automatic check: simulated arrival only; GPS tracking is off. A saved clip will be requested in 5 seconds without another tap.');status('Remain parked. The saved clip should start automatically in 5 seconds.');$('decision').textContent='Parked automatic check countdown';
   parkedTimer=setTimeout(()=>{parkedTimer=null;if(!running||!parkedCheck)return;fix={...pending.coord,accuracy:1,time:Date.now(),speed:0,heading:null};play();},5000);
@@ -474,5 +479,6 @@
 
  storage('get').then(value=>{if(value?.version===2&&Array.isArray(value.areas))useAreas(value.areas);else if(value?.items&&value?.audio){useAreas(value.items.length?[{...value,id:areaId(value.label)}]:[]);if(value.welcomeAudio)voiceCheckBlob=value.welcomeAudio;}savedLoaded=true;saved();}).catch(()=>{$('savedStatus').textContent='This browser cannot save an offline trip. Online testing is still available.';}).finally(()=>{renderHistory();if(!preparing&&!running)$('start').disabled=false;});connection();renderHistory();renderRoutePreview();
 })();
+
 
 

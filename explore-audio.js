@@ -4,8 +4,8 @@
  const sessions=new Map();let current=null,epoch=0,request=null,audioURL=null,state='idle',streaming=false,phoneActive=false;
  const setState=(next,message)=>{state=next;el('storyPause').disabled=next!=='speaking';el('storyResume').disabled=next!=='paused';el('storyStop').disabled=next==='idle';el('storyReplay').disabled=next!=='idle'||!current||current.parts.at(-1).length>1800;el('storyMore').disabled=next!=='idle'||!current||current.complete||current.parts.length>=3;el('storyPause').hidden=next!=='speaking';el('storyResume').hidden=next!=='paused';el('storyStop').hidden=next==='idle';el('storyReplay').hidden=next!=='idle';el('storyMore').hidden=next!=='idle'||!!current?.complete||current?.parts.length>=3;if(message!==undefined)el('storyStatus').textContent=message;};
  const player=globalThis.NarrationPlayer?.supported?new NarrationPlayer({onState:(next,message)=>{if(streaming)setState(next,message)}}):null;
- const voiceConfig=fetch('/voices').then(async r=>{if(!r.ok)throw Error('The narrator could not be loaded.');const c=await r.json();let saved;try{saved=localStorage.getItem('travelStoryteller.narrator')}catch{}return Object.hasOwn(c.voices||{},saved)?saved:c.defaultVoice;}).then(voice=>({voice}),error=>({error}));
- function stop(){epoch++;const diagnostic=el('storyVoice');diagnostic.textContent='';diagnostic.hidden=true;if(phoneActive)globalThis.speechSynthesis?.cancel();phoneActive=false;request?.abort();request=null;streaming=false;player?.stop();audio.pause();audio.removeAttribute('src');audio.load();audio.hidden=true;if(audioURL)URL.revokeObjectURL(audioURL);audioURL=null;setState('idle','Stopped.');}
+ let voiceConfig;const getVoiceConfig=()=>voiceConfig||=fetch('/voices').then(async r=>{if(!r.ok)throw Error('The narrator could not be loaded.');const c=await r.json();let saved;try{saved=localStorage.getItem('travelStoryteller.narrator')}catch{}return Object.hasOwn(c.voices||{},saved)?saved:c.defaultVoice;}).then(voice=>({voice}),error=>({error}));
+ function stop(){epoch++;const diagnostic=el('storyVoice');diagnostic.textContent='';diagnostic.hidden=true;if(phoneActive)globalThis.DiscoverNarrator?.stop();phoneActive=false;request?.abort();request=null;streaming=false;player?.stop();audio.pause();audio.removeAttribute('src');audio.load();audio.hidden=true;if(audioURL)URL.revokeObjectURL(audioURL);audioURL=null;setState('idle','Stopped.');}
  function reset(){stop();current=null;panel.hidden=true;setState('idle','');}
  function renderText(){el('storyText').replaceChildren(...current.parts.map((text,i)=>{const p=document.createElement('p');p.textContent=(i?'More: ':'')+text;return p}));el('storyName').textContent=current.title;el('storySources').replaceChildren(...current.sources.filter(s=>/^https:\/\//.test(s.url||'')).map(s=>{const a=document.createElement('a');a.href=s.url;a.target='_blank';a.rel='noopener';a.textContent=s.title+' ↗';return a}));}
  function showVoice(text){
@@ -23,17 +23,14 @@
  }
  async function speak(text,id){
   if(text.length>1800){setState('idle','This longer part is ready to read below; it exceeds the audio length limit.');return;}
-  if(globalThis.DiscoverNarrator)await globalThis.DiscoverNarrator.ready();
+  if(globalThis.DiscoverNarrator?.get().provider==='piper')await globalThis.DiscoverNarrator.ready();
   if(id!==epoch)return;const preference=globalThis.DiscoverNarrator?.get();
   if(preference?.provider==='phone'){
-   if(!globalThis.speechSynthesis)throw Error('Phone narration is unavailable in this browser.');
-   const voice=speechSynthesis.getVoices().find(v=>v.voiceURI===preference.uri);if(!voice)throw Error('The chosen phone voice is unavailable. Please choose another narrator.');
-   const utterance=new SpeechSynthesisUtterance(text);utterance.voice=voice;utterance.lang=voice.lang;utterance.rate=.85;phoneActive=true;
-   utterance.onstart=()=>{if(id===epoch)setState('speaking','Reading aloud…')};utterance.onend=()=>{if(id===epoch){phoneActive=false;setState('idle','Finished.')}};utterance.onerror=e=>{if(id===epoch&&e.error!=='canceled'&&e.error!=='interrupted'){phoneActive=false;setState('idle','Phone audio could not play. Choose another narrator.')}};
-   showVoice(voice.name+' · iPhone voice · '+voice.lang);
-   speechSynthesis.speak(utterance);return;
+   const voice=preference.voice;if(!voice)throw Error('Your selected phone voice is unavailable. Choose another narrator.');
+   phoneActive=true;showVoice(voice.name+' · phone voice · '+voice.lang);
+   globalThis.DiscoverNarrator.speak(text,{onProgress:()=>{if(id===epoch)setState('speaking','Reading aloud…');},onTiming:(name,seconds)=>{if(id===epoch)showVoice(name+' · phone voice · started after '+seconds.toFixed(1)+' seconds');},onEnd:()=>{if(id===epoch){phoneActive=false;setState('idle','Finished.');}},onError:message=>{if(id===epoch){phoneActive=false;setState('idle',message);}}});return;
   }
-  const config=await voiceConfig;if(id!==epoch)return;if(config.error)throw config.error;
+  const config=await getVoiceConfig();if(id!==epoch)return;if(config.error)throw config.error;
   if(preference?.voice)config.voice=preference.voice;
   if(player){streaming=true;await player.start(text,config.voice,response=>{if(id===epoch)reportServerVoice(response,'Streamed audio');});return;}
   const controller=request=new AbortController(),timer=setTimeout(()=>controller.abort(),190000);
@@ -43,7 +40,7 @@
   }finally{clearTimeout(timer);if(id===epoch)request=null;}
  }
  function listen(item,location){
-  stop();const id=epoch;player?.prime();
+  stop();const id=epoch;if(globalThis.DiscoverNarrator?.get().provider!=='phone')player?.prime();
   const key=location.label+'|'+item.id;current=sessions.get(key);
   if(!current){
    const canonical=item.source?.kind==='wikipedia'?item.source.title:item.name;
@@ -56,7 +53,7 @@
  }
  el('storyMore').addEventListener('click',async()=>{
   if(!current||state!=='idle'||current.complete||current.parts.length>=3)return;
-  stop();const id=epoch,session=current;player?.prime();const controller=request=new AbortController(),timer=setTimeout(()=>controller.abort(),90000);setState('loading','Finding more of this story…');
+  stop();const id=epoch,session=current;if(globalThis.DiscoverNarrator?.get().provider!=='phone')player?.prime();const controller=request=new AbortController(),timer=setTimeout(()=>controller.abort(),90000);setState('loading','Finding more of this story…');
   try{
    const extra=globalThis.DriveLogic.followUp(session.item,session.parts.join(' '));
    let data={story:extra};
@@ -76,7 +73,7 @@
  el('storyPause').addEventListener('click',()=>{if(phoneActive){speechSynthesis.pause();setState('paused','Paused.')}else if(streaming)player.pause();else audio.pause();});
  el('storyResume').addEventListener('click',()=>{if(phoneActive){speechSynthesis.resume();setState('speaking','Reading aloud…')}else if(streaming)player.resume();else audio.play().catch(()=>setState('idle','Press play on the audio player.'));});
  el('storyStop').addEventListener('click',stop);
- el('storyReplay').addEventListener('click',()=>{if(!current)return;stop();const id=epoch;player?.prime();setState('loading','Preparing narration…');speak(current.parts.at(-1),id).catch(error=>{if(id===epoch)setState('idle',error.message);});});
+ el('storyReplay').addEventListener('click',()=>{if(!current)return;stop();const id=epoch;if(globalThis.DiscoverNarrator?.get().provider!=='phone')player?.prime();setState('loading','Preparing narration…');speak(current.parts.at(-1),id).catch(error=>{if(id===epoch)setState('idle',error.message);});});
  audio.addEventListener('playing',()=>setState('speaking','Reading aloud…'));
  audio.addEventListener('pause',()=>{if(state==='speaking'&&!audio.ended)setState('paused','Paused.');});
  audio.addEventListener('ended',()=>setState('idle','Finished.'));
@@ -84,3 +81,4 @@
  window.addEventListener('pagehide',stop);
  globalThis.ExploreNarration={listen,reset,stop};setState('idle','');
 })();
+
