@@ -2,12 +2,35 @@
 (()=>{
  const $=id=>document.getElementById(id),L=globalThis.DriveLogic;
  let trip={items:[],audio:{},savedAt:null},running=false,watch=null,epoch=0,preparing=false,downloadController=null,guideController=null,audioController=null;
- let savedAreas=[],savedLoaded=false;
+ let savedAreas=[],savedLoaded=false,selectedRouteId='';
+ const JR=globalThis.JourneyRoute,routePlan=globalThis.DiscoverRouteTest;
+ try{selectedRouteId=localStorage.getItem('discoverPlaces.selectedRoute')||'';}catch{}
+ const routeArea=()=>savedAreas.find(a=>a.id===selectedRouteId&&routePlan&&a.routeId===routePlan.id);
+ const routeItems=()=>routeArea()?.items.filter(item=>JR.project(item.coord,routePlan.coordinates).metres<=L.PLAYBACK_METRES);
+ function selectRoute(id){selectedRouteId=id;try{localStorage.setItem('discoverPlaces.selectedRoute',id);}catch{}rebuild();renderRouteControls();}
+ function renderRouteControls(){
+  const choice=$('journeySource'),locked=running||preparing||starting||!savedLoaded;
+  choice.replaceChildren();const normal=document.createElement('option');normal.value='';normal.textContent='Just drive · nearby places';choice.append(normal);
+  for(const area of savedAreas.filter(a=>routePlan&&a.routeId===routePlan.id)){const option=document.createElement('option');option.value=area.id;option.textContent=area.label+' · '+area.items.length+' saved';choice.append(option);}
+  if(savedLoaded&&selectedRouteId&&!routeArea()){selectedRouteId='';try{localStorage.removeItem('discoverPlaces.selectedRoute');}catch{}}
+  choice.value=selectedRouteId;choice.disabled=locked;$('routeDownload').disabled=locked||!routePlan||!$('routeConfirmed').checked;$('routeConfirmed').disabled=locked;$('stopSavedAudio').disabled=running||starting;
+  $('routeModeStatus').textContent=routeArea()?'Route mode: only saved places on this route. No nearby searches or automatic rerouting.':'Nearby discovery is selected. A route download will select the saved route for you.';
+ }
+ $('journeySource').onchange=()=>{if(running||preparing||starting)return;selectRoute($('journeySource').value);};
+ $('openRouteTest').onclick=()=>{$('route-test').open=true;};
+ $('routeConfirmed').onchange=()=>renderRouteControls();
+ $('routeDownload').onclick=()=>{if(!$('routeConfirmed').checked)return;$('prepare').onclick('route');};
+ function renderRoutePreview(){
+  if(!routePlan||!JR)return;const items=JR.select(JR.within(routePlan,L.PLAYBACK_METRES),downloadCount);
+  $('routePreviewPlaces').replaceChildren(...items.map(item=>{const li=document.createElement('li');li.textContent=item.name+' · '+Math.round(item.route.metres)+' m from the route';return li;}));
+  $('routePreviewStatus').textContent=items.length+' suggested places within '+L.PLAYBACK_METRES+' m of the road route. Downloads will be spread along it, where sources are available.';
+ }
+ 
  const downloadSizes=[3,5,8,10,20],downloadKey='discoverPlaces.downloadCount';
  const downloadChoice=$('downloadCount');
  let downloadCount=8;try{const n=Number(localStorage.getItem(downloadKey));if(downloadSizes.includes(n))downloadCount=n;}catch{}
  downloadChoice.value=String(downloadCount);
- downloadChoice.onchange=()=>{if(running||preparing||starting)return;const n=Number(downloadChoice.value);downloadCount=downloadSizes.includes(n)?n:8;downloadChoice.value=String(downloadCount);try{localStorage.setItem(downloadKey,String(downloadCount));}catch{}};
+ downloadChoice.onchange=()=>{if(running||preparing||starting)return;const n=Number(downloadChoice.value);downloadCount=downloadSizes.includes(n)?n:8;downloadChoice.value=String(downloadCount);try{localStorage.setItem(downloadKey,String(downloadCount));}catch{}renderRoutePreview();};
  let source,wakeLock,lastHeading=null,lastGood=null,fix=null,movement=null,pending=null,buffer=null,audioBusy=false,lastEnd=-Infinity,lastSearch=null,lastSearchTime=0,retryAt=0,guideRetryAt=0,guideBusy=false,staleTimer;
  const played=new Set(),latchedPlaces=new Map(),closestDistances=new Map(),buffers=new Map(),preparedItems=new Map(),events=[];let previewURL,arrivalItems=[],arrivalBusy=false,arrivalController=null,lastArrivalSearch=null,lastArrivalTime=0,arrivalRetry=0,lastWaiting='';let nearbyItems=[];
  let lastPlayedPlace=null;
@@ -23,7 +46,7 @@
    distanceChoice.value=String(L.PLAYBACK_METRES);
    try{localStorage.setItem(distanceKey,String(L.PLAYBACK_METRES));$('distanceStatus').textContent='Saved on this phone and browser.';}
    catch{$('distanceStatus').textContent='Used for this session; this browser could not save your choice.';}
-   $('nearbyPlacesRadius').textContent='Explore places within '+L.PLAYBACK_METRES+' metres of your location.';
+   $('nearbyPlacesRadius').textContent='Explore places within '+L.PLAYBACK_METRES+' metres of your location.';renderRoutePreview();rebuild();
    document.querySelectorAll('[data-journey-distance]').forEach(node=>node.textContent=String(L.PLAYBACK_METRES));
   };
  }
@@ -32,7 +55,7 @@
  const placeIcons={nature:'🌿',culture:'🎨',experience:'🎟️',architecture:'🏛️',history:'📜'};
  function renderNearbyPlaces(){
   const currentFix=running&&!parkedCheck&&fix&&Date.now()-fix.time<=10000?fix:null;
-  const explored=[...nearbyItems,...trip.items,...preparedItems.values()].filter(item=>item.kind!=='arrival');
+  const explored=(routeItems()||[...nearbyItems,...trip.items,...preparedItems.values()]).filter(item=>item.kind!=='arrival');
   const nearby=L.nearbyPlaces(explored,currentFix).sort((a,b)=>a.name.localeCompare(b.name));
   $('nearbyPlaces').hidden=!running||parkedCheck;
   $('nearbyPlacesStatus').textContent=!currentFix?'Waiting for a fresh location.':
@@ -80,7 +103,7 @@
  function status(message){$('status').textContent=message;}
  function waiting(reason,message){$('decision').textContent=reason;status(message);if(lastWaiting!==reason){lastWaiting=reason;log('Waiting: '+reason);}}
  const currentArrival=i=>i?.kind==='arrival'&&[3,4,5].includes(i.profileVersion)&&L.valid(i.coord)&&typeof i.reason==='string'&&Date.parse(i.reviewAfter)>Date.now();
- function rebuild(){candidates=L.places([...arrivalItems.filter(currentArrival),...trip.items.filter(i=>i.kind!=='arrival'||currentArrival(i)),...nearbyItems,...[...preparedItems.values()].filter(i=>i.kind!=='arrival'||currentArrival(i))]);}
+ function rebuild(){if(routeArea()){candidates=L.places(routeItems());return;}candidates=L.places([...arrivalItems.filter(currentArrival),...trip.items.filter(i=>i.kind!=='arrival'||currentArrival(i)),...nearbyItems,...[...preparedItems.values()].filter(i=>i.kind!=='arrival'||currentArrival(i))]);}
  function nextLabel(approach){return approach.item.name+' · '+Math.round(approach.metres)+' m'+(approach.arrival?' from the reference point · plays within '+L.PLAYBACK_METRES+' m': approach.eta===null?' · stopped; last travel direction held':' · about '+Math.round(approach.eta)+' s');}
  function connection(){const c=navigator.connection;$('connection').textContent=navigator.onLine===false?'Offline: using downloaded information and audio only.':'Connection available'+(c?.effectiveType?' · browser estimate '+c.effectiveType:'')+'. Actual preparation times are measured below.';}
  const db=()=>new Promise((resolve,reject)=>{const r=indexedDB.open('discover-driving-test',2);r.onupgradeneeded=()=>{for(const name of ['trip','arrivals'])if(!r.result.objectStoreNames.contains(name))r.result.createObjectStore(name);};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
@@ -120,7 +143,7 @@
   $('savedAreasEmpty').hidden=!!savedAreas.length;
  }
  $('stopSavedAudio').onclick=()=>{if(running||starting)return;nativePlayer.stop();$('savedListenStatus').textContent='Stopped.';};
- function saved(){renderSavedAreas();const sample=trip.items.find(i=>trip.audio[L.key(i)]&&(i.kind!=='arrival'||currentArrival(i)));if(previewURL)URL.revokeObjectURL(previewURL);$('savedPreview').hidden=!sample;$('previewLabel').hidden=!sample;if(sample){previewURL=URL.createObjectURL(trip.audio[L.key(sample)]);$('savedPreview').src=previewURL;}else $('savedPreview').removeAttribute('src');const count=trip.items.filter(i=>trip.audio[L.key(i)]).length;$('savedStatus').textContent=trip.savedAt?`${count} clips saved on this phone for ${trip.label}. Saved ${new Date(trip.savedAt).toLocaleString('en-GB')}.`:'No offline clips saved yet.';if(trip.savedAt&&!trip.items.some(i=>i.kind==='arrival'))$('savedStatus').textContent+=' No arrival introduction is saved. Prepare again while connected to add one.';if(trip.items.some(i=>i.kind==='arrival'&&!currentArrival(i)))$('savedStatus').textContent+=' An arrival introduction needs updating or its annual review. Prepare again while connected.';}
+ function saved(){renderSavedAreas();const sample=trip.items.find(i=>trip.audio[L.key(i)]&&(i.kind!=='arrival'||currentArrival(i)));if(previewURL)URL.revokeObjectURL(previewURL);$('savedPreview').hidden=!sample;$('previewLabel').hidden=!sample;if(sample){previewURL=URL.createObjectURL(trip.audio[L.key(sample)]);$('savedPreview').src=previewURL;}else $('savedPreview').removeAttribute('src');const count=trip.items.filter(i=>trip.audio[L.key(i)]).length;$('savedStatus').textContent=trip.savedAt?`${count} clips saved on this phone for ${trip.label}. Saved ${new Date(trip.savedAt).toLocaleString('en-GB')}.`:'No offline clips saved yet.';if(trip.savedAt&&!trip.items.some(i=>i.kind==='arrival'))$('savedStatus').textContent+=' No town arrival introduction is saved; individual place clips are available.';if(trip.items.some(i=>i.kind==='arrival'&&!currentArrival(i)))$('savedStatus').textContent+=' An arrival introduction needs updating or its annual review. Prepare again while connected.';}
  async function shell(){if(!('serviceWorker'in navigator))throw Error('Offline page saving is unavailable in this browser.');const r=await navigator.serviceWorker.register('/drive-test-sw.js',{scope:'/drive-test'});const worker=r.installing||r.waiting||r.active;if(!worker)throw Error('Offline page could not be saved.');if(worker.state!=='activated')await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Offline page setup took too long. Try again.')),30000);worker.addEventListener('statechange',()=>{if(worker.state==='activated'){clearTimeout(timer);resolve();}if(worker.state==='redundant'){clearTimeout(timer);reject(Error('Offline page saving failed.'));}});});$('offlineStatus').textContent='The driving test page is saved for offline reopening at this address.';}
  async function json(url,body,signal){const r=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal});const data=await r.json();if(!r.ok)throw Error(data.error||'Request failed ('+r.status+').');return data;}
  async function guide(input,signal,onPreview=()=>{}){const end=Date.now()+120000;while(true){const data=await json('/api/explore',{...input,progressive:true,specialists:false},signal);onPreview(data);if(data.complete!==false)return data;if(Date.now()>end)throw Error('Guide preparation took too long. Try again while connected.');await new Promise((resolve,reject)=>{const abort=()=>{clearTimeout(timer);reject(new DOMException('Cancelled','AbortError'))},timer=setTimeout(()=>{signal.removeEventListener('abort',abort);resolve();},1500);signal.addEventListener('abort',abort,{once:true});if(signal.aborted)abort();});}}
@@ -140,10 +163,11 @@
   for(const place of choices){const button=document.createElement('button');button.type='button';const title=document.createElement('strong'),detail=document.createElement('small');title.textContent=place.title;detail.textContent=place.description||'';button.append(title,detail);button.onclick=()=>{chosenDestination=place.title;$('destination').value=place.title;$('destinationChoices').replaceChildren();$('destinationChoices').hidden=true;$('destinationMessage').textContent=place.description||'';$('prepare').onclick();};$('destinationChoices').append(button);}
   $('destinationChoices').hidden=!choices.length;$('savedStatus').textContent='Choose a place before downloading. Previous saved clips remain available.';return null;
  }
- $('prepare').onclick=async()=>{
- if(preparing||running||starting||!savedLoaded)return;const place=$('destination').value.trim();if(!place)return;preparing=true;renderHistory();$('testVoice').disabled=true;$('testAutomatic').disabled=true;$('prepare').disabled=true;$('start').disabled=true;$('forget').disabled=true;$('cancelPrepare').disabled=false;const controller=downloadController=new AbortController(),timer=timeout(controller,Math.max(12,downloadCount*2)*60*1000);
- try{const selected=await destination(place,controller.signal);if(!selected)return;await shell();$('savedStatus').textContent='Finding places near '+selected+'…';const g=await guide({place:selected},controller.signal);let arrivals=[];try{arrivals=(await json('/api/arrivals',{place:g.location.label},controller.signal)).items||[];}catch(error){if(controller.signal.aborted)throw error;log('Arrival introduction not downloaded: '+error.message);}const available=L.places([...arrivals,...g.items]).sort((a,b)=>Number(b.kind==='arrival')-Number(a.kind==='arrival')||Number(!!b.mustSee)-Number(!!a.mustSee)||(a.distanceKm||0)-(b.distanceKm||0));const items=available.slice(0,downloadCount);if(!items.length)throw Error('No places with usable coordinates were found. Try a nearby town.');
- const id=areaId(g.location.label),previous=savedAreas.find(a=>a.id===id),next={id,label:g.location.label,items:[],audio:{},requested:downloadCount,available:available.length,partial:true,savedAt:new Date().toISOString()},failures=[];
+ $('prepare').onclick=async(mode)=>{
+ if(preparing||running||starting||!savedLoaded)return;const place=$('destination').value.trim();if(!place&&mode!=='route')return;preparing=true;renderHistory();$('testVoice').disabled=true;$('testAutomatic').disabled=true;$('prepare').disabled=true;$('start').disabled=true;$('forget').disabled=true;$('cancelPrepare').disabled=false;const controller=downloadController=new AbortController(),timer=timeout(controller,Math.max(12,downloadCount*2)*60*1000);
+ try{let g,arrivals=[];const isRoute=mode==='route';if(isRoute){if(!routePlan||!$('routeConfirmed').checked)throw Error('Check the proposed route before downloading.');await shell();g={location:{label:routePlan.label},items:JR.within(routePlan,L.PLAYBACK_METRES)};}else{const selected=await destination(place,controller.signal);if(!selected)return;await shell();$('savedStatus').textContent='Finding places near '+selected+'…';g=await guide({place:selected},controller.signal);try{arrivals=(await json('/api/arrivals',{place:g.location.label},controller.signal)).items||[];}catch(error){if(controller.signal.aborted)throw error;log('Arrival introduction not downloaded: '+error.message);}}
+ const available=isRoute?L.places(g.items):L.places([...arrivals,...g.items]).sort((a,b)=>Number(b.kind==='arrival')-Number(a.kind==='arrival')||Number(!!b.mustSee)-Number(!!a.mustSee)||(a.distanceKm||0)-(b.distanceKm||0));const items=isRoute?JR.select(available,downloadCount):available.slice(0,downloadCount);if(!items.length)throw Error('No places with usable coordinates were found. Try a nearby town.');
+ const id=isRoute?routePlan.id:areaId(g.location.label),previous=savedAreas.find(a=>a.id===id),next={id,routeId:isRoute?routePlan.id:null,routeRadius:isRoute?L.PLAYBACK_METRES:null,label:g.location.label,items:[],audio:{},requested:downloadCount,available:available.length,partial:true,savedAt:new Date().toISOString()},failures=[];
  // Keep old clips during a refresh. Replace the area only once the complete new selection is safely stored.
  const snapshot=()=>{const merged=new Map((previous?.items||[]).map(i=>[L.key(i),i]));for(const i of next.items)merged.set(L.key(i),i);return {...next,items:[...merged.values()],audio:{...previous?.audio,...next.audio}};};
  for(const item of items){
@@ -152,7 +176,7 @@
   let a;try{a=await audio(item,controller.signal,L.narration(item,{nearby:false}));}catch(error){if(controller.signal.aborted)throw error;failures.push(item.name);log('Download failed: '+item.name+' · '+error.message);continue;}
   if(controller.signal.aborted)throw new DOMException('Cancelled','AbortError');
   next.items.push({...item,spokenText:L.narration(item,{nearby:false})});next.audio[L.key(item)]=a.blob;
-  await commitAreas([...savedAreas.filter(area=>area.id!==id),snapshot()]);
+  await commitAreas([...savedAreas.filter(area=>area.id!==id),snapshot()]);if(isRoute)selectRoute(id);
   $('savedStatus').textContent=`${next.items.length} of ${items.length} saved on this phone.`;
   log('Downloaded '+item.name+' · '+a.seconds.toFixed(1)+' seconds');
  }
@@ -241,7 +265,7 @@
  }
 
  async function refreshGuide(current,id){
- if(guideBusy||navigator.onLine===false||Date.now()<guideRetryAt)return;
+ if(routeArea()||guideBusy||navigator.onLine===false||Date.now()<guideRetryAt)return;
  if(lastSearch&&Date.now()-lastSearchTime<90000)return;
  if(lastSearch&&L.distance(lastSearch,current)<1200)return;
  guideBusy=true;const controller=guideController=new AbortController(),timer=timeout(controller,125000);lastSearchTime=Date.now();const started=performance.now();
@@ -274,6 +298,7 @@
  }
 
  function renderHistory(){
+  renderRouteControls();
   renderSavedAreas();
   if(distanceChoice)distanceChoice.disabled=running||starting;
   const snapshot=history.snapshot();$('skipFamiliar').checked=snapshot.skipFamiliar;$('skipFamiliar').disabled=running||preparing||starting;$('resetHistory').disabled=running||preparing||starting;$('historyList').replaceChildren();
@@ -383,6 +408,8 @@
  }
  const isLatched=item=>!!item&&latchedPlaces.has(L.key(item));
  function evaluate(){
+  if(!parkedCheck&&routeArea()&&fix&&JR.project(fix,routePlan.coordinates).metres>1000){if(!source){latchedPlaces.clear();pending=null;buffer=null;waiting('Away from saved route','You are more than 1 km from the saved road route. Saved route narration will resume when you return. There is no automatic rerouting.');}return;}
+
  if(!running)return;renderNearbyPlaces();dropPlacesBehind();latchNearby();renderAhead();if(source){fillAhead();return;}
  for(const [key,item]of latchedPlaces)if(played.has(L.key(item))||!history.check(item).allowed)latchedPlaces.delete(key);
  const queued=[...latchedPlaces.values()].filter(item=>audioEligible(item)&&(navigator.onLine!==false||audioReady(item))).sort((a,b)=>fix?L.distance(fix,a.coord)-L.distance(fix,b.coord):0)[0];
@@ -407,11 +434,11 @@
  function position(p,id){if(!running||id!==epoch)return;const c=p.coords,current={lat:c.latitude,lon:c.longitude,accuracy:c.accuracy,speed:c.speed,heading:c.heading,time:p.timestamp};$('accuracy').textContent=Number.isFinite(c.accuracy)?'±'+Math.round(c.accuracy)+' m':'Unavailable';if(Date.now()-current.time>10000||current.time>Date.now()+5000||!L.valid(current)||!Number.isFinite(current.accuracy)||current.accuracy>75){fix=null;movement=null;renderAhead();renderNearbyPlaces();waiting('GPS accuracy or age','Waiting for a fresh GPS fix accurate to about 75 metres or better.');return;}
  fix=current;movement=L.motion(current,lastGood,lastHeading);if(movement&&!movement.stationary)lastHeading=movement.heading;if(!lastGood||L.distance(lastGood,current)>Math.max(12,current.accuracy,lastGood.accuracy)||current.time-lastGood.time>30000)lastGood=current;
  $('speed').textContent=movement?(movement.stationary?'0 mph · last travel direction held':Math.round(movement.speed*2.23694)+' mph'):'Waiting for movement';refreshGuide(current,id);refreshArrivals(current,id);evaluate();}
- async function startTracking(){if(running||preparing)return;if(!navigator.geolocation){status('Location is unavailable in this browser.');return;}try{prime();}catch(error){status(error.message);return;}nativePlayer.stop();$('savedPreview').hidden=true;$('previewLabel').hidden=true;running=true;renderHistory();const id=++epoch;played.clear();latchedPlaces.clear();closestDistances.clear();pending=null;buffer=null;lastHeading=null;lastGood=null;fix=null;movement=null;lastSearch=null;lastSearchTime=0;lastEnd=-Infinity;retryAt=0;arrivalRetry=0;lastArrivalSearch=null;lastArrivalTime=0;guideRetryAt=0;audioRetries.clear();nearbyItems=[];rebuild();renderNearbyPlaces();$('start').disabled=true;$('stop').disabled=false;$('prepare').disabled=true;$('testVoice').disabled=true;$('testAutomatic').disabled=true;$('forget').disabled=true;status('Waiting for precise location permission…');log('V17 · up to 3 clips ahead · '+L.PLAYBACK_METRES+' m forward selection · Driving session started · '+(navigator.onLine===false?'offline':'online'));shell().catch(error=>{$('offlineStatus').textContent=error.message});try{navigator.wakeLock?.request('screen').then(lock=>{if(running&&id===epoch)wakeLock=lock;else lock.release();}).catch(()=>{});}catch{}watch=navigator.geolocation.watchPosition(p=>position(p,id),error=>{if(id!==epoch)return;fix=null;movement=null;renderAhead();renderNearbyPlaces();status('Location unavailable: '+(error.code===1?'allow precise location in your browser settings.':'waiting for GPS.'));log('GPS error '+error.code);},{enableHighAccuracy:true,maximumAge:0,timeout:15000});staleTimer=setInterval(()=>{if(running){if(fix&&Date.now()-fix.time>10000){movement=null;renderAhead();renderNearbyPlaces();if(!source&&!latchedPlaces.size)waiting('GPS fix is old','GPS fix is old. Waiting before selecting another place.');}if(latchedPlaces.size)evaluate();}},2000);}
+ async function startTracking(){if(running||preparing)return;if(!navigator.geolocation){status('Location is unavailable in this browser.');return;}try{prime();}catch(error){status(error.message);return;}nativePlayer.stop();$('savedPreview').hidden=true;$('previewLabel').hidden=true;running=true;renderHistory();const id=++epoch;played.clear();latchedPlaces.clear();closestDistances.clear();pending=null;buffer=null;lastHeading=null;lastGood=null;fix=null;movement=null;lastSearch=null;lastSearchTime=0;lastEnd=-Infinity;retryAt=0;arrivalRetry=0;lastArrivalSearch=null;lastArrivalTime=0;guideRetryAt=0;audioRetries.clear();nearbyItems=[];rebuild();renderNearbyPlaces();$('start').disabled=true;$('stop').disabled=false;$('prepare').disabled=true;$('testVoice').disabled=true;$('testAutomatic').disabled=true;$('forget').disabled=true;status('Waiting for precise location permission…');log('V18 · up to 3 clips ahead · '+L.PLAYBACK_METRES+' m forward selection · Driving session started · '+(navigator.onLine===false?'offline':'online'));shell().catch(error=>{$('offlineStatus').textContent=error.message});try{navigator.wakeLock?.request('screen').then(lock=>{if(running&&id===epoch)wakeLock=lock;else lock.release();}).catch(()=>{});}catch{}watch=navigator.geolocation.watchPosition(p=>position(p,id),error=>{if(id!==epoch)return;fix=null;movement=null;renderAhead();renderNearbyPlaces();status('Location unavailable: '+(error.code===1?'allow precise location in your browser settings.':'waiting for GPS.'));log('GPS error '+error.code);},{enableHighAccuracy:true,maximumAge:0,timeout:15000});staleTimer=setInterval(()=>{if(running){if(fix&&Date.now()-fix.time>10000){movement=null;renderAhead();renderNearbyPlaces();if(!source&&!latchedPlaces.size)waiting('GPS fix is old','GPS fix is old. Waiting before selecting another place.');}if(latchedPlaces.size)evaluate();}},2000);}
  function stop(message='Driving test stopped.'){clearTimeout(parkedTimer);parkedTimer=null;parkedCheck=false;historyReplay=null;latchedPlaces.clear();closestDistances.clear();starting=false;running=false;aheadJob?.controller.abort();aheadJob=null;lastHeading=null;downloadController?.abort();renderHistory();epoch++;if(watch!==null)navigator.geolocation.clearWatch(watch);watch=null;clearInterval(staleTimer);guideController?.abort();audioController?.abort();arrivalController?.abort();arrivalController=null;arrivalBusy=false;guideController=null;audioController=null;guideBusy=false;audioBusy=false;source=null;nativePlayer.stop();pending=null;buffer=null;$('play').disabled=true;wakeLock?.release().catch(()=>{});wakeLock=null;$('start').disabled=false;$('start').textContent='Start journey with sound';$('stop').disabled=true;$('prepare').disabled=false;$('testVoice').disabled=false;$('testAutomatic').disabled=false;$('forget').disabled=false;$('decision').textContent='Stopped';renderAhead();renderNearbyPlaces();renderMore();status(message);log(message);}
  function start(){
   if(running||preparing||starting)return;if(!navigator.geolocation){status('Location is unavailable in this browser.');return;}
-  starting=true;renderMore();const id=++epoch;prime();$('start').disabled=true;$('stop').disabled=false;$('prepare').disabled=true;$('testVoice').disabled=true;$('testAutomatic').disabled=true;$('forget').disabled=true;renderHistory();$('previewLabel').hidden=false;$('previewLabel').textContent='Journey sound';status('You should hear two short notes. GPS starts after the chime. Stay parked if you hear nothing.');log('V17 Start tapped: local chime requested directly from the button gesture; no download required.');
+  starting=true;renderMore();const id=++epoch;prime();$('start').disabled=true;$('stop').disabled=false;$('prepare').disabled=true;$('testVoice').disabled=true;$('testAutomatic').disabled=true;$('forget').disabled=true;renderHistory();$('previewLabel').hidden=false;$('previewLabel').textContent='Journey sound';status('You should hear two short notes. GPS starts after the chime. Stay parked if you hear nothing.');log('V18 Start tapped: local chime requested directly from the button gesture; no download required.');
   nativePlayer.play(L.startChime(),{onProgress(){if(id===epoch&&starting)status('Start chime player is active. Stay parked if the notes are silent.');},onEnd(){if(id!==epoch||!starting)return;starting=false;log('Start chime finished; starting GPS automatically.');startTracking();},onPaused(){if(id===epoch&&starting)status('Startup was paused. Stop, then tap Start journey again while parked.');},onError(message){if(id!==epoch||!starting)return;starting=false;stop('Sound could not start: '+message);}});
  }
  $('start').onclick=start;$('stop').onclick=()=>stop();$('play').onclick=()=>{prime();play(true);};
@@ -420,7 +447,7 @@
  $('copy').onclick=async()=>{try{await navigator.clipboard.writeText(events.join('\n'));$('copy').textContent='Copied';}catch{$('copy').textContent='Select and copy the results below';}};
 
  async function refreshArrivals(current,id){
-  if(arrivalBusy||navigator.onLine===false||Date.now()<arrivalRetry)return;
+  if(routeArea()||arrivalBusy||navigator.onLine===false||Date.now()<arrivalRetry)return;
   if(lastArrivalSearch&&(Date.now()-lastArrivalTime<60000||L.distance(lastArrivalSearch,current)<1000))return;
   arrivalBusy=true;const controller=arrivalController=new AbortController(),timer=timeout(controller,35000);lastArrivalTime=Date.now();
   try{const result=await json('/api/arrivals',{lat:Number(current.lat.toFixed(3)),lon:Number(current.lon.toFixed(3)),known:arrivalItems.filter(i=>i.profileVersion===5&&currentArrival(i)).map(i=>i.pageId)},controller.signal);if(!running||id!==epoch)return;lastArrivalSearch=current;const merged=new Map(arrivalItems.filter(currentArrival).map(i=>[i.id,i]));for(const i of result.items||[])if(currentArrival(i))merged.set(i.id,i);arrivalItems=[...merged.values()].slice(-32);storage('put',arrivalItems,'arrivals').catch(()=>{});rebuild();if(result.items?.length)log('Arrival introductions ready: '+result.items.map(i=>i.placeName).join(', ')+'. Annual source review when used.');evaluate();}
@@ -445,6 +472,7 @@
 
  storage('get',undefined,'arrivals').then(value=>{if(Array.isArray(value))arrivalItems=value.filter(currentArrival).slice(-32);if(running){rebuild();evaluate();}}).catch(()=>{});
 
- storage('get').then(value=>{if(value?.version===2&&Array.isArray(value.areas))useAreas(value.areas);else if(value?.items&&value?.audio){useAreas(value.items.length?[{...value,id:areaId(value.label)}]:[]);if(value.welcomeAudio)voiceCheckBlob=value.welcomeAudio;}savedLoaded=true;saved();}).catch(()=>{$('savedStatus').textContent='This browser cannot save an offline trip. Online testing is still available.';}).finally(()=>{renderHistory();if(!preparing&&!running)$('start').disabled=false;});connection();renderHistory();
+ storage('get').then(value=>{if(value?.version===2&&Array.isArray(value.areas))useAreas(value.areas);else if(value?.items&&value?.audio){useAreas(value.items.length?[{...value,id:areaId(value.label)}]:[]);if(value.welcomeAudio)voiceCheckBlob=value.welcomeAudio;}savedLoaded=true;saved();}).catch(()=>{$('savedStatus').textContent='This browser cannot save an offline trip. Online testing is still available.';}).finally(()=>{renderHistory();if(!preparing&&!running)$('start').disabled=false;});connection();renderHistory();renderRoutePreview();
 })();
+
 
