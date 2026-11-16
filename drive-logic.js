@@ -10,7 +10,33 @@
  const angle=(a,b)=>Math.abs((a-b+540)%360-180);
  const valid=c=>c&&Number.isFinite(c.lat)&&Number.isFinite(c.lon)&&Math.abs(c.lat)<=90&&Math.abs(c.lon)<=180;
  const key=item=>item.kind==='arrival'?item.id+':'+(item.audioKey||'legacy'):(item.source?.url||item.id);
- function places(items){const seen=new Set();return items.filter(i=>{const k=i.kind==='arrival'?i.id:key(i);if(!k||seen.has(k)||!valid(i.coord)||i.eventArea||i.historyOnly||!i.reason||!i.name)return false;seen.add(k);return true;});}
+ // A single canonical record supplies both category cards and driving narration.
+ function canonicalPlaces(items){
+  const groups=new Map();
+  for(const item of items){
+   const identity=item.kind==='arrival'?'arrival:'+item.id:item.historyOnly?'story:'+item.id:item.eventArea?'event:'+item.id:item.id||item.source?.url;
+   if(!identity)continue;
+   if(!groups.has(identity))groups.set(identity,[]);
+   groups.get(identity).push(item);
+  }
+  const priority={attractions:0,museums:1,buildings:2,gems:3,walks:4,family:5,history:6,photos:7,events:8};
+  return [...groups.values()].map(records=>{
+   const ordered=[...records].sort((a,b)=>(priority[a.section]??9)-(priority[b.section]??9)||String(a.reason).localeCompare(String(b.reason)));
+   const item=ordered[0],sections=new Set(records.map(x=>x.section));
+   if(item.displayCategory)return item; // Already canonical, including saved guides.
+   const text=item.name+' '+(item.background||item.reason||'');
+   const heritage=sections.has('museums')||item.historyOnly||/\b(museum|gallery|castle|palace|historic house|monument|barrow|stone circle|church|abbey|cathedral)\b/i.test(item.name);
+   const outdoor=/\b(gardens?|parks?|woodland|forest|trail|footpath|promenade|nature reserve)\b/i.test(item.name)&&
+    /\b(walk\w*|trail|footpath|public park|public garden|promenade)\b/i.test(text);
+   const walk=!heritage&&(sections.has('walks')||outdoor);
+   const family=!heritage&&!walk&&sections.has('family');
+   const displayCategory=item.eventArea||sections.has('events')?'events':walk?'walks':family?'family':'attractions';
+   return {...item,displayCategory,familyActivity:!!item.familyActivity||sections.has('family'),
+    image:item.image||records.find(x=>x.image)?.image||null,
+    background:item.background||records.find(x=>x.background)?.background||''};
+  });
+ }
+ function places(items){const seen=new Set();return canonicalPlaces(items).filter(i=>{const k=i.kind==='arrival'?i.id:key(i);if(!k||seen.has(k)||!valid(i.coord)||i.eventArea||i.historyOnly||!i.reason||!i.name)return false;seen.add(k);return true;});}
  function nearbyPlaces(items,fix,radius=PLAYBACK_METRES){
   if(!valid(fix))return [];
   return places(items).filter(item=>distance(fix,item.coord)<=radius);
@@ -113,7 +139,7 @@
   return facts.join(' ');
  }
 
- const api={nearbyIntroduction,narration,followUp,DISTANCE_OPTIONS,setPlaybackMetres,get PLAYBACK_METRES(){return PLAYBACK_METRES;},movingAway,startChime,distance,bearing,angle,valid,key,places,nearbyPlaces,motion,approaching,choose,opening};
+ const api={canonicalPlaces,nearbyIntroduction,narration,followUp,DISTANCE_OPTIONS,setPlaybackMetres,get PLAYBACK_METRES(){return PLAYBACK_METRES;},movingAway,startChime,distance,bearing,angle,valid,key,places,nearbyPlaces,motion,approaching,choose,opening};
  if(typeof module!=='undefined')module.exports=api;else globalThis.DriveLogic=api;
 })();
 
