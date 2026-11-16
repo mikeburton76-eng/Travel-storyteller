@@ -321,7 +321,7 @@
  $('resetHistory').onclick=()=>{if(running||preparing)return;history.clear();played.clear();latchedPlaces.clear();closestDistances.clear();renderHistory();status('Listening history reset. Places may play again on the next journey.');log('Listener reset listening history.');};
  function spokenText(item){
   const savedItem=trip.items.find(saved=>L.key(saved)===L.key(item));
-  return L.nearbyIntroduction(item,savedItem?.spokenText||L.narration(item));
+  return L.narration(savedItem?{...savedItem,...item}:item);
  }
  function renderMore(){
   $('moreStory').hidden=!lastPlayedPlace||running||starting;

@@ -43,8 +43,9 @@
   return new Blob([data],{type:'audio/wav'});
  }
  const notableFact=/\b(?:first|oldest|only|unusual|secret|legend\w*|tradition\w*|invent\w*|discover\w*|designed|restored|buried|built|opened|born|lived|wrote|poet\w*|medieval|Bronze Age|Iron Age|barrow\w*|archaeolog\w*)\b/i;
+ const humanInterest=/\b(?:battles?|poets?|writers?|royal|medieval|Bronze Age|Iron Age|barrows?|ancient|archaeolog\w*|formerly|originally|converted|unusual|tradition\w*|invent\w*|discover\w*|born|lived|wrote)\b/i;
  const standoutFact=/\b(?:first|oldest|only|unusual|secret|legend\w*|tradition\w*|invent\w*|discover\w*|born|lived|wrote|poet\w*)\b/i;
- const factRank=sentence=>standoutFact.test(sentence)?2:Number(notableFact.test(sentence));
+ const factRank=sentence=>standoutFact.test(sentence)?3:humanInterest.test(sentence)?2:Number(notableFact.test(sentence));
  const sentences=text=>String(text||'').match(/[^.!?\n]+(?:[.!?](?=\s|$)|$)/g)||[];
  const words=text=>new Set(text.toLowerCase().match(/[\p{L}\p{N}]+/gu)?.filter(word=>word.length>3)||[]);
  function repeats(candidate,previous){
@@ -56,9 +57,9 @@
   if(item.kind==='arrival'&&item.reason.length<=1700)return item.reason;
   const main=sentences(item.reason),background=sentences(item.background);
   const interest=/\b(battles?|born|lived|poets?|writers?|invent\w*|discover\w*|traditions?|royal|medieval|Bronze Age|Iron Age|barrows?|ancient|archaeolog\w*)\b/i;
-  const detail=[...main.slice(1),...background].find(sentence=>interest.test(sentence));
+  const details=[...main.slice(1),...background].filter(sentence=>interest.test(sentence)||humanInterest.test(sentence)).sort((a,b)=>factRank(b)-factRank(a)).slice(0,2);
   const selected=[];
-  for(const sentence of [main[0],detail,...main.slice(1)]){
+  for(const sentence of [main[0],...details,...main.slice(1)]){
    if(!sentence)continue;
    const candidate=sentence.trim();
    if(selected.some(previous=>repeats(candidate,previous)))continue;
@@ -91,12 +92,16 @@
   if(item.eventArea)return nearby?nearbyIntroduction(item,item.reason):item.reason;
   const base=opening(item);
   if(item.kind==='arrival'&&!item.name)return base; // Parked sound check.
-  const story=nearby?nearbyIntroduction(item,base):base;
-  const limit=item.kind==='arrival'?1700:900,wordLimit=item.kind==='arrival'?145:95;
-  const fact=extraFacts(item,story).find(sentence=>notableFact.test(sentence)
-   &&story.length+sentence.length+1<=limit
-   &&(story+' '+sentence).split(/\s+/).length<=wordLimit);
-  return fact?story+' '+fact:story;
+  let story=base;
+  const limit=item.kind==='arrival'?1700:1100,wordLimit=item.kind==='arrival'?145:115;
+  let added=0;
+  for(const fact of extraFacts(item,story)){
+   if(!(notableFact.test(fact)||humanInterest.test(fact)))continue;
+   if(story.length+fact.length+1>limit||(story+' '+fact).split(/\s+/).length>wordLimit)continue;
+   story+=' '+fact;
+   if(++added===2)break;
+  }
+  return nearby?nearbyIntroduction(item,story):story;
  }
  function followUp(item,spoken=narration(item)){
   const facts=[];
