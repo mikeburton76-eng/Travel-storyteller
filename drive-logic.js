@@ -29,7 +29,8 @@
    const outdoor=/\b(gardens?|parks?|woodland|forest|trail|footpath|promenade|nature reserve)\b/i.test(item.name)&&
     /\b(walk\w*|trail|footpath|public park|public garden|promenade)\b/i.test(text);
    const walk=!heritage&&(sections.has('walks')||outdoor);
-   const family=!heritage&&!walk&&sections.has('family');
+   const interactive=/\b(world of illusions|camera obscura|science cent(?:re|er)|children[’']s museum|chocolatarium)\b/i.test(item.name);
+   const family=(!heritage||interactive)&&!walk&&sections.has('family');
    const displayCategory=item.eventArea||sections.has('events')?'events':walk?'walks':family?'family':'attractions';
    return {...item,displayCategory,familyActivity:!!item.familyActivity||sections.has('family'),
     image:item.image||records.find(x=>x.image)?.image||null,

@@ -4,14 +4,36 @@
 const excluded = /\b(massacres?|shootings?|spree[ -]?kill\w*|school[ -]?shoot\w*|killings?|killed|murder\w*|homicid\w*|assassinat\w*|rap(?:e|es|ed|ing|ist|ists)|sexual[ -]?(?:assault|abuse|violence|exploitation)|child[ -]?abuse|molest\w*|terroris\w*|genocid\w*|lynch\w*|tortur\w*|suicid\w*|executions?|atrocit\w*|porn\w*|sex[ -]?club|strip[ -]?club|brothels?|fatal[ -]?accident|serial[ -]?kill\w*|battlefields?|sieges?)\b/iu;
 const closed = /\b(permanently closed|permanently shut|temporarily closed|closed for|closed until|demolished|no longer exists|defunct|disused|was a railway station|former railway station)\b/i;
 const visitor = /\b(barrows?|burial mounds?|standing stones?|stone circles?|henges?|hillforts?|ancient monuments?|deserted (?:medieval|mediaeval) villages?|manors?|stately homes?|country houses?|historic houses?|mansions?|châteaux|chateaux|château|chateau|wakes week|well[ -]dressing|carnival|fringe|bookshops?|bookstores?|bookbinding|antique shops?|record shops?|craft shops?|tourist information|visitor cent(?:re|er)|visitor information|museum|galler(?:y|ies)|gardens?|parks?|observatory|aquarium|zoo|castle|palace|cathedral|church|abbey|temple|bridge|tower|theat(?:re|er)|concert hall|opera house|librar(?:y|ies)|markets?|arcade|pier|beach|waterfall|caverns?|caves?|botanic\w*|monument|heritage|historic\w*|landmark|archaeolog\w*|ruins|railway|funicular|sculpture|artwork|trail|walk|harbour|harbor|waterfront|festival|tradition|invention|discovery|memorial|hills?|mountains?|ridges?|gorges?|valleys?|viewpoints?|lakes?|reservoirs?|nature reserves?|country parks?|botanical gardens?)\b/i;
-const activityType=/\b(laser[ -](?:tag|quest)|soft play|indoor play|trampoline parks?)\b/i;
-const familyUse=/\b(family[ -]friendly|families|for children|children[’']s|kids|playgrounds?|all ages|laser[ -](?:tag|quest)|soft play|indoor play|trampoline parks?|interactive (?:exhibits|displays)|hands[ -]on (?:exhibits|experiments|activities))\b/i;
+const activityType=/\b(world of illusions|camera obscura|chocolatarium|optical illusions|mirror maze|laser[ -](?:tag|quest)|soft play|indoor play|trampoline parks?)\b/i;
+const familyUse=/\b(family[ -]friendly|families|for children|children[’']s|kids|playgrounds?|all ages|laser[ -](?:tag|quest)|soft play|indoor play|trampoline parks?|optical illusions?|mirror mazes?|interactive (?:exhibits|displays|experiences|science)|hands[ -]on (?:exhibits|experiments|activities|workshops)|chocolate[ -]making|pottery[ -]making)\b/i;
 const excludedFamilyVenue=/\b(cinemas?|movie theat(?:re|er)s?|bowling|escape rooms?|(?:mini(?:ature)?[ -]?|crazy |adventure )golf)\b/i;
 const familyVenueType = /\b(aquariums?|planetariums?|science cent(?:re|er)s?|science museums?|natural history museums?|zoos?|(?:water|theme|amusement) parks?|children[’']s museums?)\b/i;
 function familyVenue(name, text = '') {
  const description = plain(text);
  return familyVenueType.test(name) || familyVenueType.test(description.match(/^[^.\n]{0,150}/)?.[0] || '') &&
   /^(?:(?:a|an|the) )?(?:public |indoor |outdoor )?(?:aquarium|planetarium|science cent(?:re|er)|science museum|natural history museum|zoo|(?:water|theme|amusement) park)\b|^[^.\n]{1,100}\bis (?:a|an|the) (?:public |indoor |outdoor )?(?:aquarium|planetarium|science cent(?:re|er)|science museum|natural history museum|zoo|(?:water|theme|amusement) park)\b/i.test(description);
+}
+function familyKind(c){
+ const text=c.name+' '+(c.text||c.background||c.reason||'');
+ if(/\b(illusions?|mirror maze|camera obscura|interactive|science cent(?:re|er)|planetarium)\b/i.test(text))return 'interactive';
+ if(/\b(chocolatarium|chocolate|pottery|craft workshop|making|creative)\b/i.test(text))return 'creative';
+ if(/\b(zoo|aquarium|wildlife|animals?|farm)\b/i.test(text))return 'animals';
+ if(/\b(playgrounds?|play park|adventure park|trampoline|soft play|indoor play)\b/i.test(text))return 'active';
+ if(/\b(museum|gallery)\b/i.test(c.name))return 'museum';
+ return 'other';
+}
+function familyIdeas(candidates,count=6){
+ const groups=new Map(['interactive','creative','animals','active','other','museum'].map(k=>[k,[]]));
+ for(const c of candidates){
+  const text=c.text||c.background||c.reason||'';
+  if(c.historyOnly||c.eventArea||excludedFamilyVenue.test(c.name)||!allowed(c.name,text)||closed.test(text)||!(familyUse.test(text)||familyVenue(c.name,text)))continue;
+  groups.get(familyKind(c)).push(c);
+ }
+ const result=[];
+ while(result.length<count&&[...groups.values()].some(g=>g.length)){
+  for(const group of groups.values()){if(group.length&&result.length<count)result.push(group.shift());}
+ }
+ return result;
 }
 const festival=/\b(festivals?|fringe|wakes?(?: week)?|well[ -]dressings?|carnivals?)\b/i;
 function eventPlace(name,text){return festival.test(name)&&festival.test(name+' '+text)&&!/\b(festival hall|festival theatre|festival theater|festival street)\b/i.test(name)}
@@ -64,4 +86,4 @@ function coordinate(lat, lon) {
  lat = Number(lat); lon = Number(lon);
  return Number.isFinite(lat)&&Number.isFinite(lon)&&Math.abs(lat)<=90&&Math.abs(lon)<=180 ? {lat,lon} : null;
 }
-module.exports = { ancientSite, excludedFamilyVenue, familyVenue, familyVenueType, activityType,familyUse,heritageType,heritagePlace,historySubject,walkingUse,allowed, cleanParagraphs, plain, visitor, hidden, festival, eventPlace, closed, sourceMarkup, shopType, shopGem, gemEvidence, visitorSuitable, themeOf, distanceKm, coordinate };
+module.exports = { familyKind,familyIdeas, ancientSite, excludedFamilyVenue, familyVenue, familyVenueType, activityType,familyUse,heritageType,heritagePlace,historySubject,walkingUse,allowed, cleanParagraphs, plain, visitor, hidden, festival, eventPlace, closed, sourceMarkup, shopType, shopGem, gemEvidence, visitorSuitable, themeOf, distanceKm, coordinate };

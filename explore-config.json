@@ -1,5 +1,5 @@
 {
-  "version": 20,
+  "version": 21,
   "enabled": true,
   "cacheMinutes": 43200,
   "cacheEntries": 32,
@@ -22,7 +22,7 @@
     "buildings": 4,
     "walks": 6,
     "photos": 8,
-    "family": 8,
+    "family": 6,
     "museums": 8,
     "events": 4
   },

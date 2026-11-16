@@ -168,7 +168,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    }
   }catch{warnings.push('A travel guide was not available for this place.');}}
   if(location.title){
-   const terms=['tourism','walk','viewpoint','(family OR children OR \"indoor activities\")','(museum OR \"science centre\" OR \"natural history\")','gallery','park','beach','market','bridge','tourist information','visitor centre','(festival OR fringe OR jazz)','(\"wakes week\" OR \"well dressing\" OR carnival)','(bookshop OR bookstore OR bookbinding)','(antiques OR artisan OR \"record shop\")','(hiking OR trail OR canyon)','(botanical garden OR arboretum OR promenade OR boardwalk)','(barrow OR hillfort OR "stone circle" OR "deserted medieval village")','(zoo OR aquarium OR planetarium OR "water park" OR "theme park" OR "amusement park" OR wildlife)'];
+   const terms=['tourism','walk','viewpoint','(family OR children OR \"interactive experiences\")','(museum OR \"science centre\" OR \"natural history\")','(optical illusions OR mirror maze OR chocolate making OR hands-on workshop)','park','beach','market','bridge','tourist information','visitor centre','(festival OR fringe OR jazz)','(\"wakes week\" OR \"well dressing\" OR carnival)','(bookshop OR bookstore OR bookbinding)','(antiques OR artisan OR \"record shop\")','(hiking OR trail OR canyon)','(botanical garden OR arboretum OR promenade OR boardwalk)','(barrow OR hillfort OR "stone circle" OR "deserted medieval village")','(zoo OR aquarium OR planetarium OR "water park" OR "theme park" OR "amusement park" OR wildlife)'];
    const searchName=location.title.replace(/,.*$/,'');
    const results=await Promise.allSettled(terms.map(terms=>api('wikipedia',{generator:'search',gsrsearch:`"${searchName.replace(/["\\]/g,'')}" ${terms}`,gsrnamespace:0,gsrlimit:12,prop:'coordinates|description|extracts|pageimages|pageprops',exintro:1,explaintext:1,exlimit:'max',piprop:'name'})));
    for(const result of results){if(result.status!=='fulfilled'){warnings.push('Some subject searches were unavailable.');continue}
@@ -238,7 +238,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   const contextCandidates=candidates.filter(c=>!c.reviewedPriority&&!c.historyOnly&&!c.walkOnly&&c.coord&&P.distanceKm(location,c.coord)<=walkLimit&&c.source?.kind==='wikipedia'&&P.visitorSuitable(c.name,c.text)&&P.themeOf(c.name,c.text)==='nature');
   const contextUnique=[...new Map(contextCandidates.map(c=>[c.source.title,c])).values()];
   const walkTitles=scatterWalks(contextUnique.map(c=>({...c,walkOnly:true})),location,12).map(c=>c.source.title);
-  const museumTitles=[...new Set(candidates.filter(c=>!c.sourceOnly&&c.coord&&c.source?.kind==='wikipedia'&&/\bmuseum\b/i.test(c.name)).sort((a,b)=>P.distanceKm(location,a.coord)-P.distanceKm(location,b.coord)).map(c=>c.source.title))].slice(0,6);
+  const museumTitles=[...new Set(candidates.filter(c=>!c.sourceOnly&&c.coord&&c.source?.kind==='wikipedia'&&(/\bmuseum\b/i.test(c.name)||P.activityType.test(c.name+' '+c.text)||P.familyVenue(c.name,c.text))).sort((a,b)=>P.distanceKm(location,a.coord)-P.distanceKm(location,b.coord)).map(c=>c.source.title))].slice(0,6);
   const contextTitles=[...new Set([...walkTitles,...museumTitles])].slice(0,18);
   if(contextTitles.length)try{
    const d=await api('wikipedia',{titles:contextTitles.join('|'),redirects:1,prop:'extracts',explaintext:1,exlimit:'max'});
@@ -270,10 +270,8 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   const ordered=[...unique.values()].sort((a,b)=>Number(!!b.reviewedPriority)-Number(!!a.reviewedPriority)||Number(!!b.mustSee)-Number(!!a.mustSee)||b.prominence-a.prominence||a.distanceKm-b.distanceKm);
   const balanced=[];const reserve=(rows,n)=>{for(const c of rows.slice(0,n))if(!balanced.includes(c)&&balanced.length<config.maxCandidates)balanced.push(c);};
   reserve(scatterWalks(ordered,location,6),6);
-  reserve(ordered.filter(c=>/\b(museum|galler(?:y|ies))\b/i.test(c.name)),4);
-  const activitiesFirst=ordered.filter(c=>!c.historyOnly&&(c.activityOnly||P.familyVenue(c.name,c.text)||P.familyUse.test(c.text))).sort((a,b)=>Number(!!b.activityOnly)-Number(!!a.activityOnly));
-  const kinds=new Set(),varied=activitiesFirst.filter(c=>{const key=c.activityKind||c.name;if(kinds.has(key))return false;kinds.add(key);return true});
-  reserve(varied,4);
+  reserve(P.familyIdeas(ordered,6),6);
+  reserve(ordered.filter(c=>/\b(museum|galler(?:y|ies))\b/i.test(c.name)),2);
   reserve(ordered.filter(c=>c.reviewedPriority||c.mustSee||c.walkOnly),config.maxCandidates);
   for(const c of [...unique.values()].filter(c=>c.eventArea).slice(0,4))if(!balanced.includes(c)&&balanced.length<config.maxCandidates)balanced.push(c);
   // Reserve a few evidenced category candidates before dense-city trimming.
