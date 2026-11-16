@@ -1,5 +1,5 @@
 {
-  "version": 19,
+  "version": 20,
   "enabled": true,
   "cacheMinutes": 43200,
   "cacheEntries": 32,
@@ -20,7 +20,7 @@
     "gems": 3,
     "history": 3,
     "buildings": 4,
-    "walks": 8,
+    "walks": 6,
     "photos": 8,
     "family": 8,
     "museums": 8,
@@ -29,5 +29,6 @@
   "specialistTrialEnabled": true,
   "specialistMaxCandidates": 16,
   "specialistMaxOutputTokens": 2600,
-  "specialistMaxResults": 28
+  "specialistMaxResults": 28,
+  "cityWalkRadiusKm": 30
 }

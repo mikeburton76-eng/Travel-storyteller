@@ -1,7 +1,7 @@
 'use strict';
 const P = require('./explore-policy');
 const {createHash}=require('node:crypto');
-const {nearbyWalks,walkingParagraphs}=require('./explore-walks');
+const {nearbyWalks,walkingParagraphs,walkCandidate,scatterWalks,walkingRadius}=require('./explore-walks');
 const {nearbyEvents}=require('./explore-events');
 const {nearbyHeritage}=require('./explore-heritage');
 const {createActivityProvider}=require('./explore-activities');
@@ -121,6 +121,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    return pages(d).filter(p=>p.title&&p.title!==location.title&&p.pageprops?.disambiguation===undefined&&P.allowed(p.title,p.description||'')&&visitorPage(p)&&!/^List of |^Timeline of /i.test(p.title));
   };
   const limit=location.mode==='nearby'?config.nearbyWiderRadiusKm:radius;
+  const walkLimit=walkingRadius(location,limit,config);
   const heritage=nearbyHeritage(location,limit);
   const placeId=(name,coord)=>'place-'+createHash('sha256').update(name+'|'+coord.lat.toFixed(3)+'|'+coord.lon.toFixed(3)).digest('hex').slice(0,12);
   const localPreview=heritage.map(c=>({...c,id:placeId(c.name,c.coord),distanceKm:Number(P.distanceKm(location,c.coord).toFixed(1)),theme:P.themeOf(c.name,c.text)}));
@@ -167,7 +168,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    }
   }catch{warnings.push('A travel guide was not available for this place.');}}
   if(location.title){
-   const terms=['tourism','walk','viewpoint','(family OR children OR \"indoor activities\")','(museum OR \"science centre\" OR \"natural history\")','gallery','park','beach','market','bridge','tourist information','visitor centre','(festival OR fringe OR jazz)','(\"wakes week\" OR \"well dressing\" OR carnival)','(bookshop OR bookstore OR bookbinding)','(antiques OR artisan OR \"record shop\")','hiking trail','circular walk','(barrow OR hillfort OR "stone circle" OR "deserted medieval village")','(zoo OR aquarium OR planetarium OR "water park" OR "theme park" OR "amusement park" OR wildlife)'];
+   const terms=['tourism','walk','viewpoint','(family OR children OR \"indoor activities\")','(museum OR \"science centre\" OR \"natural history\")','gallery','park','beach','market','bridge','tourist information','visitor centre','(festival OR fringe OR jazz)','(\"wakes week\" OR \"well dressing\" OR carnival)','(bookshop OR bookstore OR bookbinding)','(antiques OR artisan OR \"record shop\")','(hiking OR trail OR canyon)','(botanical garden OR arboretum OR promenade OR boardwalk)','(barrow OR hillfort OR "stone circle" OR "deserted medieval village")','(zoo OR aquarium OR planetarium OR "water park" OR "theme park" OR "amusement park" OR wildlife)'];
    const searchName=location.title.replace(/,.*$/,'');
    const results=await Promise.allSettled(terms.map(terms=>api('wikipedia',{generator:'search',gsrsearch:`"${searchName.replace(/["\\]/g,'')}" ${terms}`,gsrnamespace:0,gsrlimit:12,prop:'coordinates|description|extracts|pageimages|pageprops',exintro:1,explaintext:1,exlimit:'max',piprop:'name'})));
    for(const result of results){if(result.status!=='fulfilled'){warnings.push('Some subject searches were unavailable.');continue}
@@ -234,9 +235,11 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   for(const nearPage of near){const p=articles.get(nearPage.title);if(!p?.extract||!P.allowed(p.title,p.extract)||P.closed.test(p.extract))continue;
    const q=p.coordinates?.[0]||nearPage.coordinates?.[0];candidates.push({name:p.title,text:p.extract.slice(0,1400),coord:q?{lat:q.lat,lon:q.lon}:null,imageFile:p.pageimage,source:{kind:'wikipedia',title:p.title,url:pageUrl('wikipedia',p.title)},guideListed:false,wikidata:p.pageprops?.wikibase_item});}
   // Rural walking information is often below the encyclopedia introduction.
-  const walkTitles=[...new Set(candidates.filter(c=>!c.reviewedPriority&&!c.historyOnly&&!c.walkOnly&&c.coord&&c.source?.kind==='wikipedia'&&P.visitorSuitable(c.name,c.text)&&P.themeOf(c.name,c.text)==='nature').sort((a,b)=>P.distanceKm(location,a.coord)-P.distanceKm(location,b.coord)).map(c=>c.source.title))].slice(0,8);
+  const contextCandidates=candidates.filter(c=>!c.reviewedPriority&&!c.historyOnly&&!c.walkOnly&&c.coord&&P.distanceKm(location,c.coord)<=walkLimit&&c.source?.kind==='wikipedia'&&P.visitorSuitable(c.name,c.text)&&P.themeOf(c.name,c.text)==='nature');
+  const contextUnique=[...new Map(contextCandidates.map(c=>[c.source.title,c])).values()];
+  const walkTitles=scatterWalks(contextUnique.map(c=>({...c,walkOnly:true})),location,12).map(c=>c.source.title);
   const museumTitles=[...new Set(candidates.filter(c=>!c.sourceOnly&&c.coord&&c.source?.kind==='wikipedia'&&/\bmuseum\b/i.test(c.name)).sort((a,b)=>P.distanceKm(location,a.coord)-P.distanceKm(location,b.coord)).map(c=>c.source.title))].slice(0,6);
-  const contextTitles=[...new Set([...walkTitles,...museumTitles])].slice(0,14);
+  const contextTitles=[...new Set([...walkTitles,...museumTitles])].slice(0,18);
   if(contextTitles.length)try{
    const d=await api('wikipedia',{titles:contextTitles.join('|'),redirects:1,prop:'extracts',explaintext:1,exlimit:'max'});
    for(const page of pages(d)){
@@ -255,7 +258,8 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   const unique=new Map();
   for(const c of candidates){
    if(!c.coord||!P.visitorSuitable(c.name,c.text,c.historyOnly))continue;
-   const distance=P.distanceKm(location,c.coord);if(distance>limit)continue;
+   const distance=P.distanceKm(location,c.coord);if(distance>(walkCandidate(c)?walkLimit:limit))continue;
+   if(distance>limit)c.walkOnly=true;
    const key=(c.wikidata||c.wikipedia||c.name).toLowerCase().replace(/[^\p{L}\p{N}]+/gu,'');
    if(unique.has(key)){const old=unique.get(key);if(c.website&&!old.website)old.website=c.website;if(c.mustSee){old.mustSee=true;old.supportingSources=[...old.supportingSources||[],...c.supportingSources||[]];if(!old.reviewedPriority&&c.text.includes('Local tourism context:'))old.text=c.text;}if(c.queryFeatured&&!old.queryFeatured){old.queryFeatured=true;old.prominence+=2;}continue;}
    const old=[...unique.values()].find(x=>(x.name.toLowerCase()===c.name.toLowerCase()&&P.distanceKm(c.coord,x.coord)<2)||P.distanceKm(c.coord,x.coord)<.15&&(x.name.toLowerCase().includes(c.name.toLowerCase())||c.name.toLowerCase().includes(x.name.toLowerCase())));if(old){if(c.website&&!old.website)old.website=c.website;continue;}
@@ -265,6 +269,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   const groups=['nature','culture','experience','architecture','history'].map(theme=>[...unique.values()].filter(c=>c.theme===theme).sort((a,b)=>b.prominence-a.prominence||Number(b.guideListed)-Number(a.guideListed)||a.distanceKm-b.distanceKm));
   const ordered=[...unique.values()].sort((a,b)=>Number(!!b.reviewedPriority)-Number(!!a.reviewedPriority)||Number(!!b.mustSee)-Number(!!a.mustSee)||b.prominence-a.prominence||a.distanceKm-b.distanceKm);
   const balanced=[];const reserve=(rows,n)=>{for(const c of rows.slice(0,n))if(!balanced.includes(c)&&balanced.length<config.maxCandidates)balanced.push(c);};
+  reserve(scatterWalks(ordered,location,6),6);
   reserve(ordered.filter(c=>/\b(museum|galler(?:y|ies))\b/i.test(c.name)),4);
   const activitiesFirst=ordered.filter(c=>!c.historyOnly&&(c.activityOnly||P.familyVenue(c.name,c.text)||P.familyUse.test(c.text))).sort((a,b)=>Number(!!b.activityOnly)-Number(!!a.activityOnly));
   const kinds=new Set(),varied=activitiesFirst.filter(c=>{const key=c.activityKind||c.name;if(kinds.has(key))return false;kinds.add(key);return true});
@@ -277,7 +282,8 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   for(const g of groups)for(let i=g.length-1;i>=0;i--)if(balanced.includes(g[i]))g.splice(i,1);
   while(groups.some(g=>g.length)&&balanced.length<config.maxCandidates)for(const g of groups)if(g.length&&balanced.length<config.maxCandidates)balanced.push(g.shift());
   balanced.forEach(c=>c.id=placeId(c.name,c.coord));
-  return {location,candidates:balanced,warnings:[...new Set(warnings)],radiusKm:limit,travelSource:travelRoot?{kind:'wikivoyage',title:travelRoot.title,url:pageUrl('wikivoyage',travelRoot.title)}:null};
+  
+  return {location,candidates:balanced,walkRadiusKm:walkLimit,warnings:[...new Set(warnings)],radiusKm:limit,travelSource:travelRoot?{kind:'wikivoyage',title:travelRoot.title,url:pageUrl('wikivoyage',travelRoot.title)}:null};
  }
  async function images(candidates) {
   const files=[...new Set(candidates.filter(c=>!c.historyOnly&&c.imageFile).map(c=>'File:'+c.imageFile.replace(/^File:/,'')))].slice(0,36);const result=new Map();
