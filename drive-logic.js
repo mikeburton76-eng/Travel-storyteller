@@ -80,12 +80,18 @@
    used.push(sentence);return true;
   });
  }
+ function nearbyIntroduction(item,text){
+  const name=String(item.name||'').replace(/^Introducing\s+/i,'').split(' — ')[0].trim().replace(/[.!?]+$/,'');
+  if(!name)return text;
+  // Replace an existing proximity sentence rather than announcing the place twice.
+  const body=String(text||'').replace(/^(?:You[’']re near|We[’']re near|We are near|You are near)\s+[^!?]+?[.!?](?:\s+|$)/i,'').trim();
+  return 'We’re near '+name+'.'+(body?' '+body:'');
+ }
  function narration(item,{nearby=true}={}){
-  if(item.eventArea)return item.reason;
+  if(item.eventArea)return nearby?nearbyIntroduction(item,item.reason):item.reason;
   const base=opening(item);
   if(item.kind==='arrival'&&!item.name)return base; // Parked sound check.
-  const name=item.name.split(' — ')[0].trim().replace(/[.!?]+$/,'');
-  const story=item.kind==='arrival'||!nearby?base:'You’re near '+name+'. '+base;
+  const story=nearby?nearbyIntroduction(item,base):base;
   const limit=item.kind==='arrival'?1700:900,wordLimit=item.kind==='arrival'?145:95;
   const fact=extraFacts(item,story).find(sentence=>notableFact.test(sentence)
    &&story.length+sentence.length+1<=limit
@@ -102,6 +108,7 @@
   return facts.join(' ');
  }
 
- const api={narration,followUp,DISTANCE_OPTIONS,setPlaybackMetres,get PLAYBACK_METRES(){return PLAYBACK_METRES;},movingAway,startChime,distance,bearing,angle,valid,key,places,nearbyPlaces,motion,approaching,choose,opening};
+ const api={nearbyIntroduction,narration,followUp,DISTANCE_OPTIONS,setPlaybackMetres,get PLAYBACK_METRES(){return PLAYBACK_METRES;},movingAway,startChime,distance,bearing,angle,valid,key,places,nearbyPlaces,motion,approaching,choose,opening};
  if(typeof module!=='undefined')module.exports=api;else globalThis.DriveLogic=api;
 })();
+

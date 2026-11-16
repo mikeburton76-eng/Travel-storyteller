@@ -256,7 +256,7 @@ test('a queued clip waits if the car leaves the 400 m area before playback start
  const held=new Promise(resolve=>{finish=resolve;});
  const a=await app({tripItems:[],online:true,fetchImpl:async(url,options)=>{
   if(url==='/speech'){
-   assert.match(JSON.parse(options.body).text,/^You’re near A landmark\./);
+   assert.match(JSON.parse(options.body).text,/^We’re near A landmark\./);
    return held;
   }
   return {ok:true,json:async()=>url==='/api/explore'?{complete:true,items:[near]}:url==='/api/arrivals'?{items:[]}:{defaultVoice:'pippa'}};

@@ -177,9 +177,9 @@
  for(const item of items){
   if(controller.signal.aborted)throw new DOMException('Cancelled','AbortError');
   $('savedStatus').textContent=`${next.items.length} of ${items.length} saved · Preparing ${item.name}…`;
-  let a;try{a=await audio(item,controller.signal,L.narration(item,{nearby:false}));}catch(error){if(controller.signal.aborted)throw error;failures.push(item.name);log('Download failed: '+item.name+' · '+error.message);continue;}
+  let a;try{a=await audio(item,controller.signal,L.narration(item));}catch(error){if(controller.signal.aborted)throw error;failures.push(item.name);log('Download failed: '+item.name+' · '+error.message);continue;}
   if(controller.signal.aborted)throw new DOMException('Cancelled','AbortError');
-  next.items.push({...item,spokenText:L.narration(item,{nearby:false})});next.audio[L.key(item)]=a.blob;
+  next.items.push({...item,spokenText:L.narration(item)});next.audio[L.key(item)]=a.blob;
   await commitAreas([...savedAreas.filter(area=>area.id!==id),snapshot()]);if(isRoute)selectRoute(id);
   $('savedStatus').textContent=`${next.items.length} of ${items.length} saved on this phone.`;
   log((phoneMode()?'Saved text: ':'Downloaded ')+item.name+' · '+a.seconds.toFixed(1)+' seconds');
@@ -321,7 +321,7 @@
  $('resetHistory').onclick=()=>{if(running||preparing)return;history.clear();played.clear();latchedPlaces.clear();closestDistances.clear();renderHistory();status('Listening history reset. Places may play again on the next journey.');log('Listener reset listening history.');};
  function spokenText(item){
   const savedItem=trip.items.find(saved=>L.key(saved)===L.key(item));
-  return savedItem?.spokenText||L.narration(item);
+  return L.nearbyIntroduction(item,savedItem?.spokenText||L.narration(item));
  }
  function renderMore(){
   $('moreStory').hidden=!lastPlayedPlace||running||starting;
