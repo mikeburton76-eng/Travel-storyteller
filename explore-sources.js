@@ -1,5 +1,6 @@
 'use strict';
 const P = require('./explore-policy');
+const {placePhoto}=require('./drive-logic');
 const {createHash}=require('node:crypto');
 const {nearbyWalks,walkingParagraphs,walkCandidate,scatterWalks,walkingRadius}=require('./explore-walks');
 const {nearbyEvents}=require('./explore-events');
@@ -295,7 +296,8 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
     if(!/^https:\/\/commons\.wikimedia\.org\/wiki\//.test(info.descriptionurl||''))continue;
     const licenseUrl=m.LicenseUrl?.value?.replace(/^http:\/\/creativecommons\.org\//,'https://creativecommons.org/');if(license!=='Public domain'&&!/^https:\/\/creativecommons\.org\//.test(licenseUrl||''))continue;
     if(!creator)continue;
-    result.set(page.title.replace(/^File:/,''),{id:page.title,url:imageUrl,sourceUrl:info.descriptionurl,caption,creator,license,licenseUrl:licenseUrl||null});
+    const reviewed=placePhoto({image:{id:page.title,url:imageUrl,sourceUrl:info.descriptionurl,caption:P.plain(m.ImageDescription?.value),creator,license,licenseUrl:licenseUrl||null}});
+    if(reviewed)result.set(page.title.replace(/^File:/,''),{...reviewed,caption});
    }
   }catch{/* An icon is preferable to an uncredited or uncertain picture. */}}
   return result;

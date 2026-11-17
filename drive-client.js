@@ -67,7 +67,7 @@
    const card=document.createElement('article');
    card.className='nearby-place-card';
    const icon=document.createElement('span');
-   icon.textContent=placeIcons[item.theme]||'📍';
+   icon.textContent=L.placeIcon(item);
    icon.setAttribute('aria-hidden','true');
    const title=document.createElement('h3');
    title.append(icon,document.createTextNode(' '+item.name));
@@ -379,7 +379,7 @@
    $('moreCancel').hidden=true;
   }
  };
- function show(item){$('arrivalReview').textContent=item.kind==='arrival'?'Source checked '+new Date(item.checkedAt).toLocaleDateString('en-GB')+' · annual review after '+new Date(item.reviewAfter).toLocaleDateString('en-GB')+'. Food and stays in this app remain a Buxton/Tideswell trial.':'';$('placeName').textContent=item.name;$('placeText').textContent=spokenText(item);$('source').replaceChildren();for(const source of item.sources||[item.source]){if(!/^https:\/\//.test(source?.url||''))continue;const a=document.createElement('a');a.href=source.url;a.textContent='Source: '+(source.title||item.name)+' ↗ ';a.target='_blank';a.rel='noopener';$('source').append(a);}}
+ function show(item){$('arrivalReview').textContent=item.kind==='arrival'?'Source checked '+new Date(item.checkedAt).toLocaleDateString('en-GB')+' · annual review after '+new Date(item.reviewAfter).toLocaleDateString('en-GB')+'.':'';$('placeName').textContent=item.name;$('placeText').textContent=spokenText(item);$('source').replaceChildren();for(const source of item.sources||[item.source]){if(!/^https:\/\//.test(source?.url||''))continue;const a=document.createElement('a');a.href=source.url;a.textContent='Source: '+(source.title||item.name)+' ↗ ';a.target='_blank';a.rel='noopener';$('source').append(a);}}
  function play(manual=false){
   if(!running)return;if(source){if(manual)nativePlayer.resume();return;}if(!buffer||!pending)return;
   if(!parkedCheck&&!history.check(pending).allowed){const reason=history.check(pending).reason;waiting(reason,'Skipping '+pending.name+': '+reason+'. Use Hear this place again while parked to allow a replay.');pending=null;buffer=null;$('play').disabled=true;return;}

@@ -1,6 +1,18 @@
 'use strict';
 // Straight-line approach estimates, deliberately independent of road navigation.
 (()=>{
+ // Shared presentation policy for live and saved places in both views.
+ // Metadata screening catches explicit subjects, not subjective visual resemblance.
+ const placeIcons=Object.freeze({nature:'🌿',culture:'🎨',experience:'🎟️',architecture:'🏛️',history:'📜'});
+ function placeIcon(item){return placeIcons[item.theme]||'📍';}
+ function placePhoto(item){
+  const image=item.image;
+  if(!image||!/^https:\/\/(?:upload|thumb)\.wikimedia\.org\//.test(image.url||'')||
+   !/^https:\/\/commons\.wikimedia\.org\/wiki\//.test(image.sourceUrl||''))return null;
+  const metadata=[image.id,image.caption,image.sourceUrl].join(' ');
+  if(/\b(?:nude|nudity|naked|porn\w*|explicit|sexual|genitals?|penis|vulva|phallic|phallus|erotic|corpse|gore)\b/i.test(metadata.replace(/[_%]/g,' ')))return null;
+  return image;
+ }
  const DISTANCE_OPTIONS=Object.freeze([100,200,400,500,1000]);
  let PLAYBACK_METRES=400;
  function setPlaybackMetres(value){const metres=Number(value);PLAYBACK_METRES=DISTANCE_OPTIONS.includes(metres)?metres:400;return PLAYBACK_METRES;}
@@ -23,7 +35,7 @@
   return [...groups.values()].map(records=>{
    const ordered=[...records].sort((a,b)=>(priority[a.section]??9)-(priority[b.section]??9)||String(a.reason).localeCompare(String(b.reason)));
    const item=ordered[0],sections=new Set(records.map(x=>x.section));
-   if(item.displayCategory)return item; // Already canonical, including saved guides.
+   if(item.displayCategory)return {...item,image:placePhoto(item)}; // Already canonical, including saved guides.
    const text=item.name+' '+(item.background||item.reason||'');
    const heritage=sections.has('museums')||item.historyOnly||/\b(museum|gallery|castle|palace|historic house|monument|barrow|stone circle|church|abbey|cathedral)\b/i.test(item.name);
    const outdoor=/\b(gardens?|parks?|woodland|forest|trail|footpath|promenade|nature reserve)\b/i.test(item.name)&&
@@ -33,7 +45,7 @@
    const family=(!heritage||interactive)&&!walk&&sections.has('family');
    const displayCategory=item.eventArea||sections.has('events')?'events':walk?'walks':family?'family':'attractions';
    return {...item,displayCategory,familyActivity:!!item.familyActivity||sections.has('family'),
-    image:item.image||records.find(x=>x.image)?.image||null,
+    image:placePhoto({...item,image:item.image||records.find(x=>x.image)?.image||null}),
     background:item.background||records.find(x=>x.background)?.background||''};
   });
  }
@@ -149,7 +161,7 @@
   return facts.join(' ');
  }
 
- const api={completeSentences,canonicalPlaces,nearbyIntroduction,narration,followUp,DISTANCE_OPTIONS,setPlaybackMetres,get PLAYBACK_METRES(){return PLAYBACK_METRES;},movingAway,startChime,distance,bearing,angle,valid,key,places,nearbyPlaces,motion,approaching,choose,opening};
+ const api={placePhoto,placeIcon,completeSentences,canonicalPlaces,nearbyIntroduction,narration,followUp,DISTANCE_OPTIONS,setPlaybackMetres,get PLAYBACK_METRES(){return PLAYBACK_METRES;},movingAway,startChime,distance,bearing,angle,valid,key,places,nearbyPlaces,motion,approaching,choose,opening};
  if(typeof module!=='undefined')module.exports=api;else globalThis.DriveLogic=api;
 })();
 
