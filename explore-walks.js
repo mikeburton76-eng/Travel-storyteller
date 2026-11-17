@@ -12,16 +12,19 @@ const reviewed=[{
 }];
 function nearbyWalks(location,radiusKm){return reviewed.filter(c=>P.distanceKm(location,c.coord)<=radiusKm).map(c=>({...c,coord:{...c.coord},supportingSources:[...c.supportingSources]}))}
 function walkingParagraphs(text){return String(text||'').slice(0,18000).split(/\n\s*\n/).filter(p=>p.length>=40&&p.length<=800&&P.allowed(p)&&!P.sourceMarkup.test(p)&&!P.closed.test(p)&&/\b(walking route|circular walk|hiking|footpath|walking trail|walkers|strolls?|promenades?|riverside paths?|public paths?|walks? (?:along|through|from|to)|public access)\b/i.test(p)).slice(0,2).join('\n\n')}
-const outdoorName=/\b(park|gardens?|arboretum|trail|footpath|promenade|boardwalk|beach|canyon|woodland|forest|nature reserve)\b/i;
+const outdoorName=/\b(park|gardens?|arboretum|trail|footpath|promenade|boardwalk|beach|canyon|woodlands?|forest|nature reserve|hills?|crags?|craigs?|lochs?|lakes?|glens?|moors?|muir|ridges?|valleys?|walks?|ways?)\b/i;
+const routeEvidence=/\b(circular (?:walk|route)|walking (?:route|trail)|hiking (?:route|trail)|waymarked|signposted (?:walk|trail|route)|footpaths?|riverside paths?|coastal paths?|heritage walks?|walking tours?|walking circuit)\b/i;
 const gardenEvidence=/\b(botanic(?:al)? garden|arboretum|public garden|gardens? open to the public)\b/i;
 function walkCandidate(c){
  if(c.historyOnly||c.eventArea||!P.allowed(c.name,c.text)||P.closed.test(c.text||''))return false;
  if(/\b(amusement|theme park|water park|dog park|cemetery|museum)\b/i.test(c.name))return false;
- return !!c.walkOnly||outdoorName.test(c.name)&&(gardenEvidence.test(c.text||'')||P.walkingUse.test(c.text||'')&&!/walking distance|walked past|walk to (?:the )?station/i.test(c.text||''));
+ return !!c.walkOnly||(outdoorName.test(c.name)||routeEvidence.test(c.text||''))&&(gardenEvidence.test(c.text||'')||P.walkingUse.test(c.text||'')&&!/walking distance|walked past|walk to (?:the )?station/i.test(c.text||''));
 }
 function walkKind(c){
  if(/\b(gardens?|arboretum)\b/i.test(c.name))return 'garden';
  if(/\b(beach|coast|ocean|riverside|riverbank|waterfront|promenade|boardwalk)\b/i.test(c.name+' '+c.text))return 'water';
+ if(/\b(heritage walk|walking tour|town walk|city walk)\b/i.test(c.text||''))return 'town-and-heritage';
+ if(/\b(woodlands?|forest)\b/i.test(c.name+' '+c.text))return 'woodland';
  return 'park-or-hills';
 }
 function scatterWalks(candidates,location,count=6){
@@ -29,7 +32,7 @@ function scatterWalks(candidates,location,count=6){
  const selected=[];
  while(pool.length&&selected.length<count){
   const kinds=new Set(selected.map(walkKind));
-  const score=c=>(kinds.has(walkKind(c))?0:100)+Math.min(20,selected.length?Math.min(...selected.map(x=>P.distanceKm(x.coord,c.coord))):0);
+  const score=c=>(c.guideListed?60:routeEvidence.test(c.text||'')?30:0)+(kinds.has(walkKind(c))?0:40)+Math.min(20,selected.length?Math.min(...selected.map(x=>P.distanceKm(x.coord,c.coord))):0);
   pool.sort((a,b)=>score(b)-score(a));
   selected.push(pool.shift());
  }

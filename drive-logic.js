@@ -73,7 +73,16 @@
  const humanInterest=/\b(?:battles?|poets?|writers?|royal|medieval|Bronze Age|Iron Age|barrows?|ancient|archaeolog\w*|formerly|originally|converted|unusual|tradition\w*|invent\w*|discover\w*|born|lived|wrote)\b/i;
  const standoutFact=/\b(?:first|oldest|only|unusual|secret|legend\w*|tradition\w*|invent\w*|discover\w*|born|lived|wrote|poet\w*)\b/i;
  const factRank=sentence=>standoutFact.test(sentence)?3:humanInterest.test(sentence)?2:Number(notableFact.test(sentence));
- const sentences=text=>String(text||'').match(/[^.!?\n]+(?:[.!?](?=\s|$)|$)/g)||[];
+ // Source extracts can end mid-word. Only publish complete sentences, and never
+ // split decimal measurements or abbreviations into separate facts.
+ function completeSentences(text){
+  const value=String(text||'').trim();
+  const parts=typeof Intl!=='undefined'&&Intl.Segmenter
+   ?Array.from(new Intl.Segmenter('en',{granularity:'sentence'}).segment(value),x=>x.segment)
+   :value.match(/[^!?]+?(?:[.!?](?=\s+[A-Z]|$)|$)/g)||[];
+  return parts.map(x=>x.trim()).filter(x=>/[.!?][”"'’)]*$/.test(x)&&!/(?:\.\.\.|…)[”"'’)]*$/.test(x));
+ }
+ const sentences=completeSentences;
  const words=text=>new Set(text.toLowerCase().match(/[\p{L}\p{N}]+/gu)?.filter(word=>word.length>3)||[]);
  function repeats(candidate,previous){
   const tokens=words(candidate),old=words(previous);
@@ -81,7 +90,7 @@
   return candidate.toLowerCase()===previous.toLowerCase()||shared/Math.max(1,Math.min(tokens.size,old.size))>.7;
  }
  function opening(item){
-  if(item.kind==='arrival'&&item.reason.length<=1700)return item.reason;
+  if(item.kind==='arrival'&&item.reason.length<=1700)return sentences(item.reason).join(' ');
   const main=sentences(item.reason),background=sentences(item.background);
   const interest=/\b(battles?|born|lived|poets?|writers?|invent\w*|discover\w*|traditions?|royal|medieval|Bronze Age|Iron Age|barrows?|ancient|archaeolog\w*)\b/i;
   const details=[...main.slice(1),...background].filter(sentence=>interest.test(sentence)||humanInterest.test(sentence)).sort((a,b)=>factRank(b)-factRank(a)).slice(0,2);
@@ -91,9 +100,9 @@
    const candidate=sentence.trim();
    if(selected.some(previous=>repeats(candidate,previous)))continue;
    const next=[...selected,candidate].join(' ');
-   if(next.length<=700&&next.split(/\s+/).length<=75)selected.push(candidate);
+   if((!selected.length&&next.length<=1500)||(next.length<=950&&next.split(/\s+/).length<=110))selected.push(candidate);
   }
-  return selected.join(' ')||String(item.reason||'').split(/\s+/).slice(0,75).join(' ').slice(0,697).replace(/\s+\S*$/,'')+'…';
+  return selected.join(' ');
  }
 
  function extraFacts(item,alreadySpoken){
@@ -116,7 +125,7 @@
   return 'We’re near '+name+'.'+(body?' '+body:'');
  }
  function narration(item,{nearby=true}={}){
-  if(item.eventArea)return nearby?nearbyIntroduction(item,item.reason):item.reason;
+  if(item.eventArea){const text=sentences(item.reason).join(' ');return nearby?nearbyIntroduction(item,text):text;}
   const base=opening(item);
   if(item.kind==='arrival'&&!item.name)return base; // Parked sound check.
   let story=base;
@@ -140,7 +149,7 @@
   return facts.join(' ');
  }
 
- const api={canonicalPlaces,nearbyIntroduction,narration,followUp,DISTANCE_OPTIONS,setPlaybackMetres,get PLAYBACK_METRES(){return PLAYBACK_METRES;},movingAway,startChime,distance,bearing,angle,valid,key,places,nearbyPlaces,motion,approaching,choose,opening};
+ const api={completeSentences,canonicalPlaces,nearbyIntroduction,narration,followUp,DISTANCE_OPTIONS,setPlaybackMetres,get PLAYBACK_METRES(){return PLAYBACK_METRES;},movingAway,startChime,distance,bearing,angle,valid,key,places,nearbyPlaces,motion,approaching,choose,opening};
  if(typeof module!=='undefined')module.exports=api;else globalThis.DriveLogic=api;
 })();
 
