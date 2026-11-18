@@ -27,3 +27,30 @@ test('International discovery distinguishes a physical site from an event',()=>{
  assert.equal(P.visitorSuitable('Battle of Example','The battle took place in 1812.'),false);
  assert.equal(P.allowed('An account of a massacre at the battlefield'),false);
 });
+
+const { nearbyBattleStories } = require('../historic-battles');
+const catalogue = require('../historic-battles.json');
+test('Historic battle catalogue has distinct, dated, mapped records',()=>{
+ assert.ok(catalogue.length>=300);
+ assert.equal(new Set(catalogue.map(row=>row[0])).size,catalogue.length);
+ for(const [id,name,year,lat,lon,conflict] of catalogue){
+  assert.match(id,/^Q\d+$/);
+  assert.ok(name && year>0 && year<1900 && Math.abs(lat)<=90 && Math.abs(lon)<=180 && conflict);
+ }
+});
+for(const [name,lat,lon] of [
+ ['Battle of Bosworth Field',52.62,-1.40],['Battle of Towton',53.85,-1.27],
+ ['Battle of Culloden',57.49,-4.14],['Battle of Waterloo',50.714,4.40],
+ ['Battle of Gettysburg',39.83,-77.23],['Battle of Ayacucho',-13.05,-74.14],
+ ['Battle of Isandlwana',-28.36,30.65],['Battle of Ohaeawai',-35.38,173.85]
+]){
+ test('Explore shows '+name+' as local history',()=>{
+  const location={lat,lon};
+  const candidates=nearbyBattleStories(location,10,[]).map(c=>({...c,id:c.source.url}));
+  const guide=sourceCategories({items:[]},{location,candidates},config);
+  const item=guide.items.find(i=>i.name===name);
+  assert.ok(item?.historyOnly);
+  assert.equal(item.section,'history');
+  assert.equal(places(guide.items).length,0);
+ });
+}

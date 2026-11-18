@@ -5,6 +5,7 @@ const {createHash}=require('node:crypto');
 const {nearbyWalks,walkingParagraphs,walkCandidate,scatterWalks,walkingRadius}=require('./explore-walks');
 const {nearbyEvents}=require('./explore-events');
 const {nearbyHeritage}=require('./explore-heritage');
+const {nearbyBattleStories}=require('./historic-battles');
 const {createActivityProvider}=require('./explore-activities');
 const UA = 'TravelStoryteller/1.0 (https://github.com/mikeburton76-eng/Travel-storyteller)';
 const endpoint = { wikipedia:'https://en.wikipedia.org/w/api.php', wikivoyage:'https://en.wikivoyage.org/w/api.php', commons:'https://commons.wikimedia.org/w/api.php' };
@@ -123,7 +124,8 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   };
   const limit=location.mode==='nearby'?config.nearbyWiderRadiusKm:radius;
   const walkLimit=walkingRadius(location,limit,config);
-  const heritage=nearbyHeritage(location,limit);
+  const landmarks=nearbyHeritage(location,limit);
+  const heritage=[...landmarks,...nearbyBattleStories(location,limit,landmarks)];
   const placeId=(name,coord)=>'place-'+createHash('sha256').update(name+'|'+coord.lat.toFixed(3)+'|'+coord.lon.toFixed(3)).digest('hex').slice(0,12);
   const localPreview=heritage.map(c=>({...c,id:placeId(c.name,c.coord),distanceKm:Number(P.distanceKm(location,c.coord).toFixed(1)),theme:P.themeOf(c.name,c.text)}));
   if(localPreview.length)onProgress?.({location,candidates:localPreview,warnings:[],radiusKm:limit,travelSource:null});
@@ -232,6 +234,11 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    if(!q||!p.extract||p.title===location.title||!P.allowed(p.title,p.extract)||P.closed.test(p.extract)||!visitorPage(p))continue;
    candidates.push({name:p.title,text:p.extract.slice(0,1400),coord:{lat:q.lat,lon:q.lon},imageFile:p.pageimage,wikidata:p.pageprops?.wikibase_item,guideListed:true,queryFeatured:true,source:{kind:'wikipedia',title:p.title,url:pageUrl('wikipedia',p.title)}});
   }
+  for(const story of heritage.filter(c=>c.historyOnly&&c.battleHeritage)){
+   const article=articles.get(story.source.title);
+   const intro=P.cleanParagraphs(article?.extract||'').split(/(?<=[.!?])\s+/).slice(0,2).join(' ');
+   if(intro.length>=50&&intro.length<=850&&P.allowed(intro)&&!P.sourceMarkup.test(intro))story.text=intro;
+  }
   for(const c of candidates){if(c.historyOnly)continue;const p=articles.get(c.wikipedia||(c.source?.kind==='wikipedia'?c.source.title:null));if(p){if(!c.coord&&p.coordinates?.[0])c.coord={lat:p.coordinates[0].lat,lon:p.coordinates[0].lon};if(!c.imageFile&&!c.skipSourceImage)c.imageFile=p.pageimage;if(!c.wikidata)c.wikidata=p.pageprops?.wikibase_item;}}
   for(const nearPage of near){const p=articles.get(nearPage.title);if(!p?.extract||!P.allowed(p.title,p.extract)||P.closed.test(p.extract))continue;
    const q=p.coordinates?.[0]||nearPage.coordinates?.[0];candidates.push({name:p.title,text:p.extract.slice(0,1400),coord:q?{lat:q.lat,lon:q.lon}:null,imageFile:p.pageimage,source:{kind:'wikipedia',title:p.title,url:pageUrl('wikipedia',p.title)},guideListed:false,wikidata:p.pageprops?.wikibase_item});}
@@ -274,6 +281,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   reserve(scatterWalks(ordered,location,6),6);
   reserve(P.familyIdeas(ordered,6),6);
   reserve(ordered.filter(c=>/\b(museum|galler(?:y|ies))\b/i.test(c.name)),2);
+  reserve(ordered.filter(c=>c.battleHeritage&&c.historyOnly),3);
   reserve(ordered.filter(c=>c.reviewedPriority||c.mustSee||c.walkOnly),config.maxCandidates);
   for(const c of [...unique.values()].filter(c=>c.eventArea).slice(0,4))if(!balanced.includes(c)&&balanced.length<config.maxCandidates)balanced.push(c);
   // Reserve a few evidenced category candidates before dense-city trimming.
