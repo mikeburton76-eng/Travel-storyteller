@@ -9,6 +9,35 @@ const visitorTypes = {
  water_park: ['water park', 'Water park with aquatic attractions.'],
  planetarium: ['planetarium', 'Planetarium focused on astronomy and the night sky.']
 };
+function mappedWalks(elements, location, radiusKm) {
+ const walks = [];
+ const seen = new Set();
+ for (const element of elements) {
+  const tags = element?.tags || {};
+  if (element?.type !== 'relation' || tags.type !== 'route' || !['foot', 'hiking'].includes(tags.route)) continue;
+  if (!Number.isSafeInteger(element.id) || element.id < 1 || ['private', 'no'].some(value => tags.access === value || tags.foot === value)) continue;
+  if (['proposed', 'planned', 'construction', 'disused', 'abandoned'].some(state => tags.state === state || tags[state] === 'yes')) continue;
+  const name = P.plain(tags['name:en'] || tags.name || '');
+  const coord = P.coordinate(element.center?.lat, element.center?.lon);
+  if (!name || name.length > 140 || !coord || P.distanceKm(location, coord) > radiusKm) continue;
+  const from = P.plain(tags.from || ''), to = P.plain(tags.to || '');
+  const details = ['This walking route is mapped on OpenStreetMap.'];
+  if (tags.roundtrip === 'yes') details.push('It is mapped as a circular walk.');
+  if (from && to && from !== to) details.push('The mapped route runs from ' + from + ' to ' + to + '.');
+  const text = details.join(' ');
+  if (!P.visitorSuitable(name, text)) continue;
+  walks.push({name, coord, text, walkOnly:true, sourceOnly:true, theme:'nature',
+   website:publicWebsite(tags.website || tags['contact:website']),
+   source:{kind:'openstreetmap', title:'OpenStreetMap contributors', url:'https://www.openstreetmap.org/relation/' + element.id}});
+ }
+ walks.sort((a,b) => P.distanceKm(location,a.coord) - P.distanceKm(location,b.coord));
+ return walks.filter(walk => {
+  const key = walk.name.toLowerCase();
+  if (seen.has(key)) return false;
+  seen.add(key);
+  return true;
+ }).slice(0, 12);
+}
 function activityRecords(data,location,radiusKm){
  const found=[];
  for(const e of (Array.isArray(data?.elements)?data.elements:[]).slice(0,100)){
@@ -30,7 +59,7 @@ function activityRecords(data,location,radiusKm){
  found.sort((a,b)=>P.distanceKm(location,a.coord)-P.distanceKm(location,b.coord));
  const chosen=[],seen=new Set();for(const c of found)if(!seen.has(c.activityKind)){chosen.push(c);seen.add(c.activityKind);}
  for(const c of found)if(!chosen.includes(c))chosen.push(c);
- return chosen.slice(0,12);
+ return chosen.slice(0,12).concat(mappedWalks(Array.isArray(data?.elements) ? data.elements : [], location, radiusKm));
 }
 function createActivityProvider({fetchImpl=fetch,now=()=>Date.now()}={}){
  const cache=new Map(),pending=new Map();let requests=[];
@@ -45,7 +74,7 @@ function createActivityProvider({fetchImpl=fetch,now=()=>Date.now()}={}){
   const task=(async()=>{
    let value;
    const around=`(around:${Math.round(radius*1000)},${coord.lat},${coord.lon})`;
-   const query=`[out:json][timeout:6];(nwr${around}[leisure~"^(laser_game|indoor_play|trampoline_park|water_park)$"];nwr${around}[sport=laser_tag];nwr${around}[amenity=planetarium];nwr${around}[tourism~"^(museum|aquarium|zoo|theme_park)$"];);out body center 100;`;
+   const query=`[out:json][timeout:6];(nwr${around}[leisure~"^(laser_game|indoor_play|trampoline_park|water_park)$"];nwr${around}[sport=laser_tag];nwr${around}[amenity=planetarium];nwr${around}[tourism~"^(museum|aquarium|zoo|theme_park)$"];);out body center 100;rel${around}[type=route][route~"^(foot|hiking)$"][name];out tags center 60;`;
    for(const endpoint of ['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter']){
     if(requests.length>=12)break;requests.push(now());
     try{
