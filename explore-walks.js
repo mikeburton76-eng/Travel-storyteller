@@ -9,7 +9,7 @@ const reviewed=[{
  source:{kind:'route-publisher',title:'Peak District National Park — Tideswell Dale',url:'https://www.peakdistrict.gov.uk/visiting/miles-without-stiles/tideswell-dale'},
  supportingSources:[{title:'Peak District National Park — Tideswell Dale sensory trail',url:'https://www.peakdistrict.gov.uk/visiting/places-to-visit/sensory-trails/tideswell-dale-sensory-trail'}],
  reviewedAt:'2026-10-29'
-}];
+}, ...require('./published-walks.json').map(route=>({...route,walkOnly:true,theme:'nature',guideListed:true,supportingSources:[],reviewedAt:'2026-11-18'}))];
 function nearbyWalks(location,radiusKm){return reviewed.filter(c=>P.distanceKm(location,c.coord)<=radiusKm).map(c=>({...c,coord:{...c.coord},supportingSources:[...c.supportingSources]}))}
 function walkingParagraphs(text){return String(text||'').slice(0,18000).split(/\n\s*\n/).filter(p=>p.length>=40&&p.length<=800&&P.allowed(p)&&!P.sourceMarkup.test(p)&&!P.closed.test(p)&&/\b(walking route|circular walk|hiking|footpath|walking trail|walkers|strolls?|promenades?|riverside paths?|public paths?|walks? (?:along|through|from|to)|public access)\b/i.test(p)).slice(0,2).join('\n\n')}
 const outdoorName=/\b(park|gardens?|arboretum|trail|footpath|promenade|boardwalk|beach|canyon|woodlands?|forest|nature reserve|hills?|crags?|craigs?|lochs?|lakes?|glens?|moors?|muir|ridges?|valleys?|walks?|ways?)\b/i;
@@ -33,7 +33,9 @@ function scatterWalks(candidates,location,count=6){
  while(pool.length&&selected.length<count){
   const kinds=new Set(selected.map(walkKind));
   const score=c=>(c.guideListed?60:routeEvidence.test(c.text||'')?30:0)+(kinds.has(walkKind(c))?0:40)+Math.min(20,selected.length?Math.min(...selected.map(x=>P.distanceKm(x.coord,c.coord))):0);
-  pool.sort((a,b)=>score(b)-score(a));
+  // Give nearby publisher routes priority over generic outdoor listings.
+  const localRoute=c=>c.source?.kind==='route-publisher'&&P.distanceKm(location,c.coord)<=6;
+  pool.sort((a,b)=>Number(!!b.reviewedPriority)-Number(!!a.reviewedPriority)||Number(localRoute(b))-Number(localRoute(a))||score(b)-score(a));
   selected.push(pool.shift());
  }
  return selected;

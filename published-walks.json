@@ -1,0 +1,197 @@
+[
+  {
+    "name": "Back Walk and Gowan Hill",
+    "coord": {
+      "lat": 56.1174,
+      "lon": -3.9416
+    },
+    "text": "Join the Back Walk opposite Stirling Central Library. This 3.3 km heritage walk follows the old town walls and climbs to views from Gowan Hill. Expect steps and some steep sections.",
+    "source": {
+      "kind": "route-publisher",
+      "title": "Inner Forth Futures",
+      "url": "https://inner-forth-futures.s3.eu-west-2.amazonaws.com/files/Walking%20route%20PDFs/Back_Walk_and_Gowan_Hill.pdf"
+    }
+  },
+  {
+    "name": "Airthrey Loch Circuit",
+    "coord": {
+      "lat": 56.1455,
+      "lon": -3.9226
+    },
+    "text": "Start at the university boatshed for a 2.3 km walk around Airthrey Loch. The circuit follows the waterfront past the golf pavilion to the quieter eastern end of the loch.",
+    "source": {
+      "kind": "route-publisher",
+      "title": "University of Stirling",
+      "url": "https://www.stir.ac.uk/about/getting-here/getting-around-campus/campus-walks/"
+    }
+  },
+  {
+    "name": "The Wallace Way",
+    "coord": {
+      "lat": 56.1393,
+      "lon": -3.9185
+    },
+    "text": "Start at the Wallace Monument visitor car park. This uphill woodland walk passes carved sculptures on Abbey Craig. Allow 15–20 minutes for the climb to the monument entrance, plus time to return.",
+    "source": {
+      "kind": "route-publisher",
+      "title": "National Wallace Monument",
+      "url": "https://www.nationalwallacemonument.com/explore/the-abbey-craig/"
+    }
+  },
+  {
+    "name": "Raploch River Walk",
+    "coord": {
+      "lat": 56.1286,
+      "lon": -3.9369
+    },
+    "text": "Join this four-mile riverside walk at Stirling Old Bridge, a landmark on the published route. The path follows the bends of the Forth around Raploch.",
+    "source": {
+      "kind": "route-publisher",
+      "title": "Inner Forth Futures",
+      "url": "https://www.innerforthlandscape.co.uk/files/Walking%20route%20PDFs/Raploch_River_Walk.pdf"
+    }
+  },
+  {
+    "name": "Solomon’s Temple from Buxton Station",
+    "coord": {
+      "lat": 53.2607,
+      "lon": -1.9129
+    },
+    "text": "Walk from Buxton railway station to the Victorian tower on Grin Low. The climb gives a view back across the town before the circular route returns to the station.",
+    "source": {
+      "kind": "route-publisher",
+      "title": "Visit Peak District & Derbyshire",
+      "url": "https://visitpeakdistrict.com/trails/solomons-temple-walk"
+    }
+  },
+  {
+    "name": "Corbar Cross from Buxton Station",
+    "coord": {
+      "lat": 53.2607,
+      "lon": -1.9129
+    },
+    "text": "Walk from Buxton railway station into Corbar Woods and climb to Corbar Cross. The route guide gives two approaches through the trees, including an alternative to the steep steps.",
+    "source": {
+      "kind": "route-publisher",
+      "title": "Visit Peak District & Derbyshire",
+      "url": "https://visitpeakdistrict.com/trails/corbar-cross-walk-from-buxton-station"
+    }
+  },
+  {
+    "name": "Georgian Buxton and Pavilion Gardens walk",
+    "coord": {
+      "lat": 53.258,
+      "lon": -1.9201
+    },
+    "text": "Start at the west end of the Pavilion Gardens car park near Burlington Road. This town walk links the gardens, Georgian Buxton and the older streets of Higher Buxton.",
+    "source": {
+      "kind": "route-publisher",
+      "title": "Buxton Online",
+      "url": "https://www.buxtononline.net/buxton-walks-c68.html"
+    }
+  },
+  {
+    "name": "Errwood Hall and the Shrine",
+    "coord": {
+      "lat": 53.2706,
+      "lon": -1.982
+    },
+    "text": "Start at Errwood Hall car park for a three-mile walk in the Goyt Valley. The route links the ruins of the hall with the Grimshawe family burial ground and the little stone shrine.",
+    "source": {
+      "kind": "route-publisher",
+      "title": "Goyt Valley",
+      "url": "https://www.goyt-valley.org.uk/project/errwood-hall-and-shrine-walk/"
+    }
+  },
+  {
+    "name": "Tideswell village history trail",
+    "coord": {
+      "lat": 53.2781,
+      "lon": -1.7734
+    },
+    "text": "Start and finish at Bank Square Garden. This self-guided heritage walk follows the village history trail through Tideswell, with a leaflet to help identify the stops.",
+    "source": {
+      "kind": "route-publisher",
+      "title": "Visit Tideswell",
+      "url": "https://www.visittideswell.co.uk/wp-content/uploads/2011/04/tideswell_self_guided_trail.pdf"
+    }
+  },
+  {
+    "name": "Litton, Cressbrook Dale and the mills",
+    "coord": {
+      "lat": 53.2792,
+      "lon": -1.7534
+    },
+    "text": "Walk from Litton village green on a 7.9-mile circuit through Cressbrook Dale and Tideswell Dale. The route passes the former cotton mills and takes in part of the Monsal Trail.",
+    "source": {
+      "kind": "route-publisher",
+      "title": "Monsal Trail",
+      "url": "https://www.monsaltrail.org.uk/litton-to-cressbrook-dale/"
+    }
+  },
+  {
+    "name": "Miller’s Dale Station to Tideswell and Wormhill",
+    "coord": {
+      "lat": 53.2566,
+      "lon": -1.7935
+    },
+    "text": "Start at Miller’s Dale Station for a 7.3-mile circular walk. Cross the Wye near Litton Mill, climb towards Tideswell, then return through Wormhill.",
+    "source": {
+      "kind": "route-publisher",
+      "title": "Monsal Trail",
+      "url": "https://www.monsaltrail.org.uk/millers-dale-to-tideswell/"
+    }
+  },
+  {
+    "name": "Cave Dale from Castleton Market Place",
+    "coord": {
+      "lat": 53.3426,
+      "lon": -1.7757
+    },
+    "text": "Walk from Castleton Market Place into the limestone gorge below Peveril Castle. The village guide describes an approximately one-hour circuit with steep, rough ground and exposed edges.",
+    "source": {
+      "kind": "route-publisher",
+      "title": "Visit Castleton",
+      "url": "https://visitcastleton.co.uk/walking/"
+    }
+  },
+  {
+    "name": "Mam Tor, Hollins Cross and Odin Mine",
+    "coord": {
+      "lat": 53.3449,
+      "lon": -1.7778
+    },
+    "text": "Start at Castleton visitor centre for a 5.4-mile heritage walk. It links the village with Hollins Cross, Mam Tor and the old road past Odin Mine.",
+    "source": {
+      "kind": "route-publisher",
+      "title": "Visit Peak District & Derbyshire",
+      "url": "https://visitpeakdistrict.com/trails/castleton-heritage-history-walk"
+    }
+  },
+  {
+    "name": "Castleton village and surrounding fields",
+    "coord": {
+      "lat": 53.3449,
+      "lon": -1.7778
+    },
+    "text": "Start at Castleton visitor centre. This family walk follows village streets past Spital Bridge and returns through fields with views towards Mam Tor.",
+    "source": {
+      "kind": "route-publisher",
+      "title": "Peak District National Park",
+      "url": "https://www.peakdistrict.gov.uk/__data/assets/pdf_file/0022/431950/Castleton-Walk.pdf"
+    }
+  },
+  {
+    "name": "Great Ridge by train — Edale to Hope",
+    "coord": {
+      "lat": 53.3649,
+      "lon": -1.816
+    },
+    "text": "Start at Edale Station for a one-way ridge walk over Mam Tor and Lose Hill, finishing in Hope. Plan the onward journey separately for this linear route.",
+    "source": {
+      "kind": "route-publisher",
+      "title": "Mam Tor walking guide",
+      "url": "https://mamtor.uk/walks/great-ridge/"
+    }
+  }
+]

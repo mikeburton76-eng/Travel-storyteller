@@ -36,7 +36,7 @@ function validateSelection(answer,pool,config) {
  const priority=raw.filter(x=>byId.get(x.id)?.mustSee).map(x=>({...x,section:"attractions"}));
  for(const choice of [...priority,...raw]){
   const c=byId.get(choice.id);
-  if(!c||!P.visitorSuitable(c.name,c.text,c.historyOnly)||seen.has(c.id+'|'+choice.section)||!SECTIONS.includes(choice.section)||choice.familySuitable!==true||typeof choice.confidence!=='number'||choice.confidence<.75||choice.confidence>1||!Number.isInteger(choice.visitorValue)||choice.visitorValue<3||choice.visitorValue>5)continue;
+  if(!c||!P.visitorSuitable(c.name,c.text,c.historyOnly||c.walkOnly)||seen.has(c.id+'|'+choice.section)||!SECTIONS.includes(choice.section)||choice.familySuitable!==true||typeof choice.confidence!=='number'||choice.confidence<.75||choice.confidence>1||!Number.isInteger(choice.visitorValue)||choice.visitorValue<3||choice.visitorValue>5)continue;
   if(typeof choice.reason!=='string'||choice.reason.length<25||choice.reason.length>1000||(!P.allowed(c.name,c.text,choice.reason,choice.storyTitle||'')||P.sourceMarkup.test(choice.reason+' '+(choice.storyTitle||'')))||!evidenceIn(choice.evidence,c.text))continue;
   if((c.historyOnly&&choice.section!=='history')||c.walkOnly||c.sourceOnly)continue;
   if(choice.section==='events'&&!c.eventArea&&!P.eventPlace(c.name,c.text))continue;
@@ -136,8 +136,11 @@ function sourceCategories(chosen,pool,config){
  const walks=scatterWalks(pool.candidates,pool.location,6);
  const walkingIds=new Set(walks.map(c=>c.id));
  for(const c of [...walks,...families.filter(c=>!walkingIds.has(c.id)),...pool.candidates.filter(c=>!walkingIds.has(c.id)&&!familyIds.has(c.id))].sort((a,b)=>Number(!!b.reviewedPriority)-Number(!!a.reviewedPriority)||Number(!!b.activityOnly)-Number(!!a.activityOnly))){
-  if(!P.visitorSuitable(c.name,c.text,c.historyOnly))continue;
+  if(!P.visitorSuitable(c.name,c.text,c.historyOnly||c.walkOnly))continue;
   if(c.reviewedPriority&&c.mustSee&&!items.some(x=>x.id===c.id&&!x.historyOnly&&!x.eventArea))add(c,'attractions');
+  if(c.walkOnly&&walkingIds.has(c.id)&&c.source?.kind==='route-publisher'){
+   add(c,'walks',c.text); continue;
+  }
   const sentences=c.text.match(/[^.!?\n]+(?:[.!?](?=\s|$)|$)/g)||[c.text];
   const evidence=re=>sentences.map(s=>s.trim()).find(s=>s.length>=25&&s.length<=400&&re.test(s)&&P.allowed(s));
   if(c.battleHeritage){ add(c,'history',c.text); continue; }
