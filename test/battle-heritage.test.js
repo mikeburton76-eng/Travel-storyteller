@@ -54,3 +54,18 @@ for(const [name,lat,lon] of [
   assert.equal(places(guide.items).length,0);
  });
 }
+
+test('Worldwide editorial rule admits historical outcomes and excludes methods and sensitive subjects',()=>{
+ for(const text of ['Harold was killed at Hastings.', 'The execution of the king changed the succession.',
+  'The ruler was executed in France.', 'The memorial commemorates those killed in battle.',
+  'The killing changed the succession.', 'Lower Slaughter is a village.', 'Cajamarca has a historic centre.']){
+  assert.equal(P.allowed(text),true,text);
+ }
+ for(const text of ['The ruler was beheaded.', 'He was executed by firing squad.', 'She was hanged.',
+  'They were massacred.', 'sexual violence', 'sexually assaulted', 'rape', 'mass killings',
+  'school shooting', 'Battle of the Washita River', 'Battle of Fort Pillow']){
+  assert.equal(P.allowed(text),false,text);
+ }
+ const porongos=catalogue.find(r=>r[0]==='Q9651083');
+ assert.ok(!nearbyBattleStories({lat:porongos[3],lon:porongos[4]},1,[]).some(c=>c.name===porongos[1]));
+});

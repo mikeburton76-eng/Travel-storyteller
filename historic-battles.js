@@ -16,7 +16,7 @@ function nearbyBattleStories(location, radiusKm, localPlaces) {
   if (names.has(landmarks.get(id))) continue;
   const coord = {lat, lon};
   const distance = distanceKm(location, coord);
-  if (distance > radiusKm || !allowed(name, conflict)) continue;
+  if (distance > radiusKm || !allowed(name, conflict, article)) continue;
   nearby.push({
    name, coord, distanceKm:distance, historyOnly:true, battleHeritage:true,
    text:name+' took place in '+year+'. Historical context: '+conflict+'.',

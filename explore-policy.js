@@ -1,7 +1,7 @@
 'use strict';
 // Shared, replaceable editorial rules. Keyword checks supplement the AI review;
 // they cannot certify semantic or visual suitability.
-const excluded = /\b(massacres?|shootings?|spree[ -]?kill\w*|school[ -]?shoot\w*|killings?|killed|murder\w*|homicid\w*|assassinat\w*|rap(?:e|es|ed|ing|ist|ists)|sexual[ -]?(?:assault|abuse|violence|exploitation)|child[ -]?abuse|molest\w*|terroris\w*|genocid\w*|lynch\w*|tortur\w*|suicid\w*|executions?|atrocit\w*|porn\w*|sex[ -]?club|strip[ -]?club|brothels?|fatal[ -]?accident|serial[ -]?kill\w*)\b/iu;
+const excluded = /\b(massacr(?:e[ds]?|ing)|mass[ -]?(?:killings?|murders?)|slaughter(?:ed|ing)|shootings?|spree[ -]?kill\w*|school[ -]?shoot\w*|murder\w*|homicid\w*|assassinat\w*|rap(?:e[ds]?|ing|ists?)|sexual(?:ly)?[ -]+(?:assault\w*|abus\w*|violen\w*|exploit\w*)|child[ -]?abuse|molest\w*|terroris\w*|genocid\w*|lynch\w*|tortur\w*|suicid\w*|atrocit\w*|porn\w*|sex[ -]?club|strip[ -]?club|brothels?|fatal[ -]?accident|serial[ -]?kill\w*)\b/iu;
 const closed = /\b(permanently closed|permanently shut|temporarily closed|closed for|closed until|demolished|no longer exists|defunct|disused|was a railway station|former railway station)\b/i;
 const visitor = /\b(barrows?|burial mounds?|standing stones?|stone circles?|henges?|hillforts?|ancient monuments?|deserted (?:medieval|mediaeval) villages?|manors?|stately homes?|country houses?|historic houses?|mansions?|châteaux|chateaux|château|chateau|wakes week|well[ -]dressing|carnival|fringe|bookshops?|bookstores?|bookbinding|antique shops?|record shops?|craft shops?|tourist information|visitor cent(?:re|er)|visitor information|museum|galler(?:y|ies)|gardens?|parks?|observatory|aquarium|zoo|castle|palace|cathedral|church|abbey|temple|bridge|tower|theat(?:re|er)|concert hall|opera house|librar(?:y|ies)|markets?|arcade|pier|beach|waterfall|caverns?|caves?|botanic\w*|monument|heritage|historic\w*|landmark|archaeolog\w*|ruins|railway|funicular|sculpture|artwork|trail|walk|harbour|harbor|waterfront|festival|tradition|invention|discovery|memorial|hills?|crags?|craigs?|lochs?|glens?|moors?|woodlands?|mountains?|ridges?|gorges?|valleys?|viewpoints?|lakes?|reservoirs?|nature reserves?|country parks?|botanical gardens?)\b/i;
 const activityType=/\b(world of illusions|camera obscura|chocolatarium|optical illusions|mirror maze|laser[ -](?:tag|quest)|soft play|indoor play|trampoline parks?)\b/i;
@@ -39,7 +39,16 @@ const festival=/\b(festivals?|fringe|wakes?(?: week)?|well[ -]dressings?|carniva
 function eventPlace(name,text){return festival.test(name)&&festival.test(name+' '+text)&&!/\b(festival hall|festival theatre|festival theater|festival street)\b/i.test(name)}
 const hidden = /\b(lesser[ -]known|less[ -]visited|off the beaten (?:track|path)|overlooked|local favou?rite|hidden gem)\b/i;
 function plain(s) { return String(s || '').normalize('NFKC').replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/[\u2010-\u2015]/g, '-').replace(/<[^>]*>/g, '').trim(); }
-function allowed(...texts) { return !excluded.test(plain(texts.join(' '))); }
+// These event titles have an English source title or Wikidata alias identifying a massacre.
+// Match the event, so the surrounding town and its unrelated heritage stay eligible.
+const excludedBattle = /\b(?:battle of (?:the )?(?:porongos|washita(?: river)?|waxhaws|fort pillow|wyoming|cajamarca))\b/i;
+const executionMethod = /\b(?:behead\w*|decapitat\w*|dismember\w*|disembowel\w*|guillotin\w*|firing squad|burn(?:t|ed) at the stake|hang(?:ed|ing),? drawn and quartered|strangl(?:ed|ing)|bludgeon\w*|stabbed|shot dead|hanged|electrocuted|impaled)\b/i;
+const graphicDetail = /\b(?:severed (?:head|limbs?)|blood[ -]soaked|gaping wounds?|bled to death|throat (?:was )?(?:slit|cut)|(?:shot|struck) (?:through|in) (?:the |his |her )?(?:head|eye|chest)|(?:kill(?:ed|ing)|execut(?:ed|ion)|death) (?:by|with) (?:an? |the )?(?:hang\w*|shoot\w*|bullet|arrow|axe|sword|knife|poison\w*|stoning|crucifixion|lethal injection))\b/i;
+const historyGuidance = 'A historical death, killing or execution may be stated briefly as a fact. Explain its historical significance. Omit the method, injuries and physical details. Exclude massacres and sexual violence even when a source gives them a different name.';
+function allowed(...texts) {
+ const text = plain(texts.join(' '));
+ return !excluded.test(text) && !excludedBattle.test(text) && !executionMethod.test(text) && !graphicDetail.test(text);
+}
 function cleanParagraphs(s) { return plain(s).split(/\n\s*\n/).filter(p => allowed(p)).join('\n\n'); }
 // Transport infrastructure needs an explicit visitor attraction reason.
 const sourceMarkup=/\{\{|\}\}|\[\[|\]\]|\|\s*(?:name|lat|long|directions|phone|tollfree|fax|hours|price|wikipedia|wikidata|image|content|address|lastedit)\s*=/i;
@@ -93,4 +102,4 @@ function coordinate(lat, lon) {
  lat = Number(lat); lon = Number(lon);
  return Number.isFinite(lat)&&Number.isFinite(lon)&&Math.abs(lat)<=90&&Math.abs(lon)<=180 ? {lat,lon} : null;
 }
-module.exports = { battleHeritage, familyKind,familyIdeas, ancientSite, excludedFamilyVenue, familyVenue, familyVenueType, activityType,familyUse,heritageType,heritagePlace,historySubject,walkingUse,allowed, cleanParagraphs, plain, visitor, hidden, festival, eventPlace, closed, sourceMarkup, shopType, shopGem, gemEvidence, visitorSuitable, themeOf, distanceKm, coordinate };
+module.exports = { historyGuidance, battleHeritage, familyKind,familyIdeas, ancientSite, excludedFamilyVenue, familyVenue, familyVenueType, activityType,familyUse,heritageType,heritagePlace,historySubject,walkingUse,allowed, cleanParagraphs, plain, visitor, hidden, festival, eventPlace, closed, sourceMarkup, shopType, shopGem, gemEvidence, visitorSuitable, themeOf, distanceKm, coordinate };
