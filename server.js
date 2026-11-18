@@ -151,7 +151,7 @@ function readBody(req) {
   });
 }
 
-const excludedContent=/\b(massacres?|shootings?|spree[ -]?kill(?:ing|er)s?|school[ -]?shoot(?:ing|er)s?|mass[ -]?murder\w*|murder\w*|homicid\w*|assassinat\w*|rap(?:e|es|ed|ist|ists)|sexual[ -]?(?:assault|abuse|violence|exploitation)|child[ -]?abuse|molest\w*|terroris\w*|genocid\w*|lynch\w*|tortur\w*|suicid\w*|executions?|atrocit\w*|porn\w*|sex[ -]?club|strip[ -]?club|brothels?|fatal[ -]?accident|serial[ -]?kill\w*|battlefields?|sieges?)\b/i;
+const excludedContent=/\b(massacres?|shootings?|spree[ -]?kill(?:ing|er)s?|school[ -]?shoot(?:ing|er)s?|mass[ -]?murder\w*|murder\w*|homicid\w*|assassinat\w*|rap(?:e|es|ed|ist|ists)|sexual[ -]?(?:assault|abuse|violence|exploitation)|child[ -]?abuse|molest\w*|terroris\w*|genocid\w*|lynch\w*|tortur\w*|suicid\w*|executions?|atrocit\w*|porn\w*|sex[ -]?club|strip[ -]?club|brothels?|fatal[ -]?accident|serial[ -]?kill\w*)\b/i;
 function contentAllowed(...texts){return !excludedContent.test(texts.join(" ").normalize("NFKC").replace(/[\u200B-\u200D\uFEFF]/g,""))}
 
 

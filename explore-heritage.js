@@ -23,5 +23,11 @@ const reviewed=[{
  supportingSources:[{title:'Derbyshire County Council — reopening, 14 October 2026',url:'https://www.derbyshire.gov.uk/council/news-events/news-updates/news/buxton-museum-and-art-gallery-returns-in-temporary-new-home.aspx'},{title:'Buxton Library — address',url:'https://libraries.derbyshire.gov.uk/-/buxton-library'},{title:'Library postcode reference point (approximate)',url:'https://www.doogal.co.uk/ShowMap?postcode=SK17%209HW'}],reviewedAt:'2026-11-03'
 }];
 // These fill gaps in a local guide, rather than promoting Buxton to nearby cities.
-function nearbyHeritage(location,radiusKm){const localRadius=Math.min(radiusKm,3);return reviewed.filter(c=>P.distanceKm(location,c.coord)<=localRadius).map(c=>({...c,coord:{...c.coord},supportingSources:c.supportingSources.map(s=>({...s}))}));}
+const battleSites = require('./battle-heritage.json');
+function nearbyHeritage(location, radiusKm) {
+ const local = reviewed.filter(c => P.distanceKm(location,c.coord) <= Math.min(radiusKm,3));
+ const battles = battleSites.filter(c => P.distanceKm(location,c.coord) <= Math.min(radiusKm,6))
+  .map(c => ({...c, battleHeritage:true, reviewedPriority:true, guideListed:true, reviewedAt:'2026-11-18'}));
+ return [...local,...battles].map(c => ({...c,coord:{...c.coord},supportingSources:(c.supportingSources||[]).map(s=>({...s}))}));
+}
 module.exports={nearbyHeritage};

@@ -169,7 +169,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
    }
   }catch{warnings.push('A travel guide was not available for this place.');}}
   if(location.title){
-   const terms=['tourism','walk','viewpoint','(family OR children OR \"interactive experiences\")','(museum OR \"science centre\" OR \"natural history\")','(optical illusions OR mirror maze OR chocolate making OR hands-on workshop)','park','beach','market','bridge','tourist information','visitor centre','(festival OR fringe OR jazz)','(\"wakes week\" OR \"well dressing\" OR carnival)','(bookshop OR bookstore OR bookbinding)','(antiques OR artisan OR \"record shop\")','(hiking OR trail OR footpath OR circular walk OR woodland OR hill walk OR coastal path OR heritage walk)','(botanical garden OR arboretum OR promenade OR boardwalk)','(barrow OR hillfort OR "stone circle" OR "deserted medieval village")','(zoo OR aquarium OR planetarium OR "water park" OR "theme park" OR "amusement park" OR wildlife)'];
+   const terms=['(battlefield OR siege OR "battle memorial") (museum OR castle OR monument OR bridge OR abbey)', 'tourism','walk','viewpoint','(family OR children OR \"interactive experiences\")','(museum OR \"science centre\" OR \"natural history\")','(optical illusions OR mirror maze OR chocolate making OR hands-on workshop)','park','beach','market','bridge','tourist information','visitor centre','(festival OR fringe OR jazz)','(\"wakes week\" OR \"well dressing\" OR carnival)','(bookshop OR bookstore OR bookbinding)','(antiques OR artisan OR \"record shop\")','(hiking OR trail OR footpath OR circular walk OR woodland OR hill walk OR coastal path OR heritage walk)','(botanical garden OR arboretum OR promenade OR boardwalk)','(barrow OR hillfort OR "stone circle" OR "deserted medieval village")','(zoo OR aquarium OR planetarium OR "water park" OR "theme park" OR "amusement park" OR wildlife)'];
    const searchName=location.title.replace(/,.*$/,'');
    const results=await Promise.allSettled(terms.map(terms=>api('wikipedia',{generator:'search',gsrsearch:`"${searchName.replace(/["\\]/g,'')}" ${terms}`,gsrnamespace:0,gsrlimit:12,prop:'coordinates|description|extracts|pageimages|pageprops',exintro:1,explaintext:1,exlimit:'max',piprop:'name'})));
    for(const result of results){if(result.status!=='fulfilled'){warnings.push('Some subject searches were unavailable.');continue}
@@ -259,7 +259,8 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   const unique=new Map();
   for(const c of candidates){
    if(!c.coord||!P.visitorSuitable(c.name,c.text,c.historyOnly))continue;
-   const distance=P.distanceKm(location,c.coord);if(distance>(walkCandidate(c)?walkLimit:limit))continue;
+   c.battleHeritage = !!c.battleHeritage || P.battleHeritage(c.name,c.text);
+   const distance=P.distanceKm(location,c.coord);if(distance>(!c.battleHeritage&&walkCandidate(c)?walkLimit:limit))continue;
    if(distance>limit)c.walkOnly=true;
    const key=(c.wikidata||c.wikipedia||c.name).toLowerCase().replace(/[^\p{L}\p{N}]+/gu,'');
    if(unique.has(key)){const old=unique.get(key);if(c.website&&!old.website)old.website=c.website;if(c.mustSee){old.mustSee=true;old.supportingSources=[...old.supportingSources||[],...c.supportingSources||[]];if(!old.reviewedPriority&&c.text.includes('Local tourism context:'))old.text=c.text;}if(c.queryFeatured&&!old.queryFeatured){old.queryFeatured=true;old.prominence+=2;}continue;}

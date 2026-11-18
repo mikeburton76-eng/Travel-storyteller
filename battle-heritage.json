@@ -1,0 +1,80 @@
+[
+  {
+    "name": "Stirling Old Bridge",
+    "coord": {
+      "lat": 56.128619,
+      "lon": -3.936883
+    },
+    "text": "The Battle of Stirling Bridge took place beside a timber crossing in 1297. William Wallace and Andrew Moray defeated the English army here. The stone bridge over the Forth that visitors see today was built centuries later, near the earlier crossing.",
+    "source": {
+      "kind": "operator",
+      "title": "Historic Environment Scotland",
+      "url": "https://www.historicenvironment.scot/visit/all/stirling-old-bridge/"
+    }
+  },
+  {
+    "name": "Bannockburn Rotunda",
+    "coord": {
+      "lat": 56.0933,
+      "lon": -3.9378
+    },
+    "text": "The rotunda commemorates the Battle of Bannockburn in June 1314. Robert the Bruce defeated the army of Edward II in a contest over control of Stirling Castle. The memorial gives visitors a place to look out over the landscape associated with the battle.",
+    "source": {
+      "kind": "operator",
+      "title": "Historic Environment Scotland",
+      "url": "https://portal.historicenvironment.scot/designation/BTL4"
+    }
+  },
+  {
+    "name": "Battle Abbey",
+    "coord": {
+      "lat": 50.9142,
+      "lon": 0.487
+    },
+    "text": "Battle Abbey commemorates the Battle of Hastings in 1066. William of Normandy defeated King Harold here, and the abbey he subsequently founded gave the surrounding town of Battle its name.",
+    "source": {
+      "kind": "operator",
+      "title": "English Heritage",
+      "url": "https://www.english-heritage.org.uk/visit/places/1066-battle-of-hastings-abbey-and-battlefield/"
+    }
+  },
+  {
+    "name": "Harlech Castle",
+    "coord": {
+      "lat": 52.8602,
+      "lon": -4.1091
+    },
+    "text": "Harlech Castle endured a long siege during the Wars of the Roses. Its Lancastrian defenders held the fortress until 1468. The castle above the town gives visitors a sense of how its commanding position shaped its history.",
+    "source": {
+      "kind": "operator",
+      "title": "Cadw",
+      "url": "https://cadw.gov.wales/visit/places-to-visit/harlech-castle"
+    }
+  },
+  {
+    "name": "The Siege Museum",
+    "coord": {
+      "lat": 54.9952,
+      "lon": -7.3243
+    },
+    "text": "The Siege Museum on Society Street tells the story of the siege of Derry in 1689. Artefacts and displays connect the events inside the walled city with traditions still remembered in Derry today.",
+    "source": {
+      "kind": "operator",
+      "title": "Visit Derry",
+      "url": "https://www.visitderry.com/things-to-do/the-siege-museum-p676921"
+    }
+  },
+  {
+    "name": "Gifu Sekigahara Battlefield Memorial Museum",
+    "coord": {
+      "lat": 35.365676,
+      "lon": 136.466253
+    },
+    "text": "The museum tells the story of the Battle of Sekigahara in 1600. The outcome helped determine who would rule Japan. The building gives visitors a starting point for understanding the landscape where the armies met.",
+    "source": {
+      "kind": "operator",
+      "title": "Gifu Sekigahara Battlefield Memorial Museum",
+      "url": "https://sekigahara.pref.gifu.lg.jp/en/about/"
+    }
+  }
+]

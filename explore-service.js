@@ -105,7 +105,8 @@ function fallbackSelection(pool,config){
 }
 
 function sourceCategories(chosen,pool,config){
- const items=chosen.items.filter(item=>item.section!=='family'||!P.excludedFamilyVenue.test(item.name));
+ const heritageIds = new Set(pool.candidates.filter(c=>c.battleHeritage).map(c=>c.id));
+ const items=chosen.items.filter(item=>!heritageIds.has(item.id)||item.section!=='walks').filter(item=>item.section!=='family'||!P.excludedFamilyVenue.test(item.name));
  const add=(c,section,reason)=>{
   if(items.some(x=>x.id===c.id&&x.section===section))return;
   const sectionFull=items.filter(x=>x.section===section).length>=config.categoryLimits[section];
@@ -138,6 +139,7 @@ function sourceCategories(chosen,pool,config){
   if(c.reviewedPriority&&c.mustSee&&!items.some(x=>x.id===c.id&&!x.historyOnly&&!x.eventArea))add(c,'attractions');
   const sentences=c.text.match(/[^.!?\n]+(?:[.!?](?=\s|$)|$)/g)||[c.text];
   const evidence=re=>sentences.map(s=>s.trim()).find(s=>s.length>=25&&s.length<=400&&re.test(s)&&P.allowed(s));
+  if(c.battleHeritage){ add(c,'history',c.text); continue; }
   if(c.eventArea||P.eventPlace(c.name,c.text)){const reason=evidence({test:()=>true});if(reason)add(c,'events',reason);continue;}
   if(P.ancientSite.test(c.name+' '+c.text)){const reason=evidence(P.ancientSite);if(reason)add(c,'history',reason);}
   if(P.heritagePlace(c.name,c.text)){const reason=evidence({test:P.historySubject});if(reason)add(c,'history',reason);}
@@ -163,7 +165,7 @@ function mergeSpecialists(chosen,answers,pool,cfg){
  const items=[...chosen.items],byId=new Map(pool.candidates.map(c=>[c.id,c]));
  for(const {role,answer}of answers)for(const choice of (Array.isArray(answer?.choices)?answer.choices:[]).slice(0,4)){
   const c=byId.get(choice.id);
-  if(!c||c.historyOnly||P.closed.test(c.text)||choice.section!==role||(role==='walks'&&/walking distance|walked past|walk to (?:the )?station/i.test(choice.evidence||''))||!evidenceIn(choice.evidence,c.text)||!EXTRA_RULES[role].test(choice.evidence))continue;
+  if(!c||c.historyOnly||(c.battleHeritage&&role==='walks')||P.closed.test(c.text)||choice.section!==role||(role==='walks'&&/walking distance|walked past|walk to (?:the )?station/i.test(choice.evidence||''))||!evidenceIn(choice.evidence,c.text)||!EXTRA_RULES[role].test(choice.evidence))continue;
   if(items.length>=cfg.maxResults||items.some(x=>x.id===c.id&&x.section===role)||items.filter(x=>x.section===role).length>=cfg.categoryLimits[role])continue;
   const prior=items.filter(x=>x.id===c.id);
   if(prior.length>=cfg.maxCategoriesPerPlace||(prior.length&&items.length-new Set(items.map(x=>x.id)).size>=cfg.maxRepeatedAppearances))continue;

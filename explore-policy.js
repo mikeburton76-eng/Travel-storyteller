@@ -1,7 +1,7 @@
 'use strict';
 // Shared, replaceable editorial rules. Keyword checks supplement the AI review;
 // they cannot certify semantic or visual suitability.
-const excluded = /\b(massacres?|shootings?|spree[ -]?kill\w*|school[ -]?shoot\w*|killings?|killed|murder\w*|homicid\w*|assassinat\w*|rap(?:e|es|ed|ing|ist|ists)|sexual[ -]?(?:assault|abuse|violence|exploitation)|child[ -]?abuse|molest\w*|terroris\w*|genocid\w*|lynch\w*|tortur\w*|suicid\w*|executions?|atrocit\w*|porn\w*|sex[ -]?club|strip[ -]?club|brothels?|fatal[ -]?accident|serial[ -]?kill\w*|battlefields?|sieges?)\b/iu;
+const excluded = /\b(massacres?|shootings?|spree[ -]?kill\w*|school[ -]?shoot\w*|killings?|killed|murder\w*|homicid\w*|assassinat\w*|rap(?:e|es|ed|ing|ist|ists)|sexual[ -]?(?:assault|abuse|violence|exploitation)|child[ -]?abuse|molest\w*|terroris\w*|genocid\w*|lynch\w*|tortur\w*|suicid\w*|executions?|atrocit\w*|porn\w*|sex[ -]?club|strip[ -]?club|brothels?|fatal[ -]?accident|serial[ -]?kill\w*)\b/iu;
 const closed = /\b(permanently closed|permanently shut|temporarily closed|closed for|closed until|demolished|no longer exists|defunct|disused|was a railway station|former railway station)\b/i;
 const visitor = /\b(barrows?|burial mounds?|standing stones?|stone circles?|henges?|hillforts?|ancient monuments?|deserted (?:medieval|mediaeval) villages?|manors?|stately homes?|country houses?|historic houses?|mansions?|châteaux|chateaux|château|chateau|wakes week|well[ -]dressing|carnival|fringe|bookshops?|bookstores?|bookbinding|antique shops?|record shops?|craft shops?|tourist information|visitor cent(?:re|er)|visitor information|museum|galler(?:y|ies)|gardens?|parks?|observatory|aquarium|zoo|castle|palace|cathedral|church|abbey|temple|bridge|tower|theat(?:re|er)|concert hall|opera house|librar(?:y|ies)|markets?|arcade|pier|beach|waterfall|caverns?|caves?|botanic\w*|monument|heritage|historic\w*|landmark|archaeolog\w*|ruins|railway|funicular|sculpture|artwork|trail|walk|harbour|harbor|waterfront|festival|tradition|invention|discovery|memorial|hills?|crags?|craigs?|lochs?|glens?|moors?|woodlands?|mountains?|ridges?|gorges?|valleys?|viewpoints?|lakes?|reservoirs?|nature reserves?|country parks?|botanical gardens?)\b/i;
 const activityType=/\b(world of illusions|camera obscura|chocolatarium|optical illusions|mirror maze|laser[ -](?:tag|quest)|soft play|indoor play|trampoline parks?)\b/i;
@@ -50,10 +50,17 @@ const heritageType=/\b(hotels?|inns?|manors?|stately homes?|country houses?|hist
 function heritagePlace(name,text){return heritageType.test(name+' '+text)&&/\b(Grade\s+[I123]+\*?\s+listed|listed building|heritage[ -]listed|national historic landmark|historic (?:house|hotel|inn|manor|mansion|residence)|former royal residence)\b/i.test(text);}
 const ancientSite=/\b(barrows?|burial mounds?|standing stones?|stone circles?|henges?|hillforts?|ancient monuments?|deserted (?:medieval|mediaeval) villages?)\b/i;
 const walkingUse=/\b(walk\w*|hik\w*|footpaths?|trails?|strolls?|promenades?|riverside paths?|public paths?)\b/i;
-function historySubject(text){return ancientSite.test(text)||/\b(invent\w*|discover\w*|tradition\w*|engineer\w*|settlement|settled|grew|founded|festival|craft|market|people|community|transport|industry|industrial|changed|transformed|develop\w*|scientist)\b/i.test(text)||/\b(?:king|queen|monarch|royal)\b[^.!?]*\b(?:stayed|visited|residence|custody|house arrest)\b|\b(?:home of|residence of|lived here|lived at|stayed here|restored the|restoration of)\b/i.test(text);}
+const battleContext = /\b(?:battle(?:field)?s?|sieges?)\b/i;
+function battleHeritage(name, text) {
+ const landmark = /\b(?:abbey|bridge|castle|citadel|fort|fortress|gatehouse|memorial|monument|museum|national military park|city walls|rotunda)\b/i;
+ return landmark.test(name) && !/^(?:battle|siege) of /i.test(name) &&
+  battleContext.test(text) && /\b(?:[1-9]\d{2}|1\d{3})\b/.test(text);
+}
+function historySubject(text){return battleContext.test(text)||ancientSite.test(text)||/\b(invent\w*|discover\w*|tradition\w*|engineer\w*|settlement|settled|grew|founded|festival|craft|market|people|community|transport|industry|industrial|changed|transformed|develop\w*|scientist)\b/i.test(text)||/\b(?:king|queen|monarch|royal)\b[^.!?]*\b(?:stayed|visited|residence|custody|house arrest)\b|\b(?:home of|residence of|lived here|lived at|stayed here|restored the|restoration of)\b/i.test(text);}
 function visitorSuitable(name,text,historyOnly=false){
  if(!allowed(name,text)||closed.test(text)||sourceMarkup.test(name+' '+text))return false;
  if(historyOnly)return true;
+ if(/^(?:Battle|Siege) of /i.test(name)&&!/\b(?:museum|memorial|monument|visitor cent(?:re|er))\b/i.test(name))return false;
  if(/\b(hotel|inn)\b/i.test(name)&&!heritagePlace(name,text))return false;
  if(/\b(book[ -]?(?:shop|store)|antique shop|record shop|craft shop)\b/i.test(name)&&!shopGem(name,text))return false;
  if(/\b(station|stations|depot|TMD|railway shed)\b/i.test(name)&&!/\b(heritage railway|steam railway|scenic railway|tourist railway|railway museum|transport museum|visitor attraction|tourist attraction|architectural landmark|UNESCO World Heritage)\b/i.test(text))return false;
@@ -86,4 +93,4 @@ function coordinate(lat, lon) {
  lat = Number(lat); lon = Number(lon);
  return Number.isFinite(lat)&&Number.isFinite(lon)&&Math.abs(lat)<=90&&Math.abs(lon)<=180 ? {lat,lon} : null;
 }
-module.exports = { familyKind,familyIdeas, ancientSite, excludedFamilyVenue, familyVenue, familyVenueType, activityType,familyUse,heritageType,heritagePlace,historySubject,walkingUse,allowed, cleanParagraphs, plain, visitor, hidden, festival, eventPlace, closed, sourceMarkup, shopType, shopGem, gemEvidence, visitorSuitable, themeOf, distanceKm, coordinate };
+module.exports = { battleHeritage, familyKind,familyIdeas, ancientSite, excludedFamilyVenue, familyVenue, familyVenueType, activityType,familyUse,heritageType,heritagePlace,historySubject,walkingUse,allowed, cleanParagraphs, plain, visitor, hidden, festival, eventPlace, closed, sourceMarkup, shopType, shopGem, gemEvidence, visitorSuitable, themeOf, distanceKm, coordinate };
