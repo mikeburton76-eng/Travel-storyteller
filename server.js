@@ -471,6 +471,7 @@ const originalListeners = server.listeners('request');
 server.removeAllListeners('request');
 server.on('request', async (req, res) => {
   try {
+    if (/^[0-9a-f]{40}$/.test(process.env.RENDER_GIT_COMMIT || '')) res.setHeader('X-App-Revision', process.env.RENDER_GIT_COMMIT);
     if (!await authenticate(req, res)) return;
     for (const listener of originalListeners) await listener.call(server, req, res);
   } catch (error) {

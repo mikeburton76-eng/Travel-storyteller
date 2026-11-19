@@ -9,8 +9,28 @@ const reviewed=[{
  source:{kind:'route-publisher',title:'Peak District National Park — Tideswell Dale',url:'https://www.peakdistrict.gov.uk/visiting/miles-without-stiles/tideswell-dale'},
  supportingSources:[{title:'Peak District National Park — Tideswell Dale sensory trail',url:'https://www.peakdistrict.gov.uk/visiting/places-to-visit/sensory-trails/tideswell-dale-sensory-trail'}],
  reviewedAt:'2026-10-29'
-}, ...require('./published-walks.json').map(route=>({...route,walkOnly:true,theme:'nature',guideListed:true,supportingSources:[],reviewedAt:'2026-11-18'}))];
-function nearbyWalks(location,radiusKm){return reviewed.filter(c=>P.distanceKm(location,c.coord)<=radiusKm).map(c=>({...c,coord:{...c.coord},supportingSources:[...c.supportingSources]}))}
+}];
+const sources = [
+ ['National Trust', require('./walks-national-trust.json')],
+ ['Sport Ireland', require('./walks-ireland.json')],
+ ['Walkhighlands', require('./walks-scotland.json')],
+ ['New Zealand Department of Conservation', require('./walks-doc-nz.json')]
+];
+const published = require('./published-walks.json').map(route => ({
+ ...route, reviewedAt:route.reviewedAt || '2026-11-18'
+}));
+for (const [publisher, rows] of sources) {
+ for (const [name, lat, lon, text, url] of rows) {
+  const supportingSources = publisher === 'New Zealand Department of Conservation'
+   ? [{title:'Adapted from Department of Conservation open data (CC BY 4.0)',url:'https://www.doc.govt.nz/footer-links/copyright'}] : [];
+  published.push({name, coord:{lat,lon}, text, source:{kind:'route-publisher',title:publisher,url}, supportingSources, reviewedAt:'2026-11-19'});
+ }
+}
+function nearbyWalks(location,radiusKm) {
+ const nearby=[...reviewed,...published].filter(route=>P.distanceKm(location,route.coord)<=radiusKm)
+  .map(route=>({...route,coord:{...route.coord},theme:'nature',walkOnly:true,guideListed:true,supportingSources:[...(route.supportingSources||[])]}));
+ return nearby;
+}
 function walkingParagraphs(text){return String(text||'').slice(0,18000).split(/\n\s*\n/).filter(p=>p.length>=40&&p.length<=800&&P.allowed(p)&&!P.sourceMarkup.test(p)&&!P.closed.test(p)&&/\b(walking route|circular walk|hiking|footpath|walking trail|walkers|strolls?|promenades?|riverside paths?|public paths?|walks? (?:along|through|from|to)|public access)\b/i.test(p)).slice(0,2).join('\n\n')}
 const outdoorName=/\b(park|gardens?|arboretum|trail|footpath|promenade|boardwalk|beach|canyon|woodlands?|forest|nature reserve|hills?|crags?|craigs?|lochs?|lakes?|glens?|moors?|muir|ridges?|valleys?|walks?|ways?)\b/i;
 const routeEvidence=/\b(circular (?:walk|route)|walking (?:route|trail)|hiking (?:route|trail)|waymarked|signposted (?:walk|trail|route)|footpaths?|riverside paths?|coastal paths?|heritage walks?|walking tours?|walking circuit)\b/i;

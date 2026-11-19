@@ -40,7 +40,8 @@
    const heritage=sections.has('museums')||item.historyOnly||/\b(museum|gallery|castle|palace|historic house|monument|barrow|stone circle|church|abbey|cathedral)\b/i.test(item.name);
    const outdoor=/\b(gardens?|parks?|woodland|forest|trail|footpath|promenade|nature reserve)\b/i.test(item.name)&&
     /\b(walk\w*|trail|footpath|public park|public garden|promenade)\b/i.test(text);
-   const walk=!heritage&&(sections.has('walks')||outdoor);
+   const publishedWalk=sections.has('walks')&&records.some(r=>r.source?.kind==='route-publisher');
+   const walk=publishedWalk||(!heritage&&(sections.has('walks')||outdoor));
    const interactive=/\b(world of illusions|camera obscura|science cent(?:re|er)|children[’']s museum|chocolatarium)\b/i.test(item.name);
    const family=(!heritage||interactive)&&!walk&&sections.has('family');
    const displayCategory=item.eventArea||sections.has('events')?'events':walk?'walks':family?'family':'attractions';
