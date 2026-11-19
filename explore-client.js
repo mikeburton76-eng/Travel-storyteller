@@ -2,12 +2,76 @@
 const $=id=>document.getElementById(id);
 const researchMode=typeof location!=='undefined'&&new URLSearchParams(location.search).get('research')==='1';
 $('researchOptions').hidden=!researchMode;
-const sections={
+const standardSections={
  attractions:['📍','Sights & heritage','Landmarks, museums, historic places and local stories'],
  walks:['🥾','Walks & gardens','Documented walks, gardens and parks'],
  family:['👨‍👩‍👧','Family activities','Ideas for time together'],
  events:['🎭','What’s on','Festivals, fairs and local events']
 };
+const buxtonSections={
+ history:['🏛️','History & heritage','Historic buildings, spa heritage and local stories'],
+ nature:['🌿','Nature & scenery','Caves, gardens and viewpoints'],
+ arts:['🎨','Arts & culture','Theatres, museums and galleries'],
+ family:['👨‍👩‍👧','Family days out','Play areas and family activities'],
+ walks:['🥾','Walks','Published routes around Buxton'],
+ events:['🎭','What’s on','Dated events and performances']
+};
+function isBuxtonPilot(){
+ const place=guide?.location;
+ return activePageMode==='home' && /^Buxton(?:, Derbyshire| \(Derbyshire\))?$/i.test(place?.label||'') &&
+  Math.abs(place.lat-53.258)<0.035 && Math.abs(place.lon+1.915)<0.05;
+}
+function buxtonSegment(item,category){
+ const name=item.name||'';
+ if(item.displayCategory==='events')return category==='events'?( /festival|fringe/i.test(name)?'Festivals':'Shows & events'):'';
+ if(item.source?.kind==='route-publisher'){
+  if(category!=='walks')return '';
+  if(/temple|corbar|edge/i.test(name))return 'Hill walks';
+  if(/town|georgian|heritage/i.test(name))return 'Town trails';
+  return /river|water|reservoir/i.test(name)?'Waterside walks':'Countryside walks';
+ }
+ if(category==='family'){
+  if(/pavilion gardens/i.test(name))return 'Parks & play';
+  if(/grin low woods|buxton country park/i.test(name))return 'Woodland adventures';
+  return item.familyActivity||item.displayCategory==='family'?'Family activities':'';
+ }
+ if(/opera house|theat(?:re|er)|cinema/i.test(name))return category==='arts'?'Stage & screen':'';
+ if(item.section==='museums'||/museum|galler(?:y|ies)/i.test(name))return category==='arts'?'Museums & galleries':'';
+ if(/cavern|cave\b/i.test(name))return category==='nature'?'Caves':'';
+ if(/solomon.s temple|corbar cross/i.test(name))return category==='nature'?'Viewpoints':'';
+ if(item.theme==='nature'||/gardens|country park|woods/i.test(name))return category==='nature'?'Gardens & countryside':'';
+ if(category!=='history')return '';
+ if(/crescent|pump room|st\.? ann.s well|thermal baths/i.test(name))return 'Spa heritage';
+ if(item.theme==='architecture'||item.section==='buildings'||/old hall hotel/i.test(name))return 'Historic buildings';
+ return item.historyOnly||item.theme==='history'||item.section==='history'?'Local history':'';
+}
+function segmentLabels(item){
+ const labels=[buxtonSegment(item,selected)];
+ if(selected==='history'){
+  // A property's own visitor website can establish its operator.
+  const website=item.website||'';
+  if(/^https:\/\/(?:www\.)?nationaltrust\.org\.uk\/visit\/[^/]+\/[^/?#]+/i.test(website))labels.push('National Trust');
+  if(/^https:\/\/(?:www\.)?english-heritage\.org\.uk\/visit\/places\/[^/?#]+/i.test(website))labels.push('English Heritage');
+ }
+ return labels;
+}
+function renderSegments(items){
+ const controls=$('segmentFilters');
+ controls.replaceChildren();
+ controls.hidden=!isBuxtonPilot()||!items.length;
+ if(controls.hidden)return items;
+ const segments=[...new Set(items.flatMap(segmentLabels))];
+ if(!segments.includes(selectedSegment))selectedSegment='';
+ for(const label of ['',...segments]){
+  const button=node('button',label||'All');
+  button.type='button';button.className='action secondary';
+  button.setAttribute('aria-pressed',String(label===selectedSegment));
+  button.onclick=()=>{selectedSegment=label;render();};
+  controls.append(button);
+ }
+ return selectedSegment?items.filter(item=>segmentLabels(item).includes(selectedSegment)):items;
+}
+let sections=standardSections,selectedSegment='';
 const categoryHelp={events:'Upcoming and ongoing events with dates checked against the organiser. Check the organiser for the latest programme and age guidance.',walks:'Walks and outdoor places. Each card distinguishes a documented walk from a place to visit. Check routes, terrain and access; map distances are not walk lengths.',family:'Local places to explore together. Check venue details for age guidance and access.',history:'Discover local stories, museums, galleries and heritage. Map links for stories may show a related area.',attractions:'Landmarks, museums, heritage and local stories, each shown once. A town search includes the surrounding area.'};
 const originalNames={attractions:'Place to see',gems:'Lesser-known place',walks:'Walk',photos:'Photo spot',family:'Family activity',museums:'Museum or gallery',history:'History & stories',buildings:'Building & architecture',events:'Local event'};
 function eventDateLabel(item){
@@ -26,8 +90,8 @@ function distanceFromReference(item){
 function distanceText(item){const km=distanceFromReference(item);return !Number.isFinite(km)?'Distance unavailable':km<1?Math.round(km*1000)+' m':km.toFixed(1)+' km';}
 function itemsForCategory(items,category){
  const canonical=globalThis.DriveLogic.canonicalPlaces(items);
- let matched=canonical.filter(item=>item.displayCategory===category);
- if(category==='family'){
+ let matched=canonical.filter(item=>isBuxtonPilot()?buxtonSegment(item,category):item.displayCategory===category);
+ if(category==='family'&&!isBuxtonPilot()){
   const removed=/\b(cinemas?|movie theat(?:re|er)s?|bowling|escape rooms?|(?:mini(?:ature)?[ -]?|crazy |adventure )golf)\b/i;
   matched=matched.filter(item=>!removed.test(item.name));
  }
@@ -36,7 +100,8 @@ function itemsForCategory(items,category){
  return [...unique.values()].sort((a,b)=>distanceFromReference(a)-distanceFromReference(b)||a.name.localeCompare(b.name,'en'));
 }
 function renderCategories(){
- const visible=Object.keys(sections).filter(key=>key==='events'
+ sections=isBuxtonPilot()?buxtonSections:standardSections;
+ const visible=isBuxtonPilot()?Object.keys(sections):Object.keys(sections).filter(key=>key==='events'
   ? guide&&itemsForCategory(guide.items,key).length
   : !guide||guide.complete===false||itemsForCategory(guide.items,key).length);
  if(!visible.length)$('backToCategories').hidden=true;
@@ -47,7 +112,7 @@ function renderCategories(){
   const b=document.createElement('button');b.type='button';b.className='tab';b.setAttribute('aria-pressed',String(selected===key));
   const symbol=node('span',icon);symbol.className='category-icon';symbol.setAttribute('aria-hidden','true');
   const copy=document.createElement('span');copy.className='category-copy';copy.append(node('strong',name),node('small',hint));
-  b.append(symbol,copy);b.onclick=()=>{selected=key;renderCategories();if(guide){render()}else $('categoryMsg').textContent='Choose a location below to explore '+name.toLowerCase()+'.'};$('tabs').append(b);
+  b.append(symbol,copy);b.onclick=()=>{selected=key;selectedSegment='';renderCategories();if(guide){render()}else $('categoryMsg').textContent='Choose a location below to explore '+name.toLowerCase()+'.'};$('tabs').append(b);
  }
  for(const [id,path]of [['foodTile','/food-open-test'],['stayTile','/stay']]){if($(id)){const params=new URLSearchParams();if(guide?.location){params.set('place',guide.location.label);if(Number.isFinite(guide.location.lat)&&Number.isFinite(guide.location.lon)){params.set('lat',guide.location.lat);params.set('lon',guide.location.lon);}}$(id).href=path+(params.toString()?'?'+params.toString():'');}}
  $('categoryMsg').textContent=guide?(visible.length?'':'No supported suggestions found for this search yet. Try a nearby town.'):'Choose what interests you, then search a place or use your location.';
@@ -78,15 +143,15 @@ function render(){
  $('checked').textContent='Sources retrieved '+new Date(guide.checkedAt).toLocaleString('en-GB')+'. Next refresh when in use after '+new Date(guide.cacheUntil).toLocaleString('en-GB')+'.';
  $('areaSources').replaceChildren();for(const source of guide.sources){$('areaSources').append(link(source.kind==='wikivoyage'?'Travel guide ↗':source.kind==='openstreetmap'?'Map data: OpenStreetMap ↗':'Place background ↗',source.url),document.createTextNode(' '))}
  renderCategories();renderVisitorInformation();if($('listenNearby'))$('listenNearby').disabled=!guide.items.length;
- if(!Object.keys(sections).some(key=>itemsForCategory(guide.items,key).length)&&guide.complete!==false){$('results').hidden=true;return;}
- $('sectionTitle').textContent=sections[selected][1]+' near '+guide.location.label;$('sectionHelp').textContent=(categoryHelp[selected]||sections[selected][2])+' Nearest first; distances are in a straight line.';
+ if(!isBuxtonPilot()&&!Object.keys(sections).some(key=>itemsForCategory(guide.items,key).length)&&guide.complete!==false){$('results').hidden=true;return;}
+ $('sectionTitle').textContent=sections[selected][1]+' near '+guide.location.label;$('sectionHelp').textContent=(isBuxtonPilot()?sections[selected][2]:categoryHelp[selected]||sections[selected][2])+' Nearest first; distances are in a straight line.';
  if(selected==='attractions'){
   const where=mappedPoint(guide.location)?guide.location.lat+','+guide.location.lon:guide.location.label;
   const query='museums and galleries near '+where;
   $('sectionHelp').append(document.createTextNode(' '),link('More museums on Google Maps ↗','https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(query)));
  }
- $('cards').replaceChildren();const items=itemsForCategory(guide.items,selected);
- if(!items.length){const p=node('p',guide.complete===false?'Suggestions for this category are still being prepared.':selected==='history'?'No supported history or cultural suggestions found in this search yet. This does not mean the place has no history or culture.':'No sufficiently supported '+sections[selected][1].toLowerCase()+' found in this search yet. You can try another category or a nearby town.');p.className='empty';$('cards').append(p);return}
+ $('cards').replaceChildren();const items=renderSegments(itemsForCategory(guide.items,selected));
+ if(!items.length){const p=node('p',guide.complete===false?'Suggestions for this category are still being prepared.':isBuxtonPilot()&&selected==='events'?'No upcoming events with confirmed dates in this guide yet.':selected==='history'?'No supported history or cultural suggestions found in this search yet. This does not mean the place has no history or culture.':'No sufficiently supported '+sections[selected][1].toLowerCase()+' found in this search yet. You can try another category or a nearby town.');p.className='empty';$('cards').append(p);return}
  for(const item of items){
   const card=document.createElement('article');card.className='card';const photo=node('button',globalThis.DriveLogic.placeIcon(item));photo.className='photo';photo.type='button';photo.setAttribute('aria-label','Read about '+item.title);photo.onclick=()=>openItem(item);
   if(globalThis.DriveLogic.placePhoto(item)){const img=document.createElement('img');img.src=item.image.url;img.alt=item.name;img.loading='lazy';img.referrerPolicy='no-referrer';img.onerror=()=>photo.replaceChildren(document.createTextNode(globalThis.DriveLogic.placeIcon(item)));photo.replaceChildren(img)}
@@ -128,7 +193,7 @@ async function explore(input,{quiet=false}={}){
   while(true){
   const response=await fetch('/api/explore',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...input,progressive:true}),signal:currentController.signal});const data=await response.json();if(id!==requestId)return;
   if(!response.ok){if(data.choices?.length){for(const choice of data.choices){const b=node('button',choice.title+(choice.description?' — '+choice.description:''));b.className='action secondary';b.onclick=()=>{$('place').value=choice.title;explore({place:choice.title})};$('choices').append(b)}}throw Error(data.error||'The guide could not be loaded.')}
-  if(!quiet||data.complete!==false){guide=data;render();}if(data.complete===false){$('status').textContent='Here are the first suggestions. More places, photographs and categories are on their way…';await new Promise(resolve=>setTimeout(resolve,1500));if(id!==requestId)return;continue;}
+  if(!quiet||data.complete!==false){if(guide?.location?.label!==data.location.label)selectedSegment='';guide=data;render();}if(data.complete===false){$('status').textContent='Here are the first suggestions. More places, photographs and categories are on their way…';await new Promise(resolve=>setTimeout(resolve,1500));if(id!==requestId)return;continue;}
   $('status').textContent='Showing '+guide.items.length+' suggestions covering '+new Set(guide.items.map(x=>x.id)).size+' places in '+guide.location.label+'.';
   break;
   }
@@ -158,7 +223,7 @@ if(typeof IntersectionObserver!=='undefined'){
 // UI modes reuse the original AI discovery and narration endpoints.
 if($('modeGo')&&$('modeHome')){
  let pageMode='home';
- const setMode=mode=>{pageMode=mode;activePageMode=mode;globalThis.ExploreNarration?.stop();const controls=$('locationControls'),form=$('searchForm');if(mode==='go'){form.before(controls);$('locationHeading').textContent='Discover around you';$('modeHelp').textContent='Use your location, then choose a nearby place to read or hear.';$('listenNearby').hidden=false;$('place').placeholder='Or explore somewhere else';}else{form.after(controls);$('locationHeading').textContent='Where would you like to explore?';$('modeHelp').textContent='Search a place and choose what you would like to read or hear.';$('listenNearby').hidden=true;$('place').placeholder='Town, neighbourhood or landmark';}for(const [id,on]of [['modeGo',mode==='go'],['modeHome',mode==='home']]){if(on)$(id).setAttribute('aria-current','page');else $(id).removeAttribute('aria-current')}globalThis.window?.scrollTo?.({top:0,behavior:'smooth'});};
+ const setMode=mode=>{pageMode=mode;activePageMode=mode;if(guide)render();globalThis.ExploreNarration?.stop();const controls=$('locationControls'),form=$('searchForm');if(mode==='go'){form.before(controls);$('locationHeading').textContent='Discover around you';$('modeHelp').textContent='Use your location, then choose a nearby place to read or hear.';$('listenNearby').hidden=false;$('place').placeholder='Or explore somewhere else';}else{form.after(controls);$('locationHeading').textContent='Where would you like to explore?';$('modeHelp').textContent='Search a place and choose what you would like to read or hear.';$('listenNearby').hidden=true;$('place').placeholder='Town, neighbourhood or landmark';}for(const [id,on]of [['modeGo',mode==='go'],['modeHome',mode==='home']]){if(on)$(id).setAttribute('aria-current','page');else $(id).removeAttribute('aria-current')}globalThis.window?.scrollTo?.({top:0,behavior:'smooth'});};
  applyPageMode=setMode;
  $('modeGo').onclick=()=>setMode('go');$('modeHome').onclick=()=>setMode('home');
  $('listenNearby').onclick=()=>{if(!guide?.items.length)return;const items=itemsForCategory(guide.items,selected);const item=(items.length?items:guide.items).slice().sort((a,b)=>(a.distanceKm??Infinity)-(b.distanceKm??Infinity))[0];if(item)listenToItem(item);};
@@ -174,7 +239,7 @@ globalThis.window?.addEventListener?.('pagehide',saveExploreReturn);
 try{
  const saved=globalThis.DiscoverReturnState?.load('explore');
  if(saved?.guide?.location&&Array.isArray(saved.guide.items)&&saved.guide.coverage&&Array.isArray(saved.guide.sources)){
-  guide=saved.guide;selected=Object.hasOwn(sections,saved.selected)?saved.selected:'attractions';lastInput=saved.lastInput||null;$('place').value=saved.place||'';applyPageMode?.(saved.mode==='go'?'go':'home');render();setTimeout(()=>globalThis.window?.scrollTo?.({top:Number(saved.scroll)||0,behavior:'instant'}),0);
+  guide=saved.guide;selected=saved.selected;lastInput=saved.lastInput||null;$('place').value=saved.place||'';applyPageMode?.(saved.mode==='go'?'go':'home');render();setTimeout(()=>globalThis.window?.scrollTo?.({top:Number(saved.scroll)||0,behavior:'instant'}),0);
  }
 }catch{/* A missing return point must not prevent a fresh search. */}
 

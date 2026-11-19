@@ -20,3 +20,30 @@ test('renders distinct tiles and one museum card with shared wording',()=>{
  assert.equal(a.nodes.cards.children.length,1);
  assert.equal(a.run('itemsForCategory(guide.items,"walks")[0].id'),'g');
 });
+
+test('Buxton From Home pilot filters real guide cards and stays local',()=>{
+ const a=app(),location={label:'Buxton',lat:53.258,lon:-1.915,mode:'area'};
+ const places=[
+  ['Old Hall Hotel','buildings'],['Buxton Crescent','buildings'],['Buxton Opera House','attractions'],
+  ['Poole’s Cavern','attractions'],['Buxton Pavilion Gardens','walks'],
+  ['Corbar Cross from Buxton Station','walks']
+ ];
+ const items=places.map(([name,section],i)=>({id:String(i),name,title:name,section,coord:location,
+  source:{title:name,url:'https://example.org/'+i,kind:i===5?'route-publisher':'operator'}}));
+ const guide={location,items,coverage:{notes:[]},sources:[],complete:true};
+ a.run('guide='+JSON.stringify(guide)+';render()');
+ assert.equal(a.nodes.tabs.children.length,6);
+ const heritage=a.nodes.segmentFilters.children.find(b=>b.textContent==='Historic buildings');
+ heritage.onclick();
+ assert.equal(a.nodes.cards.children.length,1);
+ assert.equal(a.nodes.cards.children[0].children[1].children[1].children[0].textContent,'Old Hall Hotel');
+ for(const [index,count] of [[1,2],[2,1],[3,1],[4,1],[5,0]]){
+  a.nodes.tabs.children[index].onclick();
+  assert.equal(a.nodes.cards.children.filter(c=>c.className==='card').length,count);
+ }
+ a.nodes.modeGo.onclick();assert.equal(a.run('sections===standardSections'),true);
+ a.nodes.modeHome.onclick();assert.equal(a.nodes.tabs.children.length,6);
+ for(const change of ['guide.location.label="Stirling"','guide.location.label="Buxton Opera House"','guide.location.label="Buxton";guide.location.lat=52.76']){
+  a.run(change+';render()');assert.equal(a.run('sections===standardSections'),true);
+ }
+});
