@@ -9,7 +9,7 @@ const standardSections={
  events:['🎭','What’s on','Festivals, fairs and local events']
 };
 const buxtonSections={
- history:['🏛️','History & heritage','Historic buildings, spa heritage and local stories'],
+ history:['🏛️','Architecture & heritage','Historic buildings, spa heritage and local stories'],
  nature:['🌿','Nature & scenery','Caves, gardens and viewpoints'],
  arts:['🎨','Arts & culture','Theatres, museums and galleries'],
  family:['👨‍👩‍👧','Family days out','Play areas and family activities'],
@@ -35,6 +35,7 @@ function buxtonSegment(item,category){
   if(/grin low woods|buxton country park/i.test(name))return 'Woodland adventures';
   return item.familyActivity||item.displayCategory==='family'?'Family activities':'';
  }
+ if(category==='history'&&/^Buxton Opera House$/i.test(name))return 'Historic buildings';
  if(/opera house|theat(?:re|er)|cinema/i.test(name))return category==='arts'?'Stage & screen':'';
  if(item.section==='museums'||/museum|galler(?:y|ies)/i.test(name))return category==='arts'?'Museums & galleries':'';
  if(/cavern|cave\b/i.test(name))return category==='nature'?'Caves':'';

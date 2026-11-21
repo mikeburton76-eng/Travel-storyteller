@@ -33,10 +33,13 @@ test('Buxton From Home pilot filters real guide cards and stays local',()=>{
  const guide={location,items,coverage:{notes:[]},sources:[],complete:true};
  a.run('guide='+JSON.stringify(guide)+';render()');
  assert.equal(a.nodes.tabs.children.length,6);
+ assert.equal(a.run('sections.history[1]'),'Architecture & heritage');
  const heritage=a.nodes.segmentFilters.children.find(b=>b.textContent==='Historic buildings');
  heritage.onclick();
- assert.equal(a.nodes.cards.children.length,1);
- assert.equal(a.nodes.cards.children[0].children[1].children[1].children[0].textContent,'Old Hall Hotel');
+ const cardNames=()=>a.nodes.cards.children.map(card=>card.children[1].children[1].children[0].textContent);
+ assert.deepEqual(cardNames().sort(),['Buxton Opera House','Old Hall Hotel']);
+ a.nodes.tabs.children[2].onclick();
+ assert.deepEqual(cardNames(),['Buxton Opera House']);
  for(const [index,count] of [[1,2],[2,1],[3,1],[4,1],[5,0]]){
   a.nodes.tabs.children[index].onclick();
   assert.equal(a.nodes.cards.children.filter(c=>c.className==='card').length,count);
