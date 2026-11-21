@@ -29,3 +29,11 @@
 #journeySource{display:block;width:100%;min-height:64px;font:inherit;font-size:20px;padding:12px;border:2px solid #8baebb;border-radius:12px;background:white;color:#23343e}.route-confirm{display:flex!important;gap:12px;align-items:flex-start;margin:18px 0}.route-confirm input{width:26px;height:26px;flex-shrink:0;margin:4px 0}#routePreviewPlaces{padding-left:24px}#routePreviewPlaces li{margin:10px 0}
 
 input[type=range]{width:100%;min-height:44px;accent-color:#17617c;padding:0}#route-test .place-choice{display:block;width:100%;margin:6px 0;text-align:left}#route-test .place-choice small{display:block;font-weight:400}
+
+.journey-header{margin:12px 0 22px}.journey-header h1{font:700 clamp(36px,8vw,48px)/1.12 Georgia,serif;letter-spacing:-.025em;margin:0 0 6px}.journey-header p{margin:0;color:#435c66}
+main>section,main>details{border:1px solid #d3e1e4;box-shadow:0 2px 9px #23343e0a;margin:14px 0}
+.journey-start{border-top:4px solid #17617c}.journey-start h2{margin-top:0}.journey-start .buttons{display:grid;grid-template-columns:2fr 1fr}
+.plan-link{display:inline-block;padding:12px 0;font-weight:650;text-underline-offset:4px}
+main>details>summary{font-size:19px;font-weight:650;cursor:pointer}
+button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #bb7714;outline-offset:3px}
+#route-test{scroll-margin-top:12px}#journeyLive dl>div{min-width:0}

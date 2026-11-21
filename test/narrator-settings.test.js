@@ -17,8 +17,10 @@ test('defaults to Daniel, offers Kate, and does not fetch Pippa configuration fo
 test('personal voice selection survives reload and delayed voice lists without switching to Pippa',()=>{
  const a=setup();a.nodes.get('narratorChoice').value='phone:kate-plus';a.nodes.get('narratorChoice').onchange();const b=setup({initial:Object.fromEntries(a.stored),list:[]});assert.equal(b.api.get().provider,'phone');assert.equal(b.api.get().voice,undefined);b.setVoices([daniel,kate]);assert.equal(b.api.get().name,'Kate (Enhanced)');assert.equal(b.requests,0);
 });
-test('old Pippa default migrates to phone once, but a new explicit Pippa selection is retained',async()=>{
- const a=setup({initial:{'discoverPlaces.narrator':'piper'}});assert.equal(a.api.get().provider,'phone');a.nodes.get('narratorChoice').value='piper';a.nodes.get('narratorChoice').onchange();await a.api.ready();await a.api.ready();assert.equal(a.requests,1);const b=setup({initial:Object.fromEntries(a.stored)});assert.equal(b.api.get().provider,'piper');
+test('retired server preferences migrate to an available phone voice',async()=>{
+ const a=setup({initial:{'discoverPlaces.narrator':'piper','discoverPlaces.voiceChoiceV2':'yes'}});
+ assert.equal(a.api.get().name,'Daniel');assert.equal(a.stored.get('discoverPlaces.narrator'),'auto-phone');
+ assert.ok(a.nodes.get('narratorChoice').options.every(o=>o.value!=='piper'));await a.api.ready();assert.equal(a.requests,0);
 });
 test('selection locks during a journey and missing voice errors never silently substitute another narrator',()=>{
  const a=setup();a.api.setLocked(true);a.nodes.get('narratorChoice').value='phone:karen';a.nodes.get('narratorChoice').onchange();assert.equal(a.api.get().name,'Daniel');const b=setup({initial:{'discoverPlaces.narrator':'phone:missing'}});let error;b.api.speak('hello',{onError:m=>error=m});assert.match(error,/unavailable/);assert.equal(b.spoken.length,0);assert.equal(b.requests,0);

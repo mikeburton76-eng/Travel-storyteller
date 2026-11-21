@@ -18,7 +18,7 @@ const buxtonSections={
 };
 function isBuxtonPilot(){
  const place=guide?.location;
- return activePageMode==='home' && /^Buxton(?:, Derbyshire| \(Derbyshire\))?$/i.test(place?.label||'') &&
+ return /^Buxton(?:, Derbyshire| \(Derbyshire\))?$/i.test(place?.label||'') &&
   Math.abs(place.lat-53.258)<0.035 && Math.abs(place.lon+1.915)<0.05;
 }
 function buxtonSegment(item,category){
@@ -120,7 +120,7 @@ function renderCategories(){
  $('categoryMsg').hidden=!!guide&&!!visible.length;
 }
 const icons={nature:'🌿',culture:'🎨',experience:'🎟️',architecture:'🏛️',history:'📜'};
-let activePageMode='home',applyPageMode=null,detailHistory=false;
+let detailHistory=false;
 let guide=null,selected='attractions',requestId=0,lastInput=null,controller=null,activeItem=null,inFlight=false;
 function link(text,url){const a=document.createElement('a');a.textContent=text;a.href=url;a.target='_blank';a.rel='noopener';return a}
 function node(tag,text){const e=document.createElement(tag);e.textContent=text;return e}
@@ -221,26 +221,17 @@ if(typeof IntersectionObserver!=='undefined'){
  const update=()=>{backCategories.hidden=!$('tabs').children.length||$('categories').getBoundingClientRect().bottom>=0};window.addEventListener('scroll',update,{passive:true});update();
 }
 
-// UI modes reuse the original AI discovery and narration endpoints.
-if($('modeGo')&&$('modeHome')){
- let pageMode='home';
- const setMode=mode=>{pageMode=mode;activePageMode=mode;if(guide)render();globalThis.ExploreNarration?.stop();const controls=$('locationControls'),form=$('searchForm');if(mode==='go'){form.before(controls);$('locationHeading').textContent='Discover around you';$('modeHelp').textContent='Use your location, then choose a nearby place to read or hear.';$('listenNearby').hidden=false;$('place').placeholder='Or explore somewhere else';}else{form.after(controls);$('locationHeading').textContent='Where would you like to explore?';$('modeHelp').textContent='Search a place and choose what you would like to read or hear.';$('listenNearby').hidden=true;$('place').placeholder='Town, neighbourhood or landmark';}for(const [id,on]of [['modeGo',mode==='go'],['modeHome',mode==='home']]){if(on)$(id).setAttribute('aria-current','page');else $(id).removeAttribute('aria-current')}globalThis.window?.scrollTo?.({top:0,behavior:'smooth'});};
- applyPageMode=setMode;
- $('modeGo').onclick=()=>setMode('go');$('modeHome').onclick=()=>setMode('home');
- $('listenNearby').onclick=()=>{if(!guide?.items.length)return;const items=itemsForCategory(guide.items,selected);const item=(items.length?items:guide.items).slice().sort((a,b)=>(a.distanceKm??Infinity)-(b.distanceKm??Infinity))[0];if(item)listenToItem(item);};
- setMode('home');
-}
-
+$('listenNearby').onclick=()=>{if(!guide?.items.length)return;const items=itemsForCategory(guide.items,selected);const item=(items.length?items:guide.items).slice().sort((a,b)=>(a.distanceKm??Infinity)-(b.distanceKm??Infinity))[0];if(item)listenToItem(item);};
 
 function saveExploreReturn(){
- if(!guide)return;globalThis.DiscoverReturnState?.save('explore',{guide,selected,lastInput,place:$('place').value,mode:activePageMode,scroll:globalThis.window?.scrollY||0});
+ if(!guide)return;globalThis.DiscoverReturnState?.save('explore',{guide,selected,lastInput,place:$('place').value,scroll:globalThis.window?.scrollY||0});
 }
 for(const id of ['foodTile','stayTile'])if($(id))$(id).addEventListener('click',saveExploreReturn);
 globalThis.window?.addEventListener?.('pagehide',saveExploreReturn);
 try{
  const saved=globalThis.DiscoverReturnState?.load('explore');
  if(saved?.guide?.location&&Array.isArray(saved.guide.items)&&saved.guide.coverage&&Array.isArray(saved.guide.sources)){
-  guide=saved.guide;selected=saved.selected;lastInput=saved.lastInput||null;$('place').value=saved.place||'';applyPageMode?.(saved.mode==='go'?'go':'home');render();setTimeout(()=>globalThis.window?.scrollTo?.({top:Number(saved.scroll)||0,behavior:'instant'}),0);
+  guide=saved.guide;selected=saved.selected;lastInput=saved.lastInput||null;$('place').value=saved.place||'';render();setTimeout(()=>globalThis.window?.scrollTo?.({top:Number(saved.scroll)||0,behavior:'instant'}),0);
  }
 }catch{/* A missing return point must not prevent a fresh search. */}
 

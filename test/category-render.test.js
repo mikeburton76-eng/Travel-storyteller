@@ -44,8 +44,6 @@ test('Buxton From Home pilot filters real guide cards and stays local',()=>{
   a.nodes.tabs.children[index].onclick();
   assert.equal(a.nodes.cards.children.filter(c=>c.className==='card').length,count);
  }
- a.nodes.modeGo.onclick();assert.equal(a.run('sections===standardSections'),true);
- a.nodes.modeHome.onclick();assert.equal(a.nodes.tabs.children.length,6);
  for(const change of ['guide.location.label="Stirling"','guide.location.label="Buxton Opera House"','guide.location.label="Buxton";guide.location.lat=52.76']){
   a.run(change+';render()');assert.equal(a.run('sections===standardSections'),true);
  }

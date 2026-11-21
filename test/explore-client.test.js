@@ -63,15 +63,18 @@ test('Categories shortcut appears only after populated choices have scrolled awa
  a.run('guide.items=[];render()');observe([{isIntersecting:false,boundingClientRect:{top:-400}}]);assert.equal(a.nodes.backToCategories.hidden,true);
 });
 
-test('On the Go puts location controls first and From Home puts search first',()=>{const a=app();assert.equal(a.nodes.modeHome.attrs['aria-current'],'page');assert.equal(a.nodes.searchForm.afterNode,a.nodes.locationControls);a.nodes.modeGo.onclick();assert.equal(a.nodes.modeGo.attrs['aria-current'],'page');assert.equal(a.nodes.searchForm.beforeNode,a.nodes.locationControls);assert.equal(a.nodes.listenNearby.hidden,false);a.nodes.modeHome.onclick();assert.equal(a.nodes.listenNearby.hidden,true);});
+test('On the Go opens the driving companion directly',()=>{
+ const html=fs.readFileSync(path.join(__dirname,'../explore.html'),'utf8');
+ assert.match(html,/<a href="\/drive-test" id="modeGo">/);
+});
 
 
 test('food navigation carries the selected place and coordinates without changing category selection',()=>{const a=app();a.run('guide='+JSON.stringify({...fixture,location:{label:'Melbourne, Derbyshire',mode:'area',lat:52.82,lon:-1.43}})+';render()');const u=new URL(a.nodes.foodTile.href,'https://test.example');assert.equal(u.pathname,'/food-open-test');assert.equal(u.searchParams.get('place'),'Melbourne, Derbyshire');assert.equal(u.searchParams.get('lat'),'52.82');assert.equal(a.nodes.tabs.children[0].attrs['aria-pressed'],'true');});
 
-test('returning from Food restores the guide and selected mode without another AI request',()=>{
+test('returning from Food restores the guide without another AI request',()=>{
  let saved;const state={save:(key,value)=>{if(key==='explore')saved=value},load:()=>null};
- const a=app(()=>assert.fail('No request expected'),'',{DiscoverReturnState:state});a.run('guide='+JSON.stringify(fixture)+';render()');a.nodes.modeGo.onclick();a.nodes.place.value='Sample Town';a.nodes.foodTile.events.click();assert.equal(saved.guide.location.label,'Sample Town');assert.equal(saved.mode,'go');
- const b=app(()=>assert.fail('Returning must not rebuild the guide'),'',{DiscoverReturnState:{load:()=>saved}});assert.equal(b.nodes.locationName.textContent,'Sample Town');assert.equal(b.nodes.modeGo.attrs['aria-current'],'page');assert.equal(b.nodes.cards.children.length,1);
+ const a=app(()=>assert.fail('No request expected'),'',{DiscoverReturnState:state});a.run('guide='+JSON.stringify(fixture)+';render()');a.nodes.place.value='Sample Town';a.nodes.foodTile.events.click();assert.equal(saved.guide.location.label,'Sample Town');
+ const b=app(()=>assert.fail('Returning must not rebuild the guide'),'',{DiscoverReturnState:{load:()=>saved}});assert.equal(b.nodes.locationName.textContent,'Sample Town');assert.equal(b.nodes.cards.children.length,1);
 });
 test('reading panel has top/bottom close controls and browser Back closes it without leaving the guide',()=>{
  const listeners={};let backs=0;const history={state:null,pushState(s){this.state=s;},back(){backs++;this.state=null;listeners.popstate?.();}};
