@@ -314,7 +314,7 @@ test('the drive plays a sourced highlight and offers distinct details after stop
 });
 
 test('Explore cards within 400 m show their images even behind the car and leave the list outside the radius',async()=>{
- const crescent={...item,name:'Buxton Crescent',theme:'architecture',image:{url:'https://upload.wikimedia.org/example.jpg'},coord:{lat:0,lon:.002}};
+ const crescent={...item,name:'Buxton Crescent',theme:'architecture',image:{url:'https://upload.wikimedia.org/example.jpg',sourceUrl:'https://commons.wikimedia.org/wiki/File:Example.jpg'},coord:{lat:0,lon:.002}};
  const a=await app({tripItems:[crescent]});
  a.position({heading:270});await tick();
  const cards=a.nodes.get('nearbyPlaceCards');
@@ -328,7 +328,7 @@ test('Explore cards within 400 m show their images even behind the car and leave
 test('distance options set matching playback and nearby-card boundaries',()=>{
  const f=fix(),m=L.motion(f);
  try{
- for(const radius of [100,200,400,500,1000]){
+ for(const radius of [100,200,400,500,1000,2700,5000]){
  L.setPlaybackMetres(radius);
  const inside={...item,coord:{lat:0,lon:(radius-5)/111195}};
  const outside={...item,coord:{lat:0,lon:(radius+5)/111195}};
@@ -432,4 +432,26 @@ test('phone route download stores text without voice generation and reloads for 
 test('switching to Pippa cannot play a saved text record as audio',async()=>{
  const narrator=phoneNarrator(),a=await app({autoStart:false,voiceNarrator:narrator,routePlan:sampleRoute});a.nodes.get('routeConfirmed').checked=true;await a.nodes.get('prepare').onclick('route');narrator.provider='piper';narrator.changed();
  const row=a.nodes.get('savedAreasList').children.find(x=>x.children[0].textContent.startsWith(sampleRoute.label));assert.equal(row.children[2].children[2].disabled,true);
+});
+
+test('custom journey previews and saves 30 stories, and saved GPS playback works on a detour',async()=>{
+ const detour={...item,id:'detour',name:'Detour story',coord:{lat:.03,lon:.003},source:{url:'https://example.org/detour'}};
+ const points=Array.from({length:35},(_,i)=>({...item,id:'site'+i,coord:{lat:0,lon:.01+i*.001},route:{along:1000+i*100,metres:0},source:{url:'https://example.org/'+i}}));
+ const plan={id:'road-new',label:'Buxton → Sheffield',from:{lat:0,lon:0},to:{lat:0,lon:.05},distanceM:5500,durationS:400,radiusM:20000,coordinates:[[0,0],[.05,0]],items:[{...detour,route:{along:300,metres:3300}},...points]};
+ const narrator=phoneNarrator(),a=await app({autoStart:false,tripItems:[],voiceNarrator:narrator,online:true,fetchImpl:async(url,options)=>{
+  assert.equal(url,'/api/journey-route');assert.equal(JSON.parse(options.body).radiusM,20000);
+  return {ok:true,json:async()=>plan};
+ }});
+ const radius=a.nodes.get('routeRadius');radius.value='20';radius.oninput();
+ const count=a.nodes.get('downloadCount');count.value='30';count.oninput();
+ await a.nodes.get('planRoute').onclick();
+ assert.equal(a.nodes.get('routePreviewPlaces').children.length,30);
+ a.nodes.get('routeConfirmed').checked=true;
+ await a.nodes.get('prepare').onclick('route');
+ const record=a.records.get('trip');assert.equal(record.areas[0].items.length,30);
+ const b=await app({autoStart:false,initialRecord:record,voiceNarrator:phoneNarrator(),online:false});
+ b.nodes.get('journeySource').value=plan.id;b.nodes.get('journeySource').onchange();await b.startJourney();
+ b.position({lat:.03,lon:.001});await tick();await tick();
+ assert.equal(b.nodes.get('placeName').textContent,'Detour story');assert.equal(b.requests,0);
+ b.nodes.get('stop').onclick();
 });

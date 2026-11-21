@@ -27,3 +27,5 @@
 
 
 #journeySource{display:block;width:100%;min-height:64px;font:inherit;font-size:20px;padding:12px;border:2px solid #8baebb;border-radius:12px;background:white;color:#23343e}.route-confirm{display:flex!important;gap:12px;align-items:flex-start;margin:18px 0}.route-confirm input{width:26px;height:26px;flex-shrink:0;margin:4px 0}#routePreviewPlaces{padding-left:24px}#routePreviewPlaces li{margin:10px 0}
+
+input[type=range]{width:100%;min-height:44px;accent-color:#17617c;padding:0}#route-test .place-choice{display:block;width:100%;margin:6px 0;text-align:left}#route-test .place-choice small{display:block;font-weight:400}

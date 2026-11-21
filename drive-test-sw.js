@@ -1,6 +1,6 @@
 'use strict';
-const CACHE='discover-driving-shell-v26-shared-place-images';
-const ASSETS=['/drive-test','/drive-test.css','/drive-client.js','/drive-player.js','/drive-history.js','/drive-logic.js','/journey-route.js','/route-test-data.js','/narrator-settings.js'];
+const CACHE='discover-driving-shell-v27-journey-planner';
+const ASSETS=['/drive-test','/drive-test.css','/drive-client.js','/drive-player.js','/drive-history.js','/drive-logic.js','/journey-route.js','/place-search.js','/route-test-data.js','/narrator-settings.js'];
 self.addEventListener('install',event=>event.waitUntil((async()=>{const cache=await caches.open(CACHE);await cache.addAll(ASSETS);await self.skipWaiting();})()));
 self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
 // Only this explicitly downloaded test shell is saved. Never cache API calls,

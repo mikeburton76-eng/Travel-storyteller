@@ -13,7 +13,7 @@
   if(/\b(?:nude|nudity|naked|porn\w*|explicit|sexual|genitals?|penis|vulva|phallic|phallus|erotic|corpse|gore)\b/i.test(metadata.replace(/[_%]/g,' ')))return null;
   return image;
  }
- const DISTANCE_OPTIONS=Object.freeze([100,200,400,500,1000]);
+ const DISTANCE_OPTIONS=Object.freeze(Array.from({length:50},(_,i)=>(i+1)*100));
  let PLAYBACK_METRES=400;
  function setPlaybackMetres(value){const metres=Number(value);PLAYBACK_METRES=DISTANCE_OPTIONS.includes(metres)?metres:400;return PLAYBACK_METRES;}
  const rad=x=>x*Math.PI/180;
@@ -64,7 +64,7 @@
   if(speed===null||speed<1||speed>55||heading===null)return null;
   return {speed,heading};
  }
- function approaching(item,fix,movement,played=new Set(),prepareMetres=Math.min(3000,Math.max(1000,movement?.speed*90))){
+ function approaching(item,fix,movement,played=new Set(),prepareMetres=Math.max(PLAYBACK_METRES+500,Math.min(3000,Math.max(1000,(movement?.speed||0)*90)))){
   if(!valid(item.coord)||!valid(fix)||!Number.isFinite(fix.accuracy)||fix.accuracy<0||fix.accuracy>75||played.has(key(item)))return null;
   if(!movement)return null;
   const metres=distance(fix,item.coord),delta=angle(movement.heading,bearing(fix,item.coord));

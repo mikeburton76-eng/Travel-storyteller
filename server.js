@@ -224,6 +224,13 @@ const server = http.createServer(async (req, res) => {
   }
 
 
+  if(req.method==='POST'&&req.url==='/api/journey-route'){
+    try{
+      if(req.headers.origin&&new URL(req.headers.origin).host!==req.headers.host)return sendJson(res,403,{error:'Open On the Go to plan your route.'});
+      if(!String(req.headers['content-type']||'').startsWith('application/json'))return sendJson(res,415,{error:'Send a journey request.'});
+      return sendJson(res,200,await require('./journey-planner').plan(JSON.parse(await readBody(req))));
+    }catch(error){return sendJson(res,error.status||502,{error:error.status?error.message:'Could not prepare the road route. Try again while connected.'});}
+  }
   if (req.method === 'POST' && req.url === '/api/arrivals') {
     const reply=(status,data)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'private, no-store'});res.end(JSON.stringify(data));};
     if (!String(req.headers['content-type']||'').startsWith('application/json')) return reply(415,{error:'Use the driving test to prepare an introduction.'});

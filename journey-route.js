@@ -14,7 +14,7 @@
  }
  function within(plan,metres){return (plan.items||[]).map(item=>({...item,route:project(item.coord,plan.coordinates)})).filter(item=>item.route.metres<=metres).sort((a,b)=>a.route.along-b.route.along);}
  function select(items,count){
-  const n=Math.max(1,Math.min(20,Math.floor(Number(count)||8))),ordered=[...items].sort((a,b)=>a.route.along-b.route.along);
+  const n=Math.max(1,Math.min(30,Math.floor(Number(count)||8))),ordered=[...items].sort((a,b)=>a.route.along-b.route.along);
   if(ordered.length<=n)return ordered;
   if(n===1)return [ordered[Math.floor(ordered.length/2)]];
   const remaining=[...ordered],result=[],start=ordered[0].route.along,end=ordered.at(-1).route.along;
