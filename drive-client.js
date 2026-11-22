@@ -188,7 +188,7 @@
    for(const item of area.items){
     const entry=document.createElement('details'),name=document.createElement('summary'),text=document.createElement('p'),listen=document.createElement('button');
     name.textContent=item.name;text.textContent=item.spokenText||L.narration(item,{nearby:false});listen.type='button';listen.textContent='Listen';listen.disabled=locked||(!phoneMode()&&!!area.audio[L.key(item)]?.phoneText);
-    listen.onclick=()=>{if(running||preparing||starting)return;prime();$('previewLabel').hidden=false;$('previewLabel').textContent=item.name;nativePlayer.play(phoneMode()?textClip(item.spokenText||L.narration(item,{nearby:false})):area.audio[L.key(item)],{onError:message=>{$('savedListenStatus').textContent=message;},onProgress:()=>{$('savedListenStatus').textContent='Playing: '+item.name;},onEnd:()=>{$('savedListenStatus').textContent='Finished: '+item.name;}});};
+    listen.onclick=()=>{if(running||preparing||starting)return;prime();$('previewLabel').hidden=false;$('previewLabel').textContent=item.name;nativePlayer.play(phoneMode()?textClip(withStoryLength(item,item.spokenText||L.narration(item,{nearby:false}))):area.audio[L.key(item)],{onError:message=>{$('savedListenStatus').textContent=message;},onProgress:()=>{$('savedListenStatus').textContent='Playing: '+item.name;},onEnd:()=>{$('savedListenStatus').textContent='Finished: '+item.name;}});};
     entry.append(name,text,listen);
     if(/^https:\/\//.test(item.source?.url||'')){const link=document.createElement('a');link.href=item.source.url;link.target='_blank';link.rel='noopener';link.textContent='Source (connection needed)';entry.append(link);}
     card.append(entry);
@@ -370,10 +370,11 @@
  }
  $('skipFamiliar').onchange=()=>{if(running||preparing)return;history.setSkipFamiliar($('skipFamiliar').checked);renderHistory();};
  $('resetHistory').onclick=()=>{if(running||preparing)return;history.clear();played.clear();latchedPlaces.clear();closestDistances.clear();renderHistory();status('Listening history reset. Places may play again on the next journey.');log('Listener reset listening history.');};
+ function withStoryLength(item,opening){return globalThis.DiscoverNarrator?.fullStory?.()?L.fullStory(item,opening):opening;}
  function spokenText(item){
-  if(running&&!parkedCheck&&item.romanRoad?.line&&L.followingRomanRoad(item.romanRoad.line,fix))return 'You’re following the line of a Roman road. '+item.reason;
+  if(running&&!parkedCheck&&item.romanRoad?.line&&L.followingRomanRoad(item.romanRoad.line,fix))return withStoryLength(item,'You’re following the line of a Roman road. '+item.reason);
   const savedItem=trip.items.find(saved=>L.key(saved)===L.key(item));
-  return L.narration(savedItem?{...savedItem,...item}:item);
+  const place=savedItem?{...savedItem,...item}:item;return withStoryLength(place,L.narration(place));
  }
  function renderMore(){
   $('moreStory').hidden=!lastPlayedPlace||running||starting;

@@ -28,3 +28,10 @@ test('selection locks during a journey and missing voice errors never silently s
 test('speech startup times out clearly and cancelling prevents stale callbacks',()=>{
  const a=setup();let starts=0,errors=[];a.api.speak('one',{onProgress:()=>starts++,onError:e=>errors.push(e)});const old=a.spoken[0];a.api.speak('two',{onProgress:()=>starts++,onError:e=>errors.push(e)});old.onstart();old.onend();assert.equal(starts,0);assert.equal(a.timers.size,1);[...a.timers.values()][0]();assert.match(errors[0],/did not start/);assert.equal(a.timers.size,0);
 });
+
+test('story length defaults to quick and remembers full independently of voice',()=>{
+ const a=setup(),choice=a.nodes.get('storyLength');assert.equal(choice.value,'quick');
+ choice.value='full';choice.onchange();const b=setup({initial:Object.fromEntries(a.stored)});
+ assert.equal(b.api.fullStory(),true);assert.equal(b.api.get().name,'Daniel');
+ b.api.setLocked(true);assert.equal(b.nodes.get('storyLength').disabled,true);
+});

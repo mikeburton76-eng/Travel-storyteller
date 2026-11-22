@@ -466,3 +466,11 @@ test('Batham Gate announces following the road offline only after two fixes alon
  await tick();assert.match(narrator.spoken[1],/following the line of a Roman road/);
  assert.equal(a.requests,0);a.nodes.get('stop').onclick();
 });
+
+test('Full story includes downloaded Tell me more details in the same phone narration offline',async()=>{
+ const extended={...item,reason:'The town square stands beside the river.',background:'The paving stones form a chequered pattern across the square.'};
+ const narrator=phoneNarrator();narrator.fullStory=()=>true;
+ const a=await app({tripItems:[extended],voiceNarrator:narrator});a.position({lon:.0025});await tick();
+ assert.equal(narrator.spoken.length,2);assert.match(narrator.spoken[1],/beside the river.*chequered pattern/);assert.equal(a.requests,0);
+ a.nodes.get('stop').onclick();
+});

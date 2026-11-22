@@ -10,3 +10,5 @@ body{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px));scroll-padding-
 #app-menu [aria-current=page]{background:#e1f1f5;font-weight:700}#app-menu button{margin-top:14px;background:#17617c;color:#fff;text-align:center}
 .app-nav a:focus-visible,.app-nav button:focus-visible,#app-menu a:focus-visible,#app-menu button:focus-visible{outline:3px solid #e0a100;outline-offset:2px}
 @media(min-width:724px){.app-nav{border-radius:16px 16px 0 0;border:1px solid #c9dbe2;border-bottom:0}}
+
+.story-length{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin:14px 0}.story-length label{font-weight:650}.story-length select{font:inherit;min-height:44px;max-width:100%;border:1px solid #8baebb;border-radius:9px;padding:6px 10px;background:white;color:#23343e}

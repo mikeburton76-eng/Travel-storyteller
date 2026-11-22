@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='discover-driving-shell-v28-on-the-go';
+const CACHE='discover-driving-shell-v29-story-length';
 const ASSETS=['/navigation.css','/drive-test','/drive-test.css','/drive-client.js','/drive-player.js','/drive-history.js','/drive-logic.js','/journey-route.js','/place-search.js','/route-test-data.js','/narrator-settings.js'];
 self.addEventListener('install',event=>event.waitUntil((async()=>{const cache=await caches.open(CACHE);await cache.addAll(ASSETS);await self.skipWaiting();})()));
 self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));

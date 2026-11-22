@@ -7,6 +7,19 @@
   if(saved?.startsWith('phone:'))preferred=saved;
   else if(saved&&saved!==preferred)localStorage.setItem(key,preferred);
  }catch{}
+ const lengthSelect=el('storyLength'),lengthKey='discoverPlaces.storyLength';
+ let full=false;
+ function restoreLength(){
+  try{full=localStorage.getItem(lengthKey)==='full';}catch{}
+  if(lengthSelect)lengthSelect.value=full?'full':'quick';
+ }
+ restoreLength();
+ globalThis.addEventListener?.('pageshow',restoreLength);
+ if(lengthSelect)lengthSelect.onchange=()=>{
+  if(locked)return;
+  full=lengthSelect.value==='full';
+  try{localStorage.setItem(lengthKey,full?'full':'quick');}catch{}
+ };
  const voices=()=>globalThis.speechSynthesis?.getVoices()||[];
  const rank=v=>/^en[-_]GB$/i.test(v.lang)&&/\bDaniel\b/i.test(v.name)?0:/^en[-_]GB$/i.test(v.lang)&&/\bKate\b/i.test(v.name)?1:/^en[-_]GB$/i.test(v.lang)?2:/^en[-_]/i.test(v.lang)?3:4;
  function get(){const list=voices().slice().sort((a,b)=>rank(a)-rank(b)||Number(b.localService)-Number(a.localService)||a.name.localeCompare(b.name));const voice=preferred==='auto-phone'?list[0]:list.find(v=>v.voiceURI===preferred.slice(6));return {provider:'phone',uri:voice?.voiceURI,voice,name:voice?.name||'Phone voice unavailable',local:voice?.localService===true};}
@@ -25,7 +38,7 @@
   try{speechSynthesis.resume();speechSynthesis.speak(utterance);}catch(error){fail(error.message);}
  }
  const ready=()=>Promise.resolve();
- const api={get,ready,speak,stop,pause:()=>globalThis.speechSynthesis?.pause(),resume:()=>{if(!active)return false;globalThis.speechSynthesis?.resume();return true;},setLocked:value=>{locked=value;load();},addChangeListener:fn=>listeners.push(fn)};
+ const api={fullStory:()=>full,get,ready,speak,stop,pause:()=>globalThis.speechSynthesis?.pause(),resume:()=>{if(!active)return false;globalThis.speechSynthesis?.resume();return true;},setLocked:value=>{locked=value;if(lengthSelect)lengthSelect.disabled=value;load();},addChangeListener:fn=>listeners.push(fn)};
  globalThis.DiscoverNarrator=api;
  if(select){select.onchange=()=>{if(locked){load();return;}globalThis.ExploreNarration?.stop();stop();preferred=select.value;try{localStorage.setItem(key,preferred);}catch{}load();for(const fn of listeners)fn();};el('narratorPreview').onclick=()=>{globalThis.ExploreNarration?.stop();speak('Welcome to Discover Places. This is the voice you’ll hear on your journey.',{onTiming:name=>{el('narratorMessage').textContent=name+' started playing.';},onError:message=>{el('narratorMessage').textContent=message;}});};}
  globalThis.speechSynthesis?.addEventListener('voiceschanged',load);load();
