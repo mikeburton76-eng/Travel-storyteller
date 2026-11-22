@@ -125,7 +125,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   const limit=location.mode==='nearby'?config.nearbyWiderRadiusKm:radius;
   const walkLimit=walkingRadius(location,limit,config);
   const landmarks=nearbyHeritage(location,limit);
-  const heritage=[...landmarks,...nearbyBattleStories(location,limit,landmarks)];
+  const heritage=[...landmarks,...require('./roman-roads').nearRoads(location,limit),...nearbyBattleStories(location,limit,landmarks)];
   const placeId=(name,coord)=>'place-'+createHash('sha256').update(name+'|'+coord.lat.toFixed(3)+'|'+coord.lon.toFixed(3)).digest('hex').slice(0,12);
   const localWalks=nearbyWalks(location,limit);
   const localPreview=[...heritage,...localWalks].map(c=>({...c,id:placeId(c.name,c.coord),distanceKm:Number(P.distanceKm(location,c.coord).toFixed(1)),theme:P.themeOf(c.name,c.text)}));
@@ -282,6 +282,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   reserve(scatterWalks(ordered,location,6),6);
   reserve(P.familyIdeas(ordered,6),6);
   reserve(ordered.filter(c=>/\b(museum|galler(?:y|ies))\b/i.test(c.name)),2);
+  reserve(ordered.filter(c=>c.romanRoad),2);
   reserve(ordered.filter(c=>c.battleHeritage&&c.historyOnly),3);
   reserve(ordered.filter(c=>c.reviewedPriority||c.mustSee||c.walkOnly),config.maxCandidates);
   for(const c of [...unique.values()].filter(c=>c.eventArea).slice(0,4))if(!balanced.includes(c)&&balanced.length<config.maxCandidates)balanced.push(c);

@@ -76,7 +76,11 @@ async function plan(input,{fetchImpl=fetch}={}){
   const responses=await Promise.allSettled(pointsToSearch.slice(i,i+4).map(point=>stories(point,Math.min(10000,Math.max(4500,radius+1000)),fetchImpl)));
   for(const response of responses)if(response.status==='fulfilled'){successful++;for(const item of response.value)unique.set(item.id,item);}
  }
- if(!successful)throw failure('The story source is unavailable. Try again while connected.',503);
+ for(const road of require('./roman-roads').reviewed){
+  const item={...road,id:'roman-road-'+road.name,title:road.name,reason:road.text,background:road.text,section:'history'};
+  if(JR.project(item.coord,coordinates).metres<=radius)unique.set(item.id,item);
+ }
+ if(!successful&&!unique.size)throw failure('The story source is unavailable. Try again while connected.',503);
  const items=JR.within({coordinates,items:[...unique.values()]},radius);
  const id='road-'+createHash('sha256').update(JSON.stringify(coordinates)).digest('hex').slice(0,20);
  return {id,label:from.title+' → '+to.title,from,to,radiusM:radius,coordinates,distanceM:road.distance,durationS:road.duration,items};

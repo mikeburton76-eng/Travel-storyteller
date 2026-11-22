@@ -81,6 +81,7 @@
  downloadChoice.oninput=downloadChoice.onchange=()=>{if(running||preparing||starting)return;const n=Number(downloadChoice.value);downloadCount=validCount(n)?n:8;downloadChoice.value=String(downloadCount);$('downloadValue').textContent=String(downloadCount);try{localStorage.setItem(downloadKey,String(downloadCount));}catch{}renderRoutePreview();};
  let source,wakeLock,lastHeading=null,lastGood=null,fix=null,movement=null,pending=null,buffer=null,audioBusy=false,lastEnd=-Infinity,lastSearch=null,lastSearchTime=0,retryAt=0,guideRetryAt=0,guideBusy=false,staleTimer;
  const played=new Set(),latchedPlaces=new Map(),closestDistances=new Map(),buffers=new Map(),preparedItems=new Map(),events=[];let previewURL,arrivalItems=[],arrivalBusy=false,arrivalController=null,lastArrivalSearch=null,lastArrivalTime=0,arrivalRetry=0,lastWaiting='';let nearbyItems=[];
+ let roadFix=null;
  let lastPlayedPlace=null;
  let visiblePlaceCards='';
  const distanceKey='discoverPlaces.drivingDistance';
@@ -370,6 +371,7 @@
  $('skipFamiliar').onchange=()=>{if(running||preparing)return;history.setSkipFamiliar($('skipFamiliar').checked);renderHistory();};
  $('resetHistory').onclick=()=>{if(running||preparing)return;history.clear();played.clear();latchedPlaces.clear();closestDistances.clear();renderHistory();status('Listening history reset. Places may play again on the next journey.');log('Listener reset listening history.');};
  function spokenText(item){
+  if(running&&!parkedCheck&&item.romanRoad?.line&&L.followingRomanRoad(item.romanRoad.line,fix))return 'You’re following the line of a Roman road. '+item.reason;
   const savedItem=trip.items.find(saved=>L.key(saved)===L.key(item));
   return L.narration(savedItem?{...savedItem,...item}:item);
  }
@@ -433,7 +435,11 @@
  function play(manual=false){
   if(!running)return;if(source){if(manual)nativePlayer.resume();return;}if(!buffer||!pending)return;
   if(!parkedCheck&&!history.check(pending).allowed){const reason=history.check(pending).reason;waiting(reason,'Skipping '+pending.name+': '+reason+'. Use Hear this place again while parked to allow a replay.');pending=null;buffer=null;$('play').disabled=true;return;}
-  if(!manual&&!parkedCheck&&(!fix||Date.now()-fix.time>10000||L.distance(fix,pending.coord)>L.PLAYBACK_METRES||L.movingAway(pending,fix,movement)))return;
+  if(!manual&&!parkedCheck){
+   if(!fix||Date.now()-fix.time>10000)return;
+   if(pending.romanRoad?.line){if(!L.followingRomanRoad(pending.romanRoad.line,fix))return;}
+   else if(L.distance(fix,pending.coord)>L.PLAYBACK_METRES||L.movingAway(pending,fix,movement))return;
+  }
   if(!manual&&!parkedCheck&&!isLatched(pending)&&(!fix||Date.now()-fix.time>10000||!L.approaching(pending,fix,movement,played)?.trigger))return;
   const item=pending,clip=phoneMode()?textClip(spokenText(item)):buffer,id=epoch,token=source={item};prime();show(item);$('play').disabled=false;$('previewLabel').hidden=false;$('previewLabel').textContent='Journey narration · '+(globalThis.DiscoverNarrator?.get().name||'Narrator');
   const distanceLabel=!manual&&!parkedCheck?' · '+Math.round(L.distance(fix,item.coord))+' m from reference point':'';
@@ -455,6 +461,7 @@
  function dropPlacesBehind(){
   if(parkedCheck||!fix||Date.now()-fix.time>10000)return;
   for(const item of L.places([...latchedPlaces.values(),...(pending?[pending]:[])])){
+   if(item.romanRoad?.line&&L.followingRomanRoad(item.romanRoad.line,fix))continue;
    const key=L.key(item),metres=L.distance(fix,item.coord),closest=Math.min(closestDistances.get(key)??metres,metres);closestDistances.set(key,closest);
    if(!L.movingAway(item,fix,movement)&&metres<=closest+Math.max(100,fix.accuracy*2))continue;
    latchedPlaces.delete(key);closestDistances.delete(key);log('Discarding unplayed '+item.name+': moving away. Looking ahead instead.');
@@ -465,7 +472,12 @@
  function evaluate(){
   if(!parkedCheck&&routeArea()&&!flexibleRoute()&&fix&&legacyRoute&&JR.project(fix,legacyRoute.coordinates).metres>1000){if(!source){latchedPlaces.clear();pending=null;buffer=null;waiting('Away from saved route','You are more than 1 km from the saved road route. Saved route narration will resume when you return. There is no automatic rerouting.');}return;}
 
- if(!running)return;renderNearbyPlaces();dropPlacesBehind();latchNearby();renderAhead();if(source){fillAhead();return;}
+ if(!running)return;
+ if(pending?.romanRoad?.line&&!parkedCheck&&!L.followingRomanRoad(pending.romanRoad.line,fix)){
+  latchedPlaces.delete(L.key(pending));audioController?.abort();audioController=null;audioBusy=false;pending=null;buffer=null;
+ }
+ for(const [key,item] of latchedPlaces)if(item.romanRoad?.line&&!L.followingRomanRoad(item.romanRoad.line,fix))latchedPlaces.delete(key);
+ renderNearbyPlaces();dropPlacesBehind();latchNearby();renderAhead();if(source){fillAhead();return;}
  for(const [key,item]of latchedPlaces)if(played.has(L.key(item))||!history.check(item).allowed)latchedPlaces.delete(key);
  const queued=[...latchedPlaces.values()].filter(item=>audioEligible(item)&&(navigator.onLine!==false||audioReady(item))).sort((a,b)=>fix?L.distance(fix,a.coord)-L.distance(fix,b.coord):0)[0];
  const fresh=fix&&Date.now()-fix.time<=10000;
@@ -487,9 +499,11 @@
  pending=next.item;buffer=null;show(pending);$('next').textContent=next.latched?pending.name+' · queued from your '+L.PLAYBACK_METRES+' m approach':nextLabel(next);$('timing').textContent='Preparing ahead…';status('Preparing '+pending.name+'.');prepareCandidate(pending,epoch);
  }
  function position(p,id){if(!running||id!==epoch)return;const c=p.coords,current={lat:c.latitude,lon:c.longitude,accuracy:c.accuracy,speed:c.speed,heading:c.heading,time:p.timestamp};$('accuracy').textContent=Number.isFinite(c.accuracy)?'±'+Math.round(c.accuracy)+' m':'Unavailable';if(Date.now()-current.time>10000||current.time>Date.now()+5000||!L.valid(current)||!Number.isFinite(current.accuracy)||current.accuracy>75){fix=null;movement=null;renderAhead();renderNearbyPlaces();waiting('GPS accuracy or age','Waiting for a fresh GPS fix accurate to about 75 metres or better.');return;}
+ if(roadFix&&current.time-roadFix.time<=15000)current.previousRoadFix=roadFix;
+ if(!roadFix||current.time-roadFix.time>15000||L.distance(roadFix,current)>=25){roadFix={lat:current.lat,lon:current.lon,time:current.time,accuracy:current.accuracy};}
  fix=current;movement=L.motion(current,lastGood,lastHeading);if(movement&&!movement.stationary)lastHeading=movement.heading;if(!lastGood||L.distance(lastGood,current)>Math.max(12,current.accuracy,lastGood.accuracy)||current.time-lastGood.time>30000)lastGood=current;
  $('speed').textContent=movement?(movement.stationary?'0 mph · last travel direction held':Math.round(movement.speed*2.23694)+' mph'):'Waiting for movement';refreshGuide(current,id);refreshArrivals(current,id);evaluate();}
- async function startTracking(){if(running||preparing)return;$('journeyLive').open=true;if(!navigator.geolocation){status('Location is unavailable in this browser.');return;}try{prime();}catch(error){status(error.message);return;}nativePlayer.stop();$('savedPreview').hidden=true;$('previewLabel').hidden=true;running=true;renderHistory();const id=++epoch;played.clear();latchedPlaces.clear();closestDistances.clear();pending=null;buffer=null;lastHeading=null;lastGood=null;fix=null;movement=null;lastSearch=null;lastSearchTime=0;lastEnd=-Infinity;retryAt=0;arrivalRetry=0;lastArrivalSearch=null;lastArrivalTime=0;guideRetryAt=0;audioRetries.clear();nearbyItems=[];rebuild();renderNearbyPlaces();$('start').disabled=true;$('stop').disabled=false;$('prepare').disabled=true;$('testVoice').disabled=true;$('testAutomatic').disabled=true;$('forget').disabled=true;status('Waiting for precise location permission…');log('V20 · up to 3 clips ahead · '+L.PLAYBACK_METRES+' m forward selection · Driving session started · '+(navigator.onLine===false?'offline':'online'));shell().catch(error=>{$('offlineStatus').textContent=error.message});try{navigator.wakeLock?.request('screen').then(lock=>{if(running&&id===epoch)wakeLock=lock;else lock.release();}).catch(()=>{});}catch{}watch=navigator.geolocation.watchPosition(p=>position(p,id),error=>{if(id!==epoch)return;fix=null;movement=null;renderAhead();renderNearbyPlaces();status('Location unavailable: '+(error.code===1?'allow precise location in your browser settings.':'waiting for GPS.'));log('GPS error '+error.code);},{enableHighAccuracy:true,maximumAge:0,timeout:15000});staleTimer=setInterval(()=>{if(running){if(fix&&Date.now()-fix.time>10000){movement=null;renderAhead();renderNearbyPlaces();if(!source&&!latchedPlaces.size)waiting('GPS fix is old','GPS fix is old. Waiting before selecting another place.');}if(latchedPlaces.size)evaluate();}},2000);}
+ async function startTracking(){if(running||preparing)return;$('journeyLive').open=true;if(!navigator.geolocation){status('Location is unavailable in this browser.');return;}try{prime();}catch(error){status(error.message);return;}nativePlayer.stop();$('savedPreview').hidden=true;$('previewLabel').hidden=true;running=true;renderHistory();const id=++epoch;played.clear();latchedPlaces.clear();closestDistances.clear();pending=null;buffer=null;lastHeading=null;lastGood=null;roadFix=null;fix=null;movement=null;lastSearch=null;lastSearchTime=0;lastEnd=-Infinity;retryAt=0;arrivalRetry=0;lastArrivalSearch=null;lastArrivalTime=0;guideRetryAt=0;audioRetries.clear();nearbyItems=[];rebuild();renderNearbyPlaces();$('start').disabled=true;$('stop').disabled=false;$('prepare').disabled=true;$('testVoice').disabled=true;$('testAutomatic').disabled=true;$('forget').disabled=true;status('Waiting for precise location permission…');log('V20 · up to 3 clips ahead · '+L.PLAYBACK_METRES+' m forward selection · Driving session started · '+(navigator.onLine===false?'offline':'online'));shell().catch(error=>{$('offlineStatus').textContent=error.message});try{navigator.wakeLock?.request('screen').then(lock=>{if(running&&id===epoch)wakeLock=lock;else lock.release();}).catch(()=>{});}catch{}watch=navigator.geolocation.watchPosition(p=>position(p,id),error=>{if(id!==epoch)return;fix=null;movement=null;renderAhead();renderNearbyPlaces();status('Location unavailable: '+(error.code===1?'allow precise location in your browser settings.':'waiting for GPS.'));log('GPS error '+error.code);},{enableHighAccuracy:true,maximumAge:0,timeout:15000});staleTimer=setInterval(()=>{if(running){if(fix&&Date.now()-fix.time>10000){movement=null;renderAhead();renderNearbyPlaces();if(!source&&!latchedPlaces.size)waiting('GPS fix is old','GPS fix is old. Waiting before selecting another place.');}if(latchedPlaces.size)evaluate();}},2000);}
  function stop(message='Journey stopped.'){clearTimeout(parkedTimer);parkedTimer=null;parkedCheck=false;historyReplay=null;latchedPlaces.clear();closestDistances.clear();starting=false;running=false;aheadJob?.controller.abort();aheadJob=null;lastHeading=null;downloadController?.abort();renderHistory();epoch++;if(watch!==null)navigator.geolocation.clearWatch(watch);watch=null;clearInterval(staleTimer);guideController?.abort();audioController?.abort();arrivalController?.abort();arrivalController=null;arrivalBusy=false;guideController=null;audioController=null;guideBusy=false;audioBusy=false;source=null;nativePlayer.stop();pending=null;buffer=null;$('play').disabled=true;wakeLock?.release().catch(()=>{});wakeLock=null;$('start').disabled=false;$('start').textContent='Start journey with sound';$('stop').disabled=true;$('prepare').disabled=false;$('testVoice').disabled=false;$('testAutomatic').disabled=false;$('forget').disabled=false;$('decision').textContent='Stopped';renderAhead();renderNearbyPlaces();renderMore();status(message);log(message);}
  function start(){
   log('Start tapped · '+(globalThis.DiscoverNarrator?.get().name||'Narrator'));if(running||preparing||starting){log('Start blocked: another session or download is active.');status('Wait for preparation to finish, or cancel it, before starting.');return;}if(phoneMode()&&!globalThis.DiscoverNarrator.get().voice){status('Choose an available phone voice and preview it before starting.');return;}if(!navigator.geolocation){status('Location is unavailable in this browser.');return;}

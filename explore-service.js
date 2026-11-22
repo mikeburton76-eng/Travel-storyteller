@@ -38,6 +38,7 @@ function validateSelection(answer,pool,config) {
   const c=byId.get(choice.id);
   if(!c||!P.visitorSuitable(c.name,c.text,c.historyOnly||c.walkOnly)||seen.has(c.id+'|'+choice.section)||!SECTIONS.includes(choice.section)||choice.familySuitable!==true||typeof choice.confidence!=='number'||choice.confidence<.75||choice.confidence>1||!Number.isInteger(choice.visitorValue)||choice.visitorValue<3||choice.visitorValue>5)continue;
   if(typeof choice.reason!=='string'||choice.reason.length<25||choice.reason.length>1000||(!P.allowed(c.name,c.text,choice.reason,choice.storyTitle||'')||P.sourceMarkup.test(choice.reason+' '+(choice.storyTitle||'')))||!evidenceIn(choice.evidence,c.text))continue;
+  if(c.romanRoad)continue;
   if((c.historyOnly&&choice.section!=='history')||c.walkOnly||c.sourceOnly)continue;
   if(choice.section==='events'&&!c.eventArea&&!P.eventPlace(c.name,c.text))continue;
   if((c.eventArea||P.eventPlace(c.name,c.text))&&/\b(today|tonight|tomorrow|this week|this weekend|happening now|tickets available|20[0-9]{2}|January|February|March|April|May|June|July|August|September|October|November|December)\b/i.test(choice.reason))continue;
@@ -96,7 +97,7 @@ function fallbackSelection(pool,config){
  const seenTheme=new Map(),items=[];
  const ordered=[...pool.candidates].sort((a,b)=>Number(!!b.mustSee)-Number(!!a.mustSee));
  for(const c of ordered){
-  if(c.sourceOnly||c.historyOnly||c.walkOnly||c.eventArea||P.eventPlace(c.name,c.text)||c.shop||P.shopGem(c.name,c.text)||!P.visitorSuitable(c.name,c.text))continue;
+  if(c.romanRoad||c.sourceOnly||c.historyOnly||c.walkOnly||c.eventArea||P.eventPlace(c.name,c.text)||c.shop||P.shopGem(c.name,c.text)||!P.visitorSuitable(c.name,c.text))continue;
   const n=seenTheme.get(c.theme)||0;if(!c.mustSee&&n>=3)continue;seenTheme.set(c.theme,n+1);
   const short=sourceDescription(c.text);if(!short)continue;
   items.push({id:c.id,name:c.name,title:c.name,section:'attractions',theme:c.theme,reason:short,background:c.text,website:c.website||null,source:c.source,supportingSources:c.supportingSources||[],mustSee:!!c.mustSee,coord:c.coord,distanceKm:c.distanceKm,image:c.image||null,selectionBasis:'source'});
@@ -128,7 +129,7 @@ function sourceCategories(chosen,pool,config){
    if(index>=0)items.splice(index,1);
   }
   if(items.length>=config.maxResults)return;
-  items.push({id:c.id,name:c.name,title:c.name,section,theme:c.theme,reason,background:c.text,website:c.website||null,source:c.source,supportingSources:c.supportingSources||[],mustSee:!!c.mustSee,coord:c.coord,distanceKm:c.distanceKm,image:c.image||null,historyOnly:!!c.historyOnly,eventArea:!!c.eventArea||P.eventPlace(c.name,c.text),eventTiming:c.eventTiming||null,selectionBasis:'source'});
+  items.push({...(c.romanRoad?{romanRoad:c.romanRoad}:{}),id:c.id,name:c.name,title:c.name,section,theme:c.romanRoad?'history':c.theme,reason,background:c.text,website:c.website||null,source:c.source,supportingSources:c.supportingSources||[],mustSee:!!c.mustSee,coord:c.coord,distanceKm:c.distanceKm,image:c.image||null,historyOnly:!!c.historyOnly,eventArea:!!c.eventArea||P.eventPlace(c.name,c.text),eventTiming:c.eventTiming||null,selectionBasis:'source'});
  };
  // Read literal descriptive sentences, without manufacturing an AI endorsement.
  const families=P.familyIdeas(pool.candidates,6);
@@ -143,6 +144,7 @@ function sourceCategories(chosen,pool,config){
   }
   const sentences=c.text.match(/[^.!?\n]+(?:[.!?](?=\s|$)|$)/g)||[c.text];
   const evidence=re=>sentences.map(s=>s.trim()).find(s=>s.length>=25&&s.length<=400&&re.test(s)&&P.allowed(s));
+  if(c.romanRoad){add(c,'history',c.text);continue;}
   if(c.battleHeritage){ add(c,'history',c.text); continue; }
   if(c.eventArea||P.eventPlace(c.name,c.text)){const reason=evidence({test:()=>true});if(reason)add(c,'events',reason);continue;}
   if(P.ancientSite.test(c.name+' '+c.text)){const reason=evidence(P.ancientSite);if(reason)add(c,'history',reason);}

@@ -455,3 +455,14 @@ test('custom journey previews and saves 30 stories, and saved GPS playback works
  assert.equal(b.nodes.get('placeName').textContent,'Detour story');assert.equal(b.requests,0);
  b.nodes.get('stop').onclick();
 });
+
+test('Batham Gate announces following the road offline only after two fixes along the verified stretch',async()=>{
+ const road=require('../roman-roads').reviewed[0],narrator=phoneNarrator();
+ const a=await app({tripItems:[{...road,id:'batham',reason:road.text,section:'history'}],voiceNarrator:narrator});
+ const [lon,lat]=road.romanRoad.line[3];
+ a.position({lat:lat+.0008,lon,accuracy:5});a.advance(5000);a.position({lat,lon,accuracy:5});
+ assert.equal(narrator.spoken.length,1);
+ a.advance(5000);const [nextLon,nextLat]=road.romanRoad.line[4];a.position({lat:nextLat,lon:nextLon,accuracy:5});
+ await tick();assert.match(narrator.spoken[1],/following the line of a Roman road/);
+ assert.equal(a.requests,0);a.nodes.get('stop').onclick();
+});

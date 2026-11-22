@@ -85,3 +85,16 @@ test('the Crescent is in the first nearby preview and survives a full guide sele
  assert.ok(guide.items.some(item=>item.id===crescent.id&&item.section==='attractions'));
  assert.ok(guide.items.filter(item=>item.section==='attractions').length<=cfg.categoryLimits.attractions);
 });
+
+test('Roman heritage labels distinguish reviewed sections and conjectural atlas entries',()=>{
+ const {nearRoads,reviewed}=require('../roman-roads');
+ for(const road of reviewed){
+  const rows=nearRoads(road.coord,1);assert.ok(rows.includes(road));
+  const chosen=fallbackSelection({location:road.coord,candidates:rows.map((c,i)=>({...c,id:String(i),distanceKm:0})),warnings:[]},cfg);
+  assert.ok(chosen.items.some(i=>i.name===road.name&&i.section==='history'&&i.romanRoad.status===road.romanRoad.status));
+ }
+ const example=require('../roman-roads/51.json')[0][3][0];
+ const uncertain=nearRoads({lon:example[0],lat:example[1]},.2)[0];
+ assert.equal(uncertain.romanRoad.status,'Present use unverified');assert.equal(uncertain.historyOnly,true);
+ assert.deepEqual(nearRoads({lat:54.597,lon:-5.93},12),[]);
+});

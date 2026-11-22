@@ -64,9 +64,19 @@
   if(speed===null||speed<1||speed>55||heading===null)return null;
   return {speed,heading};
  }
+ // Two accurate fixes and sustained travel along the surveyed stretch, in either direction.
+ function followingRomanRoad(line,fix){
+  const prior=fix?.previousRoadFix;
+  if(!prior||!valid(prior)||!valid(fix)||!(fix.accuracy<=15&&prior.accuracy<=15)||fix.time<=prior.time||fix.time-prior.time>15000)return false;
+  const project=globalThis.JourneyRoute?.project||(typeof require==='function'&&require('./journey-route').project);
+  if(!project)return false;
+  const a=project(prior,line),b=project(fix,line),travel=distance(prior,fix);
+  return travel>=25&&a.metres<=12&&b.metres<=12&&Math.abs(b.along-a.along)>=0.85*travel;
+ }
  function approaching(item,fix,movement,played=new Set(),prepareMetres=Math.max(PLAYBACK_METRES+500,Math.min(3000,Math.max(1000,(movement?.speed||0)*90)))){
   if(!valid(item.coord)||!valid(fix)||!Number.isFinite(fix.accuracy)||fix.accuracy<0||fix.accuracy>75||played.has(key(item)))return null;
   if(!movement)return null;
+  if(item.romanRoad?.line)return followingRomanRoad(item.romanRoad.line,fix)?{item,metres:0,ahead:0,cross:0,eta:0,trigger:true}:null;
   const metres=distance(fix,item.coord),delta=angle(movement.heading,bearing(fix,item.coord));
   if(delta>65||metres<20)return null;
   const cross=metres*Math.sin(rad(delta)),ahead=metres*Math.cos(rad(delta));
@@ -162,7 +172,7 @@
   return facts.join(' ');
  }
 
- const api={placePhoto,placeIcon,completeSentences,canonicalPlaces,nearbyIntroduction,narration,followUp,DISTANCE_OPTIONS,setPlaybackMetres,get PLAYBACK_METRES(){return PLAYBACK_METRES;},movingAway,startChime,distance,bearing,angle,valid,key,places,nearbyPlaces,motion,approaching,choose,opening};
+ const api={followingRomanRoad,placePhoto,placeIcon,completeSentences,canonicalPlaces,nearbyIntroduction,narration,followUp,DISTANCE_OPTIONS,setPlaybackMetres,get PLAYBACK_METRES(){return PLAYBACK_METRES;},movingAway,startChime,distance,bearing,angle,valid,key,places,nearbyPlaces,motion,approaching,choose,opening};
  if(typeof module!=='undefined')module.exports=api;else globalThis.DriveLogic=api;
 })();
 
