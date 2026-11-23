@@ -20,7 +20,7 @@ test('playback stays local at higher speeds; duplicate and area-only locations a
  assert.ok(L.opening({...item,reason:('This is a supported sentence about a place. ').repeat(30)}).length<=700);
 });
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
-async function app({tripItems=[item],wakeLock,fetchImpl,online=false,autoStart=true,confirm=true,historyStorage,initialRecord,failPut,routePlan,voiceNarrator}={}){
+async function app({trialRoute,tripItems=[item],wakeLock,fetchImpl,online=false,autoStart=true,confirm=true,historyStorage,initialRecord,failPut,routePlan,voiceNarrator}={}){
  const nodes=new Map(),events={},windowEvents={},sources=[],chimes=[],timers=new Map(),intervals=[];let gps,requests=0,timerId=0,nowMs=Date.now(),chimePlaying=false;
  class Clock extends Date{constructor(...args){super(...(args.length?args:[nowMs]));}static now(){return nowMs;}}
  const node=()=>({disabled:false,textContent:'',value:'Buxton',children:[],setAttribute(){},append(...items){this.children.push(...items);},replaceChildren(...items){this.children=items;},removeAttribute(name){delete this[name];},pause(){this.paused=true;this.onpause?.();},currentTime:0,async play(){this.paused=false;this.ended=false;this.currentTime=0;this.onplaying?.();this.currentTime=1;this.ontimeupdate?.();(chimePlaying?chimes:sources).push(this);}});
@@ -31,7 +31,7 @@ async function app({tripItems=[item],wakeLock,fetchImpl,online=false,autoStart=t
  const indexedDB={open(){const request={};queueMicrotask(()=>{request.result={close(){},transaction(namespace){const tx={objectStore(){const perform=(action,value)=>{const r={};queueMicrotask(()=>{if(action==='put'&&failPut?.(value)){tx.error=Error('Storage full');tx.onerror();return;}if(action==='put')records.set(namespace,structuredClone(value));if(action==='delete')records.delete(namespace);r.result=records.get(namespace);r.onsuccess?.();tx.oncomplete?.();});return r;};return {get:()=>perform('get'),put:value=>perform('put',value),delete:()=>perform('delete')};}};return tx;}};request.onsuccess();});return request;}};
  class AudioContext{constructor(){this.state='running';this.sampleRate=24000;this.destination={};}resume(){return Promise.resolve();}createBuffer(){return {duration:.0001};}createBufferSource(){const s={connect(){},disconnect(){},start(){sources.push(this);},stop(){}};return s;}async decodeAudioData(){return {duration:22};}}
  const navigator={serviceWorker:{register:async()=>({active:{state:'activated'}})},onLine:online,wakeLock,geolocation:{watchPosition(success){gps=success;return 7;},clearWatch(){gps=null;}}};
- vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../drive-client.js'),'utf8'),{document,navigator,localStorage:historyStore,window:{addEventListener(k,f){windowEvents[k]=f;}},DriveLogic:L,DiscoverNarrator:voiceNarrator,JourneyRoute:require('../journey-route'),DiscoverRouteTest:routePlan,DriveHistory:{createDriveHistory:options=>require('../drive-history').createDriveHistory({...options,storage:historyStore})},createDrivePlayer:options=>require('../drive-player').createDrivePlayer({...options,schedule:()=>1,cancel(){},url:{createObjectURL:blob=>{chimePlaying=blob.type==='audio/wav';return 'blob:fixture';},revokeObjectURL(){}}}),AudioContext,indexedDB,Blob,AbortController,DOMException,URL:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}},Date:Clock,performance,setTimeout(fn,ms){timers.set(++timerId,{fn,ms});return timerId;},clearTimeout(id){timers.delete(id);},setInterval(fn){intervals.push(fn);return intervals.length;},clearInterval(id){intervals[id-1]=null;},fetch(...args){requests++;if(fetchImpl)return fetchImpl(...args);throw Error('Offline fetch must not occur');}});
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../drive-client.js'),'utf8'),{document,navigator,localStorage:historyStore,window:{addEventListener(k,f){windowEvents[k]=f;}},DriveLogic:L,DiscoverNarrator:voiceNarrator,JourneyRoute:require('../journey-route'),DiscoverRouteTest:routePlan,DiscoverTideswellTrial:trialRoute,location:trialRoute?{search:"?trial=buxton-tideswell"}:undefined,URLSearchParams,DriveHistory:{createDriveHistory:options=>require('../drive-history').createDriveHistory({...options,storage:historyStore})},createDrivePlayer:options=>require('../drive-player').createDrivePlayer({...options,schedule:()=>1,cancel(){},url:{createObjectURL:blob=>{chimePlaying=blob.type==='audio/wav';return 'blob:fixture';},revokeObjectURL(){}}}),AudioContext,indexedDB,Blob,AbortController,DOMException,URL:{createObjectURL:()=> 'blob:fixture',revokeObjectURL(){}},Date:Clock,performance,setTimeout(fn,ms){timers.set(++timerId,{fn,ms});return timerId;},clearTimeout(id){timers.delete(id);},setInterval(fn){intervals.push(fn);return intervals.length;},clearInterval(id){intervals[id-1]=null;},fetch(...args){requests++;if(fetchImpl)return fetchImpl(...args);throw Error('Offline fetch must not occur');}});
  await tick();if(autoStart){await nodes.get('start').onclick();if(confirm){if(voiceNarrator?.get().provider==='phone')voiceNarrator.finish();else nodes.get('savedPreview').onended?.();}}await tick();
  return {nodes,events,document,sources,chimes,navigator,records,async startJourney(){await nodes.get('start').onclick();if(voiceNarrator?.get().provider==='phone')voiceNarrator.finish();else nodes.get('savedPreview').onended?.();await tick();},timers,historyStore,runIntervals(){for(const fn of intervals)fn?.();},advance(ms){nowMs+=ms;},runTimer(ms){const entry=[...timers].find(([,t])=>t.ms===ms);if(entry){timers.delete(entry[0]);entry[1].fn();}},get gps(){return gps;},get requests(){return requests;},position(overrides){const f=fix({time:Clock.now(),...overrides});gps({timestamp:f.time,coords:{latitude:f.lat,longitude:f.lon,accuracy:f.accuracy,speed:f.speed,heading:f.heading}});}};
 }
@@ -473,4 +473,19 @@ test('Full story includes downloaded Tell me more details in the same phone narr
  const a=await app({tripItems:[extended],voiceNarrator:narrator});a.position({lon:.0025});await tick();
  assert.equal(narrator.spoken.length,2);assert.match(narrator.spoken[1],/beside the river.*chequered pattern/);assert.equal(a.requests,0);
  a.nodes.get('stop').onclick();
+});
+
+test('Buxton to Tideswell phone link previews and saves eight places within reach',async()=>{
+ require('../route-test-data');
+ const trialRoute=globalThis.DiscoverTideswellTrial;
+ const a=await app({trialRoute,autoStart:false,tripItems:[],voiceNarrator:phoneNarrator()});
+ assert.equal(a.nodes.get('routeTo').value,'Tideswell');
+ assert.equal(a.nodes.get('route-test').open,true);
+ assert.equal(a.nodes.get('routePreviewPlaces').children.length,8);
+ a.nodes.get('routeConfirmed').checked=true;
+ await a.nodes.get('prepare').onclick('route');
+ const area=a.records.get('trip').areas.find(area=>area.id===trialRoute.id);
+ assert.equal(area.items.length,8);
+ assert.ok(area.items.every(item=>item.route.metres<=400));
+ assert.equal(a.requests,0);
 });

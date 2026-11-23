@@ -13,9 +13,15 @@
   return best;
  }
  function within(plan,metres){return (plan.items||[]).map(item=>({...item,route:project(item.coord,plan.coordinates)})).filter(item=>item.route.metres<=metres).sort((a,b)=>a.route.along-b.route.along);}
- function select(items,count){
+ function select(items,count,playbackMetres=Infinity){
   const n=Math.max(1,Math.min(30,Math.floor(Number(count)||8))),ordered=[...items].sort((a,b)=>a.route.along-b.route.along);
   if(ordered.length<=n)return ordered;
+  const inRange=ordered.filter(item=>item.route.metres<=playbackMetres);
+  if(inRange.length>=n&&inRange.length<ordered.length)return select(inRange,n);
+  if(inRange.length&&inRange.length<n){
+   const extra=ordered.filter(item=>item.route.metres>playbackMetres);
+   return [...inRange,...select(extra,n-inRange.length)].sort((a,b)=>a.route.along-b.route.along);
+  }
   if(n===1)return [ordered[Math.floor(ordered.length/2)]];
   const remaining=[...ordered],result=[],start=ordered[0].route.along,end=ordered.at(-1).route.along;
   for(let i=0;i<n;i++){const target=start+(end-start)*i/(n-1);let nearest=0;for(let j=1;j<remaining.length;j++)if(Math.abs(remaining[j].route.along-target)<Math.abs(remaining[nearest].route.along-target))nearest=j;result.push(remaining.splice(nearest,1)[0]);}

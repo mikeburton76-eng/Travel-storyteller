@@ -4,7 +4,12 @@
  let trip={items:[],audio:{},savedAt:null},running=false,watch=null,epoch=0,preparing=false,downloadController=null,guideController=null,audioController=null;
  let savedAreas=[],savedLoaded=false,selectedRouteId='';
  const JR=globalThis.JourneyRoute,legacyRoute=globalThis.DiscoverRouteTest;
+ const trialRoute=globalThis.location && new URLSearchParams(globalThis.location.search).get('trial')==='buxton-tideswell'
+  ?globalThis.DiscoverTideswellTrial:null;
  let routePlan=legacyRoute;
+ function selectDownloadPlaces(items){
+  return JR.select(items,downloadCount,trialRoute&&routePlan?.id===trialRoute.id?L.PLAYBACK_METRES:Infinity);
+ }
  try{selectedRouteId=localStorage.getItem('discoverPlaces.selectedRoute')||'';}catch{}
  const routeArea=()=>savedAreas.find(a=>a.id===selectedRouteId&&a.routeId);
  const flexibleRoute=()=>!!routeArea()?.coordinates;
@@ -25,7 +30,7 @@
  $('routeConfirmed').onchange=()=>renderRouteControls();
  $('routeDownload').onclick=()=>{if(!$('routeConfirmed').checked)return;$('prepare').onclick('route');};
  function renderRoutePreview(){
-  if(!routePlan||!JR)return;const items=JR.select(routePlan.from?routePlan.items:JR.within(routePlan,L.PLAYBACK_METRES),downloadCount);
+  if(!routePlan||!JR)return;const items=selectDownloadPlaces(L.places(routePlan.from?routePlan.items:JR.within(routePlan,L.PLAYBACK_METRES)));
   $('routePreviewPlaces').replaceChildren(...items.map(item=>{const li=document.createElement('li');li.textContent=item.name+' · '+Math.round(item.route.metres)+' m from the route';return li;}));
   $('routePreviewStatus').textContent=items.length+' of '+downloadCount+' requested stories within '+radiusLabel(routePlan.radiusM||L.PLAYBACK_METRES)+' of the road route. Downloads will be spread along it, where sources are available.';
  }
@@ -100,6 +105,16 @@
    $('nearbyPlacesRadius').textContent='Explore places within '+L.PLAYBACK_METRES+' metres of your location.';renderRoutePreview();rebuild();
    document.querySelectorAll('[data-journey-distance]').forEach(node=>node.textContent=String(L.PLAYBACK_METRES));
   };
+ }
+ if(trialRoute){
+  routePlan=trialRoute;
+  routeEnds.From=trialRoute.from;routeEnds.To=trialRoute.to;
+  $('routeFrom').value=trialRoute.from.title;$('routeTo').value=trialRoute.to.title;
+  downloadCount=8;downloadChoice.value='8';$('downloadValue').textContent='8';
+  searchRadius=trialRoute.radiusM;radiusInput.value=String(searchRadius/1000);$('routeRadiusValue').textContent=radiusLabel(searchRadius);
+  L.setPlaybackMetres(400);distanceChoice.value='400';$('playbackValue').textContent='400 m';
+  $('route-test').open=true;
+  $('plannedRoad').textContent='Buxton to Tideswell via Miller’s Dale · 9 miles. Review the places below and download before leaving.';
  }
  document.querySelectorAll('[data-journey-distance]').forEach(node=>node.textContent=String(L.PLAYBACK_METRES));
  $('nearbyPlacesRadius').textContent='Explore places within '+L.PLAYBACK_METRES+' metres of your location.';
@@ -221,7 +236,7 @@
  $('prepare').onclick=async(mode)=>{
  if(preparing||running||starting||!savedLoaded)return;const place=$('destination').value.trim();if(!place&&mode!=='route')return;preparing=true;renderHistory();$('testVoice').disabled=true;$('testAutomatic').disabled=true;$('prepare').disabled=true;$('start').disabled=true;$('forget').disabled=true;$('cancelPrepare').disabled=false;const controller=downloadController=new AbortController(),timer=timeout(controller,Math.max(12,downloadCount*2)*60*1000);
  try{let g,arrivals=[];const isRoute=mode==='route';if(isRoute){if(!routePlan||!$('routeConfirmed').checked)throw Error('Check the proposed route before downloading.');await shell();g={location:{label:routePlan.label},items:JR.within(routePlan,routePlan.radiusM||L.PLAYBACK_METRES)};}else{const selected=await destination(place,controller.signal);if(!selected)return;await shell();$('savedStatus').textContent='Finding places near '+selected+'…';g=await guide({place:selected},controller.signal);try{arrivals=(await json('/api/arrivals',{place:g.location.label},controller.signal)).items||[];}catch(error){if(controller.signal.aborted)throw error;log('Arrival introduction not downloaded: '+error.message);}}
- const available=isRoute?L.places(g.items):L.places([...arrivals,...g.items]).sort((a,b)=>Number(b.kind==='arrival')-Number(a.kind==='arrival')||Number(!!b.mustSee)-Number(!!a.mustSee)||(a.distanceKm||0)-(b.distanceKm||0));const items=isRoute?JR.select(available,downloadCount):available.slice(0,downloadCount);if(!items.length)throw Error('No places with usable coordinates were found. Try a nearby town.');
+ const available=isRoute?L.places(g.items):L.places([...arrivals,...g.items]).sort((a,b)=>Number(b.kind==='arrival')-Number(a.kind==='arrival')||Number(!!b.mustSee)-Number(!!a.mustSee)||(a.distanceKm||0)-(b.distanceKm||0));const items=isRoute?selectDownloadPlaces(available):available.slice(0,downloadCount);if(!items.length)throw Error('No places with usable coordinates were found. Try a nearby town.');
  const id=isRoute?routePlan.id:areaId(g.location.label),previous=savedAreas.find(a=>a.id===id),next={id,routeId:isRoute?routePlan.id:null,coordinates:isRoute&&routePlan.from?routePlan.coordinates:null,routeRadius:isRoute?(routePlan.radiusM||L.PLAYBACK_METRES):null,label:g.location.label,items:[],audio:{},requested:downloadCount,available:available.length,partial:true,savedAt:new Date().toISOString()},failures=[];
  // Keep old clips during a refresh. Replace the area only once the complete new selection is safely stored.
  const snapshot=()=>{const merged=new Map((previous?.items||[]).map(i=>[L.key(i),i]));for(const i of next.items)merged.set(L.key(i),i);return {...next,items:[...merged.values()],audio:{...previous?.audio,...next.audio}};};
