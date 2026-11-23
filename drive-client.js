@@ -66,11 +66,11 @@
   const generation=planEpoch;
   planning=true;renderRouteControls();$('plannedRoad').textContent='Finding a driving route and checking nearby stories…';
   try{
-   const planned=await json('/api/journey-route',{from:routeEnds.From,to:routeEnds.To,radiusM:searchRadius});
+   const planned=await json('/api/journey-route',{from:routeEnds.From,to:routeEnds.To,radiusM:searchRadius,trial:trialRoute&&routeEnds.From===trialRoute.from&&routeEnds.To===trialRoute.to?'buxton-tideswell':undefined});
    if(generation!==planEpoch)return;
    routePlan=planned;
    const map=document.createElement('a');map.textContent='View proposed roads on OpenStreetMap';map.target='_blank';map.rel='noopener';
-   map.href='https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route='+encodeURIComponent([planned.from,planned.to].map(p=>p.lat+','+p.lon).join(';'));
+   map.href='https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route='+encodeURIComponent([planned.from,...(planned.via||[]),planned.to].map(p=>p.lat+','+p.lon).join(';'));
    $('plannedRoad').textContent=planned.label+' · '+(planned.distanceM/1609.344).toFixed(1)+' miles · about '+Math.round(planned.durationS/60)+' minutes before traffic. ';
    $('plannedRoad').append(map);renderRoutePreview();
   }catch(error){if(generation===planEpoch)$('plannedRoad').textContent=error.message;}
@@ -114,7 +114,7 @@
   searchRadius=trialRoute.radiusM;radiusInput.value=String(searchRadius/1000);$('routeRadiusValue').textContent=radiusLabel(searchRadius);
   L.setPlaybackMetres(400);distanceChoice.value='400';$('playbackValue').textContent='400 m';
   $('route-test').open=true;
-  $('plannedRoad').textContent='Buxton to Tideswell via Miller’s Dale · 9 miles. Review the places below and download before leaving.';
+  $('plannedRoad').textContent=trialRoute.label+' · '+(trialRoute.distanceM/1609.344).toFixed(1)+' miles. Review the places below and download before leaving.';
  }
  document.querySelectorAll('[data-journey-distance]').forEach(node=>node.textContent=String(L.PLAYBACK_METRES));
  $('nearbyPlacesRadius').textContent='Explore places within '+L.PLAYBACK_METRES+' metres of your location.';

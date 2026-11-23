@@ -54,7 +54,12 @@ async function plan(input,{fetchImpl=fetch}={}){
  if(P.distanceKm(from,to)<0.1)throw failure('Choose two different places.',400);
  if(Date.now()-lastRequest<1000)throw failure('Please wait a moment and try the route again.',429);
  lastRequest=Date.now();
- const points=[from,to].map(p=>p.lon+','+p.lat).join(';');
+ const trial=input.trial==='buxton-tideswell';
+ const via=trial?[
+  {lon:-1.874857,lat:53.284868},{lon:-1.858085,lat:53.292888},
+  {lon:-1.843391,lat:53.299537},{lon:-1.830962,lat:53.310205}
+ ]:[];
+ const points=[from,...via,to].map(p=>p.lon+','+p.lat).join(';');
  const response=await getJson('https://routing.openstreetmap.de/routed-car/route/v1/driving/'+points+'?overview=full&geometries=geojson&steps=false',fetchImpl);
  const road=response.routes?.[0],coordinates=road?.geometry?.coordinates;
  if(!coordinates||coordinates.length<2)throw failure('No connected driving route was found between those places.',422);
@@ -81,8 +86,8 @@ async function plan(input,{fetchImpl=fetch}={}){
   if(JR.project(item.coord,coordinates).metres<=radius)unique.set(item.id,item);
  }
  if(!successful&&!unique.size)throw failure('The story source is unavailable. Try again while connected.',503);
- const items=JR.within({coordinates,items:[...unique.values()]},radius);
+ const items=JR.within({coordinates,items:[...unique.values()].filter(item=>!trial||item.name!=='Batham Gate'||!unique.has('roman-road-Batham Gate Roman road near Smalldale'))},radius);
  const id='road-'+createHash('sha256').update(JSON.stringify(coordinates)).digest('hex').slice(0,20);
- return {id,label:from.title+' → '+to.title,from,to,radiusM:radius,coordinates,distanceM:road.distance,durationS:road.duration,items};
+ return {id,label:from.title+' → '+to.title+(trial?' via Batham Gate, Smalldale and Peak Forest':''),from,to,via,radiusM:radius,coordinates,distanceM:road.distance,durationS:road.duration,items};
 }
 module.exports={plan,sampleRoad};

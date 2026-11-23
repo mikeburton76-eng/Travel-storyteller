@@ -487,5 +487,8 @@ test('Buxton to Tideswell phone link previews and saves eight places within reac
  const area=a.records.get('trip').areas.find(area=>area.id===trialRoute.id);
  assert.equal(area.items.length,8);
  assert.ok(area.items.every(item=>item.route.metres<=400));
+ assert.ok(area.items.some(item=>item.romanRoad?.line));
+ assert.ok(area.items.some(item=>item.name==='Peak Forest'));
+ for(const point of trialRoute.via)assert.ok(require('../journey-route').project(point,area.coordinates).metres<10);
  assert.equal(a.requests,0);
 });
