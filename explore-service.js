@@ -113,7 +113,7 @@ function sourceCategories(chosen,pool,config){
   if(items.some(x=>x.id===c.id&&x.section===section))return;
   const sectionFull=items.filter(x=>x.section===section).length>=config.categoryLimits[section];
   const highlight=c.reviewedPriority&&c.mustSee&&section==='attractions';
-  const replacement=sectionFull&&highlight?items.findLastIndex(x=>x.section===section&&!x.mustSee):-1;
+  const replacement=sectionFull&&(highlight||c.nameStory)?items.findLastIndex(x=>x.section===section&&!x.mustSee&&!pool.candidates.some(p=>p.id===x.id&&(p.reviewedPriority||p.nameStory))):-1;
   if(sectionFull&&replacement<0)return;
   const prior=items.filter(x=>x.id===c.id);
   reason=sourceDescription(c.text,reason,section==='events');if(!reason)return;
@@ -160,6 +160,17 @@ function sourceCategories(chosen,pool,config){
    if(!reason||(section==='walks'&&/walking distance|walked past|walk to (?:the )?station/i.test(reason)))continue;
    add(c,section,reason);
   }
+ }
+ // Use an existing card where possible. This also keeps the name in its spoken opening.
+ for(const c of pool.candidates.filter(c=>c.nameStory).slice(0,2)){
+  const text=c.nameText||c.text;
+  const existing=items.filter(item=>item.id===c.id);
+  if(existing.length){
+   for(const item of existing){
+    if(!item.reason.includes(c.nameOrigin))item.reason+=' '+c.nameOrigin;
+    if(!(item.background||'').includes(text))item.background=[item.background,text].filter(Boolean).join(' ');
+   }
+  }else add({...c,text,reviewedPriority:true},'history',text);
  }
  return {...chosen,items};
 }

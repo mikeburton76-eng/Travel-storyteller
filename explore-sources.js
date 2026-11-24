@@ -130,6 +130,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   const localWalks=nearbyWalks(location,limit);
   const localPreview=[...heritage,...localWalks].map(c=>({...c,id:placeId(c.name,c.coord),distanceKm:Number(P.distanceKm(location,c.coord).toFixed(1)),theme:P.themeOf(c.name,c.text)}));
   if(localPreview.length)onProgress?.({location,candidates:localPreview,warnings:[],radiusKm:limit,travelSource:null});
+  const namesTask=require('./place-names').nearbyNames(location,limit,fetchImpl).catch(()=>[]);
   const activityTask=nearbyActivities(location,limit);
   let near=[];try{near=await base(radius)}catch{warnings.push('Nearby encyclopedia coverage could not be loaded.');}
   if(location.mode==='nearby'&&near.length<4){try{near=await base(config.nearbyWiderRadiusKm);warnings.push('The search includes a wider area because nearby results were limited.');}catch{}}
@@ -260,6 +261,15 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
     for(const c of candidates)if(c.source?.kind==='wikipedia'&&c.source.title===page.title){c.walkingContext=context;c.text=c.text.slice(0,900)+'\n\nWalking context: '+context;}
    }
   }catch{warnings.push('Some walking or museum activity descriptions could not be checked.');}
+  for(const story of await namesTask){
+   const existing=candidates.find(c=>c.name===story.name||c.wikidata&&c.wikidata===story.wikidata);
+   if(existing){
+    existing.nameStory=true;
+    existing.nameText=story.text;
+    existing.nameOrigin=story.nameOrigin;
+    existing.supportingSources=[...(existing.supportingSources||[]),story.source];
+   }else candidates.push(story);
+  }
   const activities=await activityTask;
   if(activities.unavailable)warnings.push('Some indoor activity and museum listings could not be checked.');
   candidates.push(...activities.candidates);
@@ -283,6 +293,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   reserve(P.familyIdeas(ordered,6),6);
   reserve(ordered.filter(c=>/\b(museum|galler(?:y|ies))\b/i.test(c.name)),2);
   reserve(ordered.filter(c=>c.romanRoad),2);
+  reserve(ordered.filter(c=>c.nameStory),2);
   reserve(ordered.filter(c=>c.battleHeritage&&c.historyOnly),3);
   reserve(ordered.filter(c=>c.reviewedPriority||c.mustSee||c.walkOnly),config.maxCandidates);
   for(const c of [...unique.values()].filter(c=>c.eventArea).slice(0,4))if(!balanced.includes(c)&&balanced.length<config.maxCandidates)balanced.push(c);

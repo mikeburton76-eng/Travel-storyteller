@@ -1,0 +1,241 @@
+[
+ {
+  "name": "The Marquis of Granby",
+  "coord": {
+   "lat": 51.518059,
+   "lon": -0.13468
+  },
+  "text": "The Marquis of Granby is a public house at 2 Rathbone Street, Fitzrovia, London, W1. The pub is named after John Manners, Marquess of Granby.",
+  "id": "wiki-44507001",
+  "wikidata": "Q18748735",
+  "source": {
+   "kind": "wikipedia",
+   "title": "The Marquis of Granby",
+   "url": "https://en.wikipedia.org/?curid=44507001"
+  }
+ },
+ {
+  "name": "Captain Kidd, Wapping",
+  "coord": {
+   "lat": 51.5033,
+   "lon": -0.0583
+  },
+  "text": "The Captain Kidd is a pub in Wapping, East London, that is named after the seventeenth-century pirate William Kidd, who was executed at the nearby Execution Dock.",
+  "id": "wiki-51572678",
+  "wikidata": "Q28433128",
+  "source": {
+   "kind": "wikipedia",
+   "title": "Captain Kidd, Wapping",
+   "url": "https://en.wikipedia.org/?curid=51572678"
+  }
+ },
+ {
+  "name": "Sir Richard Steele (public house)",
+  "coord": {
+   "lat": 51.54685,
+   "lon": -0.1589
+  },
+  "text": "The Sir Richard Steele is a public house in Haverstock Hill, north London, midway between Belsize Park and Chalk Farm tube stations on the Northern line. It is named after Richard Steele (1672-1729).",
+  "id": "wiki-50699454",
+  "wikidata": "Q24553438",
+  "source": {
+   "kind": "wikipedia",
+   "title": "Sir Richard Steele (public house)",
+   "url": "https://en.wikipedia.org/?curid=50699454"
+  }
+ },
+ {
+  "name": "Uttley House",
+  "coord": {
+   "lat": 53.44361111,
+   "lon": -2.21333333
+  },
+  "text": "Uttley House (formerly named The Firs), is a Grade II listed building and halls of residence in Fallowfield, Manchester, England. The building is named after English writer Alison Uttley.",
+  "id": "wiki-10572474",
+  "wikidata": "Q5070809",
+  "source": {
+   "kind": "wikipedia",
+   "title": "Uttley House",
+   "url": "https://en.wikipedia.org/?curid=10572474"
+  }
+ },
+ {
+  "name": "Redwood Building",
+  "coord": {
+   "lat": 51.48783,
+   "lon": -3.18417
+  },
+  "text": "The Redwood Building is a Cardiff University building, in the Cathays Park area of Cardiff, Wales. In 1979 the building was named after the Redwood family of Boverton, near Llantwit Major, namely the pharmacist Theophilus Redwood, his son Sir Boverton Redwood as well as Theophilus's medical brother Lewis Redwood and his son Thomas Redwood (after whom the former Redwood Hospital of Rhymney was named).",
+  "id": "wiki-11521406",
+  "wikidata": "Q7306482",
+  "source": {
+   "kind": "wikipedia",
+   "title": "Redwood Building",
+   "url": "https://en.wikipedia.org/?curid=11521406"
+  }
+ },
+ {
+  "name": "Roald Dahl Plass",
+  "coord": {
+   "lat": 51.46392778,
+   "lon": -3.16419722
+  },
+  "text": "Roald Dahl Plass is a public space in Cardiff Bay, Cardiff, Wales. It is named after Cardiff-born author Roald Dahl, and is located on the coast along the south of the city centre.",
+  "id": "wiki-7604657",
+  "wikidata": "Q3400760",
+  "source": {
+   "kind": "wikipedia",
+   "title": "Roald Dahl Plass",
+   "url": "https://en.wikipedia.org/?curid=7604657"
+  }
+ },
+ {
+  "name": "Thompson's Park",
+  "coord": {
+   "lat": 51.4861,
+   "lon": -3.209
+  },
+  "text": "Thompson's Park, originally known as Sir David’s Field, is a park in Cardiff, Wales, located in the Canton area. The park is named after the influential family of James Pyke Thompson who owned it before it was acquired by Cardiff Council who continue to own and maintain the park.",
+  "id": "wiki-26999611",
+  "wikidata": "Q7795664",
+  "source": {
+   "kind": "wikipedia",
+   "title": "Thompson's Park",
+   "url": "https://en.wikipedia.org/?curid=26999611"
+  }
+ },
+ {
+  "name": "Queen's Bridge, Belfast",
+  "coord": {
+   "lat": 54.59966667,
+   "lon": -5.92053611
+  },
+  "text": "Queen's Bridge is a B+ listed Victorian stone arch bridge in Belfast, Northern Ireland. It opened to traffic in 1843 and is named after Queen Victoria.",
+  "id": "wiki-4591176",
+  "wikidata": "Q12066706",
+  "source": {
+   "kind": "wikipedia",
+   "title": "Queen's Bridge, Belfast",
+   "url": "https://en.wikipedia.org/?curid=4591176"
+  }
+ },
+ {
+  "name": "Queen's Quay, Belfast",
+  "coord": {
+   "lat": 54.602,
+   "lon": -5.914
+  },
+  "text": "Queen's Quay is a section of the River Lagan, in the western Titanic Quarter of the city of Belfast, Northern Ireland. Queen's Quay is named after Queen Victoria following her 1849 royal visit.",
+  "id": "wiki-15260510",
+  "wikidata": "Q7270084",
+  "source": {
+   "kind": "wikipedia",
+   "title": "Queen's Quay, Belfast",
+   "url": "https://en.wikipedia.org/?curid=15260510"
+  }
+ },
+ {
+  "name": "Shaftesbury Square",
+  "coord": {
+   "lat": 54.589,
+   "lon": -5.934
+  },
+  "text": "Shaftesbury Square is in Belfast, Northern Ireland at the southern end of Great Victoria Street and Dublin Road, with the adjoining streets of Lisburn Road and the Donegall Road converging at this junction. The square was named after the Earl of Shaftesbury.",
+  "id": "wiki-38548527",
+  "wikidata": "Q7461125",
+  "source": {
+   "kind": "wikipedia",
+   "title": "Shaftesbury Square",
+   "url": "https://en.wikipedia.org/?curid=38548527"
+  }
+ },
+ {
+  "name": "Judge Building",
+  "coord": {
+   "lat": 40.7375,
+   "lon": -73.99277778
+  },
+  "text": "The Judge Building, originally the Goelet Building, is a ten-story edifice built in 1888 at 110 Fifth Avenue and 16th Street in the Flatiron District of Manhattan, New York City. It is named after Judge magazine, which was printed there.",
+  "id": "wiki-21807600",
+  "wikidata": "Q6302493",
+  "source": {
+   "kind": "wikipedia",
+   "title": "Judge Building",
+   "url": "https://en.wikipedia.org/?curid=21807600"
+  }
+ },
+ {
+  "name": "Stanton Street",
+  "coord": {
+   "lat": 40.72081944,
+   "lon": -73.98657222
+  },
+  "text": "Stanton Street is a west-to-east street in the New York City borough of Manhattan, in the neighborhood of the Lower East Side. The street is named after George Stanton, an associate of landowner James De Lancey.",
+  "id": "wiki-3488904",
+  "wikidata": "Q7600270",
+  "source": {
+   "kind": "wikipedia",
+   "title": "Stanton Street",
+   "url": "https://en.wikipedia.org/?curid=3488904"
+  }
+ },
+ {
+  "name": "Broome Street",
+  "coord": {
+   "lat": 40.7192,
+   "lon": -73.99390833
+  },
+  "text": "Broome Street is an east-west street in Lower Manhattan. The street was named after Staten Island-born John Broome, who was a Colonial merchant and politician and became a Lieutenant Governor of New York State.",
+  "id": "wiki-34958189",
+  "wikidata": "Q917139",
+  "source": {
+   "kind": "wikipedia",
+   "title": "Broome Street",
+   "url": "https://en.wikipedia.org/?curid=34958189"
+  }
+ },
+ {
+  "name": "Delancey Street",
+  "coord": {
+   "lat": 40.71861111,
+   "lon": -73.98833333
+  },
+  "text": "Delancey Street is one of the main thoroughfares of the Lower East Side in Manhattan, New York City. Delancey Street is named after James De Lancey Sr., chief justice, lieutenant governor, and acting colonial governor of the Province of New York, whose farm was located in what is now called the Lower East Side.",
+  "id": "wiki-948495",
+  "wikidata": "Q3021466",
+  "source": {
+   "kind": "wikipedia",
+   "title": "Delancey Street",
+   "url": "https://en.wikipedia.org/?curid=948495"
+  }
+ },
+ {
+  "name": "Blackwattle Bay",
+  "coord": {
+   "lat": -33.872564,
+   "lon": 151.188912
+  },
+  "text": "Blackwattle Bay is a bay to the south-east of Glebe Island and east of Rozelle Bay on Sydney Harbour. In 1788 the bay was named after the black wattle tree found there that was used for housing construction.",
+  "id": "wiki-31788658",
+  "wikidata": "Q4923568",
+  "source": {
+   "kind": "wikipedia",
+   "title": "Blackwattle Bay",
+   "url": "https://en.wikipedia.org/?curid=31788658"
+  }
+ },
+ {
+  "name": "Cowane's Hospital",
+  "coord": {
+   "lat": 56.1205,
+   "lon": -3.9451
+  },
+  "id": "names-cowanes-hospital",
+  "text": "Cowane’s Hospital in Stirling carries the name of John Cowane, a local merchant. His bequest of 40,000 merks established this almshouse in 1637.",
+  "source": {
+   "kind": "heritage",
+   "title": "Stirling Council — Cowane’s Hospital",
+   "url": "https://www.stirling.gov.uk/community-life-and-leisure/community-centres-and-halls/our-centres/community-run-centres-and-halls/cowane-hospital-guild-hall/"
+  }
+ }
+]

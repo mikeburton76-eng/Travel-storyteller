@@ -3,7 +3,7 @@ const {distanceKm}=require('./explore-policy');
 const reviewed=require('./roman-roads/reviewed.json').map(row=>({
  name:row.name,coord:row.coord,text:row.text,romanRoad:{status:row.status,line:row.line},
  reviewedPriority:true,guideListed:true,theme:'history',source:{kind:'heritage',title:row.name,url:row.url},
- supportingSources:[...(row.extra?[{title:'Historical evidence',url:row.extra}]:[]),...(row.line?[{title:'Modern road geometry © OpenStreetMap contributors (OSRM)',url:'https://www.openstreetmap.org/copyright'}]:[])]
+ supportingSources:[...(row.nameSource?[{title:"Peak District National Park — place-name evidence",url:row.nameSource}]:[]),...(row.extra?[{title:'Historical evidence',url:row.extra}]:[]),...(row.line?[{title:'Modern road geometry © OpenStreetMap contributors (OSRM)',url:'https://www.openstreetmap.org/copyright'}]:[])]
 }));
 const atlas=[50,51,52,53,54,55].flatMap(band=>require('./roman-roads/'+band+'.json'));
 function nearRoads(place,radiusKm){

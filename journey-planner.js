@@ -76,10 +76,16 @@ async function plan(input,{fetchImpl=fetch}={}){
    }
   }
  }
+ const namePoints=sampleRoad(coordinates,3);
+ const nameLookups=Promise.allSettled(namePoints.map(([lon,lat])=>require('./place-names').nearbyNames({lat,lon},Math.min(10,Math.max(4.5,radius/1000)),fetchImpl)));
  const unique=new Map();let successful=0;
  for(let i=0;i<pointsToSearch.length;i+=4){
   const responses=await Promise.allSettled(pointsToSearch.slice(i,i+4).map(point=>stories(point,Math.min(10000,Math.max(4500,radius+1000)),fetchImpl)));
   for(const response of responses)if(response.status==='fulfilled'){successful++;for(const item of response.value)unique.set(item.id,item);}
+ }
+ for(const result of await nameLookups){
+  if(result.status!=='fulfilled')continue;
+  for(const c of result.value)unique.set(c.id,{...c,title:c.name,reason:c.text,background:c.text,section:'history',theme:'history'});
  }
  for(const road of require('./roman-roads').reviewed){
   const item={...road,id:'roman-road-'+road.name,title:road.name,reason:road.text,background:road.text,section:'history'};
