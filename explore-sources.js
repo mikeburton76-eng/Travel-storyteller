@@ -118,8 +118,10 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
  async function collect(location, config, onProgress) {
   const warnings=[],candidates=[];
   const radius=location.mode==='nearby'?config.nearbyRadiusKm:location.scale==='village'?config.villageRadiusKm:location.scale==='town'?config.townRadiusKm:config.areaRadiusKm;
+  const subjectStories=[];
   const base = async radiusKm => {
-   const d=await api('wikipedia',{generator:'geosearch',ggscoord:`${location.lat}|${location.lon}`,ggsradius:Math.min(10000,radiusKm*1000),ggslimit:50,prop:'description|coordinates|pageprops'});
+   const d=await api('wikipedia',{generator:'geosearch',ggscoord:`${location.lat}|${location.lon}`,ggsradius:Math.min(10000,radiusKm*1000),ggslimit:50,prop:'description|coordinates|pageprops|extracts',exintro:1,explaintext:1,exlimit:'max',colimit:'max'});
+   for(const page of pages(d)){const story=require('./subject-stories').fromPage(page);if(story)subjectStories.push(story);}
    return pages(d).filter(p=>p.title&&p.title!==location.title&&p.pageprops?.disambiguation===undefined&&P.allowed(p.title,p.description||'')&&visitorPage(p)&&!/^List of |^Timeline of /i.test(p.title));
   };
   const limit=location.mode==='nearby'?config.nearbyWiderRadiusKm:radius;
@@ -304,7 +306,7 @@ function createSourceProvider({fetchImpl=fetch,timeoutMs=14000}={}) {
   while(groups.some(g=>g.length)&&balanced.length<config.maxCandidates)for(const g of groups)if(g.length&&balanced.length<config.maxCandidates)balanced.push(g.shift());
   balanced.forEach(c=>c.id=placeId(c.name,c.coord));
   
-  return {location,candidates:balanced,walkRadiusKm:walkLimit,warnings:[...new Set(warnings)],radiusKm:limit,travelSource:travelRoot?{kind:'wikivoyage',title:travelRoot.title,url:pageUrl('wikivoyage',travelRoot.title)}:null};
+  return {location,subjectStories,candidates:balanced,walkRadiusKm:walkLimit,warnings:[...new Set(warnings)],radiusKm:limit,travelSource:travelRoot?{kind:'wikivoyage',title:travelRoot.title,url:pageUrl('wikivoyage',travelRoot.title)}:null};
  }
  async function images(candidates) {
   const files=[...new Set(candidates.filter(c=>!c.historyOnly&&c.imageFile).map(c=>'File:'+c.imageFile.replace(/^File:/,'')))].slice(0,36);const result=new Map();

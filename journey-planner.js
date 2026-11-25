@@ -38,6 +38,8 @@ async function stories(point,searchRadius,fetchImpl){
  const items=[];
  for(const page of Object.values(data.query?.pages||{})){
   const name=page.title,text=P.plain(page.extract||''),coord=page.coordinates?.[0];
+  const subjectStory=require('./subject-stories').fromPage(page);
+  if(subjectStory){items.push(subjectStory);continue;}
   if(!coord||!text||!P.visitor.test(name+' '+text)||!P.visitorSuitable(name,text))continue;
   const sentences=text.match(/[^.!?]+[.!?]+(?:\s|$)/g)||[];
   const reason=sentences.slice(0,2).join('').trim();
@@ -91,8 +93,10 @@ async function plan(input,{fetchImpl=fetch}={}){
   const item={...road,id:'roman-road-'+road.name,title:road.name,reason:road.text,background:road.text,section:'history'};
   if(JR.project(item.coord,coordinates).metres<=radius)unique.set(item.id,item);
  }
- if(!successful&&!unique.size)throw failure('The story source is unavailable. Try again while connected.',503);
- const items=JR.within({coordinates,items:[...unique.values()].filter(item=>!trial||item.name!=='Batham Gate'||!unique.has('roman-road-Batham Gate Roman road near Smalldale'))},radius);
+ const subjectStories=require('./subject-stories');
+ const local=subjectStories.stored.filter(item=>JR.project(item.coord,coordinates).metres<=radius);
+ if(!successful&&!unique.size&&!local.length)throw failure('The story source is unavailable. Try again while connected.',503);
+ const items=JR.within({coordinates,items:subjectStories.mergeStories([...unique.values()],local).filter(item=>!trial||item.name!=='Batham Gate'||!unique.has('roman-road-Batham Gate Roman road near Smalldale'))},radius);
  const id='road-'+createHash('sha256').update(JSON.stringify(coordinates)).digest('hex').slice(0,20);
  return {id,label:from.title+' → '+to.title+(trial?' via Batham Gate, Smalldale and Peak Forest':''),from,to,via,radiusM:radius,coordinates,distanceM:road.distance,durationS:road.duration,items};
 }

@@ -1,0 +1,428 @@
+[
+ {
+  "name": "Old Hall Hotel",
+  "subject": "Royal visits",
+  "text": "Mary, Queen of Scots came to Buxton to bathe in the warm spring water. She lodged at the Hall during visits between 1573 and 1584. Part of the fortified tower survives inside the later hotel.",
+  "lat": 53.2582,
+  "lon": -1.9153,
+  "pageId": 26553815,
+  "source": {
+   "kind": "heritage",
+   "title": "High Peak Borough Council — Buxton conservation area",
+   "url": "https://www.highpeak.gov.uk/media/220/Buxton-area-character-appraisal-adopted-April-2007/pdf/HP_CAA.pdf"
+  }
+ },
+ {
+  "name": "Boscobel House",
+  "subject": "Royal visits",
+  "text": "In 1651 this hunting lodge was a hiding place for Charles II after his defeat at Worcester. The oak in which he hid became part of the escape story remembered in the pub name Royal Oak.",
+  "lat": 52.6716,
+  "lon": -2.2416,
+  "pageId": 878585
+ },
+ {
+  "name": "Magpie Mine",
+  "subject": "Mines and quarries",
+  "text": "The walls on this hillside enclose the workings of five lead mines. Magpie was only one of them. Its neighbours had names such as Dirty Red Soil and Horsesteps.",
+  "lat": 53.21166667,
+  "lon": -1.74222222,
+  "pageId": 63640033
+ },
+ {
+  "name": "Big Pit National Coal Museum",
+  "subject": "Mines and quarries",
+  "text": "Big Pit worked as a coal mine from 1880 until 1980. Just three years later it opened as a museum, giving the workings a second life.",
+  "lat": 51.7724,
+  "lon": -3.105,
+  "pageId": 2499527
+ },
+ {
+  "name": "Wieliczka Salt Mine",
+  "subject": "Mines and quarries",
+  "text": "Salt shaped this town long before miners sank shafts here. People first collected it from brine rising to the surface, and in the thirteenth century miners began cutting into the salt below.",
+  "lat": 49.97916667,
+  "lon": 20.06388889,
+  "pageId": 5522313
+ },
+ {
+  "name": "Millers Dale railway station",
+  "subject": "Old railways",
+  "text": "Miller’s Dale station opened in 1863. Passengers for Buxton could change trains here. The platforms now sit beside a trail where trains once ran between Manchester and London.",
+  "lat": 53.2563,
+  "lon": -1.7932,
+  "pageId": 5465467
+ },
+ {
+  "name": "Monsal Trail",
+  "subject": "Old railways",
+  "text": "The level track through these limestone dales was built for trains. Today the Monsal Trail follows part of the Midland Railway route that once connected Manchester with London.",
+  "lat": 53.2447,
+  "lon": -1.7317,
+  "pageId": 10834297
+ },
+ {
+  "name": "Cromford Mills",
+  "subject": "Mills",
+  "text": "In 1771 Richard Arkwright established a cotton-spinning mill at Cromford. Water supplied the power to turn the machines, which helps explain why a factory of such influence was built here.",
+  "lat": 53.109,
+  "lon": -1.556,
+  "pageId": 16901850
+ },
+ {
+  "name": "New Lanark",
+  "subject": "Mills",
+  "text": "David Dale built cotton mills beside the River Clyde and houses for the people who would work in them. The village and its industry grew together from the 1780s.",
+  "lat": 55.6636,
+  "lon": -3.7814,
+  "pageId": 411570
+ },
+ {
+  "name": "Litton Mill",
+  "subject": "Mills",
+  "text": "The River Wye once supplied the power to spin cotton at Litton Mill. The business was founded in 1782 by Ellis Needham and Thomas Frith.",
+  "lat": 53.254,
+  "lon": -1.762,
+  "pageId": 6333895
+ },
+ {
+  "name": "Quarry Bank Mill",
+  "subject": "Mills",
+  "text": "Quarry Bank began spinning cotton in 1784. The mill and the workers’ village at Styal preserve two sides of the same story: the machinery and the people who kept it running.",
+  "lat": 53.3439,
+  "lon": -2.2495,
+  "pageId": 600354
+ },
+ {
+  "name": "Pontcysyllte Aqueduct",
+  "subject": "Rivers and bridges",
+  "text": "Boats cross the River Dee here without descending to it. The Llangollen Canal runs high overhead in a cast-iron trough carried on nineteen arches.",
+  "lat": 52.97055556,
+  "lon": -3.08777778,
+  "pageId": 412159
+ },
+ {
+  "name": "Pont du Gard",
+  "subject": "Rivers and bridges",
+  "text": "This Roman bridge carried drinking water across the Gardon on its way to Nîmes. It was one crossing on an aqueduct roughly fifty kilometres long.",
+  "lat": 43.94722222,
+  "lon": 4.53555556,
+  "pageId": 198030
+ },
+ {
+  "name": "Chee Dale",
+  "subject": "Woods and nature reserves",
+  "text": "The River Wye threads a narrow limestone gorge at Chee Dale. Above it the former railway skirts the cliffs, giving walkers a very different view of the valley from the riverside path.",
+  "lat": 53.2526,
+  "lon": -1.8218,
+  "pageId": 63526649
+ },
+ {
+  "name": "Padley Gorge",
+  "subject": "Woods and nature reserves",
+  "text": "Burbage Brook runs through the woods at Padley Gorge. It once marked the county boundary between Derbyshire and Yorkshire.",
+  "lat": 53.3055,
+  "lon": -1.6248,
+  "pageId": 4593646
+ },
+ {
+  "name": "Wistman's Wood",
+  "subject": "Woods and nature reserves",
+  "text": "The twisted oaks of Wistman’s Wood grow high on Dartmoor. They are part of a surviving patch of temperate rainforest in a landscape many people picture as open moor.",
+  "lat": 50.577,
+  "lon": -3.961,
+  "pageId": 13915228
+ },
+ {
+  "name": "Poole's Cavern",
+  "subject": "Geology",
+  "text": "Buxton’s limestone landscape continues underground. Poole’s Cavern belongs to the Wye cave system, where water has shaped a passage beneath the hillside.",
+  "lat": 53.2498,
+  "lon": -1.9259,
+  "pageId": 6842954
+ },
+ {
+  "name": "Blue John Cavern",
+  "subject": "Geology",
+  "text": "Blue John is a coloured variety of fluorite. The cavern near Castleton owes its name to the mineral that people came underground to extract.",
+  "lat": 53.3456,
+  "lon": -1.8035,
+  "pageId": 1046969
+ },
+ {
+  "name": "Giant's Causeway",
+  "subject": "Geology",
+  "text": "The interlocking columns along this coast formed as volcanic rock cooled and contracted. There are roughly forty thousand of them.",
+  "lat": 55.24083333,
+  "lon": -6.51166667,
+  "pageId": 216346
+ },
+ {
+  "name": "Wharram Percy",
+  "subject": "Deserted medieval villages",
+  "text": "The ruined church is the easiest building to spot at Wharram Percy. The village is still visible in the grass above it, where low earthworks trace the outlines of houses.",
+  "lat": 54.0675,
+  "lon": -0.68972222,
+  "pageId": 803585
+ },
+ {
+  "name": "Gainsthorpe",
+  "subject": "Deserted medieval villages",
+  "text": "An open field at Gainsthorpe preserves the layout of a medieval village. The humps and hollows mark lanes, plots and buildings that disappeared above ground centuries ago.",
+  "lat": 53.49792,
+  "lon": -0.56031,
+  "pageId": 872873
+ },
+ {
+  "name": "Devonshire Dome",
+  "subject": "Former uses of buildings",
+  "text": "Buxton’s great dome grew out of a stable block. The building later housed a hospital, and architect Robert Rippon Duke added the wide unsupported dome over the former courtyard.",
+  "lat": 53.26,
+  "lon": -1.9168,
+  "pageId": 25946034
+ },
+ {
+  "name": "Tate Modern",
+  "subject": "Former uses of buildings",
+  "text": "Bankside’s power station became Tate Modern. The Turbine Hall takes its name from the machines that once generated electricity in the space now used to display art.",
+  "lat": 51.5078,
+  "lon": -0.0994,
+  "pageId": 31119
+ },
+ {
+  "name": "Musée d'Orsay",
+  "subject": "Former uses of buildings",
+  "text": "This museum beside the Seine began as a railway terminus. The former Gare d’Orsay now houses paintings and sculpture beneath the roof that once covered arriving trains.",
+  "lat": 48.859972,
+  "lon": 2.326527,
+  "pageId": 53919
+ },
+ {
+  "name": "York Watergate",
+  "subject": "Street features",
+  "text": "The York Watergate once opened directly onto the Thames. It now stands inland in Victoria Embankment Gardens, a surviving clue to where the riverbank used to be.",
+  "lat": 51.5081,
+  "lon": -0.1229,
+  "pageId": 4094213
+ },
+ {
+  "name": "London Stone",
+  "subject": "Street features",
+  "text": "A small block of limestone on Cannon Street is the surviving fragment of a much larger landmark. London Stone stood for centuries on the other side of the street.",
+  "lat": 51.5116,
+  "lon": -0.0895,
+  "pageId": 386598
+ },
+ {
+  "name": "River Sheaf",
+  "subject": "Hidden waterways",
+  "text": "The River Sheaf disappears into a culvert beneath central Sheffield. It continues below the city streets until it joins the River Don.",
+  "lat": 53.38527778,
+  "lon": -1.46222222,
+  "pageId": 305157
+ },
+ {
+  "name": "River Fleet",
+  "subject": "Hidden waterways",
+  "text": "The Fleet still flows beneath London. During the nineteenth century its lower course became part of the sewer system, hiding a river that had once reached the Thames in the open.",
+  "lat": 51.51083333,
+  "lon": -0.10444444,
+  "pageId": 142043
+ },
+ {
+  "name": "Doune Castle",
+  "subject": "Filming locations",
+  "text": "Doune Castle played Castle Leoch, home of Clan MacKenzie, in Outlander. The same Scottish castle also appeared in Monty Python and the Holy Grail.",
+  "lat": 56.185158,
+  "lon": -4.050253,
+  "pageId": 1011843
+ },
+ {
+  "name": "Glenfinnan Viaduct",
+  "subject": "Filming locations",
+  "text": "Trains on the West Highland Line curve across this viaduct above Loch Shiel. Film audiences know the crossing from the Hogwarts Express scenes in the Harry Potter films.",
+  "lat": 56.876285,
+  "lon": -5.431914,
+  "pageId": 1496340
+ },
+ {
+  "name": "Hobbiton Movie Set",
+  "subject": "Filming locations",
+  "text": "A farm in New Zealand stood in for the Shire in The Lord of the Rings. The filmmakers returned to create Hobbiton again for The Hobbit films.",
+  "lat": -37.8575,
+  "lon": 175.67972222,
+  "pageId": 45237613
+ },
+ {
+  "name": "Tissington Trail",
+  "subject": "Walking",
+  "text": "The walking and cycling trail follows the trackbed of the railway between Ashbourne and Buxton. Its name comes from Tissington, the village the line skirts.",
+  "lat": 53.096,
+  "lon": -1.7755,
+  "pageId": 1661813
+ },
+ {
+  "name": "Water of Leith Walkway",
+  "subject": "Walking",
+  "text": "This path follows Edinburgh’s river from Balerno to Leith. Walking it links parts of the city that look quite separate from the roads above.",
+  "lat": 55.88603611,
+  "lon": -3.33980833,
+  "pageId": 1901820
+ },
+ {
+  "name": "Bass Rock",
+  "subject": "Animal stories",
+  "text": "The steep island rising out of the Firth of Forth is a volcanic plug. Its rocky slopes support a colony of northern gannets.",
+  "lat": 56.07777778,
+  "lon": -2.64027778,
+  "pageId": 144612
+ },
+ {
+  "name": "Skomer",
+  "subject": "Animal stories",
+  "text": "Manx shearwaters nest in burrows on Skomer. The island’s puffins are easier for daytime visitors to spot, although both birds breed on the same small island.",
+  "lat": 51.7375,
+  "lon": -5.295,
+  "pageId": 613928
+ },
+ {
+  "name": "Longleat Safari and Adventure Park",
+  "subject": "Animal stories",
+  "text": "Longleat opened its drive-through safari park in 1966, in the grounds of the Wiltshire country house. It brought the experience of watching animals from a vehicle to an English estate.",
+  "lat": 51.19,
+  "lon": -2.261,
+  "pageId": 2845587
+ },
+ {
+  "name": "Down House",
+  "subject": "Famous people",
+  "text": "Charles Darwin worked on natural selection in this house and its garden. The grounds were part of his working life as a scientist as well as his family home.",
+  "lat": 51.33138889,
+  "lon": 0.05333333,
+  "pageId": 646334
+ },
+ {
+  "name": "Dove Cottage",
+  "subject": "Famous people",
+  "text": "William Wordsworth and his sister Dorothy moved into Dove Cottage in 1799. The small house in Grasmere was their home for more than eight years.",
+  "lat": 54.4543,
+  "lon": -3.0164,
+  "pageId": 5999801
+ },
+ {
+  "name": "St George's Hall, Liverpool",
+  "subject": "Important buildings",
+  "text": "Behind this Liverpool landmark’s classical façade are both concert halls and law courts. The building opened in 1854, bringing music and court proceedings under the same roof.",
+  "lat": 53.4086,
+  "lon": -2.9801,
+  "pageId": 1045002
+ },
+ {
+  "name": "Buxton Opera House",
+  "subject": "Important buildings",
+  "text": "Frank Matcham designed Buxton Opera House, which opened in 1903. Its place on the square puts a purpose-built theatre alongside the town’s gardens and spa buildings.",
+  "lat": 53.2586,
+  "lon": -1.9157,
+  "pageId": 1856115
+ },
+ {
+  "name": "Skara Brae",
+  "subject": "Neolithic archaeology",
+  "text": "A storm exposed stone buildings beneath the sand at Skara Brae. The Neolithic settlement preserves the arrangement of homes facing a network of passages.",
+  "lat": 59.0487138,
+  "lon": -3.3417499,
+  "pageId": 28892
+ },
+ {
+  "name": "West Kennet Long Barrow",
+  "subject": "Neolithic archaeology",
+  "text": "People in Early Neolithic Wiltshire built stone chambers under this long mound. The chambers made the interior a place people could enter again.",
+  "lat": 51.40856389,
+  "lon": -1.85108333,
+  "pageId": 588233
+ },
+ {
+  "name": "Castell Henllys",
+  "subject": "Iron Age archaeology",
+  "text": "The Iron Age hillfort at Castell Henllys has reconstructed roundhouses. Archaeologists used evidence from excavations to place them on the footprints of earlier buildings.",
+  "lat": 52.017,
+  "lon": -4.745,
+  "pageId": 4297534
+ },
+ {
+  "name": "Maiden Castle, Dorset",
+  "subject": "Iron Age archaeology",
+  "text": "The banks and ditches near Dorchester enclosed an Iron Age hillfort. The hill had already been used thousands of years earlier, in the Neolithic period.",
+  "lat": 50.695,
+  "lon": -2.47,
+  "pageId": 157531
+ },
+ {
+  "name": "Navio Roman Fort",
+  "subject": "Roman archaeology",
+  "text": "The Roman fort at Brough overlooks a bend in the River Noe. A civilian settlement grew beside the military site, which was linked by road to Buxton.",
+  "lat": 53.34111111,
+  "lon": -1.73,
+  "pageId": 63398943
+ },
+ {
+  "name": "Nine Ladies",
+  "subject": "Late Neolithic and Bronze Age archaeology",
+  "text": "The low stones on Stanton Moor form a prehistoric circle. The Nine Ladies belong to a stone-circle tradition spanning the Late Neolithic and Early Bronze Age.",
+  "lat": 53.16805556,
+  "lon": -1.62888889,
+  "pageId": 3568851
+ },
+ {
+  "name": "The Crown Inn, Chiddingfold",
+  "id": "heritage-crown-chiddingfold",
+  "subject": "Royal visits",
+  "lat": 51.1096,
+  "lon": -0.6292,
+  "text": "On 21 July 1552 Edward VI and his travelling court came to Chiddingfold. They camped on the village green facing the Crown Inn.",
+  "source": {
+   "kind": "heritage",
+   "title": "Waverley Borough Council — Chiddingfold conservation area",
+   "url": "https://www.waverley.gov.uk/portals/0/documents/services/planning-and-building/heritage-and-trees/heritage/chiddingfold%20conservation%20area%20appraisal.pdf"
+  }
+ },
+ {
+  "name": "Peak Forest Tramway",
+  "subject": "Old railways",
+  "text": "Horses and gravity powered the Peak Forest Tramway when it began trading in 1796. Part of its western course survives as a walking trail.",
+  "lat": 53.3354,
+  "lon": -1.969,
+  "pageId": 2135243
+ },
+ {
+  "name": "The Bull Ring",
+  "subject": "Late Neolithic archaeology",
+  "text": "The ring at Dove Holes is an earthwork built in the Late Neolithic period. Close beside the henge are two burial mounds of different shapes, one oval and one round.",
+  "lat": 53.30069444,
+  "lon": -1.88442222,
+  "pageId": 9409557
+ },
+ {
+  "name": "Brooklyn Bridge",
+  "subject": "Rivers and bridges",
+  "text": "When the Brooklyn Bridge opened in 1883 it gave Manhattan and Brooklyn their first fixed crossing of the East River. The main span was then the longest of any suspension bridge in the world.",
+  "lat": 40.7057,
+  "lon": -73.9964,
+  "pageId": 47742
+ },
+ {
+  "name": "Great Zimbabwe",
+  "subject": "Medieval archaeology",
+  "text": "The stone city near Masvingo grew into a royal capital from the thirteenth century. Its builders were ancestors of the Shona people, who had settled here centuries earlier.",
+  "lat": -20.26666667,
+  "lon": 30.93333333,
+  "pageId": 177952
+ },
+ {
+  "name": "Petrified Forest National Park",
+  "subject": "Geology",
+  "text": "The wood that gives this Arizona park its name has turned to stone. Deposits of petrified timber survive among the coloured badlands of a landscape that now looks quite different from a forest.",
+  "lat": 35.08805556,
+  "lon": -109.80638889,
+  "pageId": 276241
+ }
+]

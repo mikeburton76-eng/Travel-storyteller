@@ -219,7 +219,7 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
   const infoTask=provider.visitorInformation?Promise.resolve().then(()=>provider.visitorInformation(location)).catch(()=>({items:[],unavailable:true})):Promise.resolve({items:[],unavailable:false});
   function preview(pool){
    const chosen=fallbackSelection(pool,cfg);
-   chosen.items=curatedPlaces(chosen.items,pool.location);
+   chosen.items=require('./subject-stories').forGuide(curatedPlaces(chosen.items,pool.location),pool);
    if(!chosen.items.length)return;
    const byId=new Map(pool.candidates.map(c=>[c.id,c]));
    for(const item of chosen.items)item.image=byId.get(item.id)?.image||null;
@@ -232,7 +232,7 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
   const images=await provider.images(pool.candidates);
   for(const c of pool.candidates)c.image=images.get(String(c.imageFile||'').replace(/^File:/,'').replace(/_/g,' '))||null;
   preview(pool);
-  const fingerprint=createHash('sha256').update(JSON.stringify({version:cfg.version,specialists,overview:location.overview,candidates:pool.candidates.map(({readerInterest,prominence,queryFeatured,eventTiming,...c})=>c).sort((a,b)=>a.id.localeCompare(b.id))})).digest('hex');
+  const fingerprint=createHash('sha256').update(JSON.stringify({version:cfg.version,specialists,subjectStories:pool.subjectStories,overview:location.overview,candidates:pool.candidates.map(({readerInterest,prominence,queryFeatured,eventTiming,...c})=>c).sort((a,b)=>a.id.localeCompare(b.id))})).digest('hex');
   let specialistStatus=previous?.specialistStatus||null;
   let chosen,mode='ai',aiReviewedAt=new Date(now()).toISOString();
   if(previous?.selectionMode==='ai'&&previous._fingerprint===fingerprint){chosen={overview:previous.overview,items:previous.items.map(item=>{const c=pool.candidates.find(c=>c.id===item.id);return item.eventArea?{...item,eventTiming:c?.eventTiming||null}:item})};aiReviewedAt=previous.aiReviewedAt;}
@@ -251,7 +251,7 @@ function createExploreService({fetchImpl=fetch,provider=createSourceProvider({fe
   }
   if(!chosen)chosen=fallbackSelection(pool,cfg);
   chosen=sourceCategories(chosen,pool,cfg);
-  chosen.items=curatedPlaces(chosen.items,pool.location);
+  chosen.items=require('./subject-stories').forGuide(curatedPlaces(chosen.items,pool.location),pool);
   const visitorInfo=await infoTask;
   const notes=[];
   if(pool.walkRadiusKm>pool.radiusKm)notes.push('Walks and gardens include the wider city area, up to '+pool.walkRadiusKm+' km from the search centre. Distances shown are not walk lengths.');
