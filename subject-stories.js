@@ -37,15 +37,20 @@ function fromPage(page){
  let subject,hook;
  for(const sentence of sentences){
   if(sentence.length>430)continue;
-  const era=sentence.match(/\b(Neolithic|Bronze Age|Iron Age|Roman)\b/i);
-  if(era&&/\b(settlement|hillfort|fort|stone circle|henge|barrow|chambered tomb|villa|amphitheatre)\b/i.test(sentence)){
+  const era=sentence.match(/\b(Neolithic|Bronze Age|Iron Age|Roman) (?:auxiliary |military |chambered |long |round |burial )?(?:settlement|hillfort|fort|stone circle|henge|barrow|tomb|villa|amphitheatre)\b/i);
+  if(era&&sentence===first){
    subject=era[1]+' archaeology';hook=sentence;break;
   }
   if(/\b(?:King|Queen)\s+[A-Z]/.test(sentence)&&/\b(?:stayed|visited|lodged|took refuge)\b/i.test(sentence)&&/\b[1-2]\d{3}\b/.test(sentence)){
    subject='Royal visits';hook=sentence;break;
   }
   const match=rules.find(([,pattern])=>pattern.test(sentence));
-  if(match){subject=match[0];hook=sentence;break;}
+  if(match){
+   const label=match[0];
+   if(['Deserted medieval villages','Important buildings'].includes(label)&&sentence!==first)continue;
+   if(label==='Important buildings'&&/\b(?:village|parish|market town|spa town|district)\b/i.test(first))continue;
+   subject=label;hook=sentence;break;
+  }
  }
  if(!hook)return null;
  const detail=hook===first?sentences[1]:hook;
