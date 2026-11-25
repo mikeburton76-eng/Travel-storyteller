@@ -424,5 +424,96 @@
   "lat": 35.08805556,
   "lon": -109.80638889,
   "pageId": 276241
+ },
+ {
+  "id": "openplaque-8484",
+  "name": "Vera Brittain’s home on Park Road",
+  "subject": "Commemorative plaques",
+  "lat": 53.26082,
+  "lon": -1.92286,
+  "text": "In 1907 the Brittain family moved to Melrose, the house now numbered 151 Park Road. Vera was still living in Buxton in 1915, when she left for London to nurse. The plaque marks the family home.",
+  "source": {
+   "kind": "heritage",
+   "title": "Buxton Local History Society",
+   "url": "https://www.buxtonhistory.org.uk/bp1.html"
+  }
+ },
+ {
+  "id": "heritage-leawood-pump",
+  "name": "Leawood Pump House",
+  "subject": "Industrial heritage",
+  "lat": 53.0975,
+  "lon": -1.53083,
+  "text": "The Cromford Canal needed a way to top up its water. This engine house used a steam-powered beam engine built in 1849 to lift water from the River Derwent into the canal.",
+  "source": {
+   "kind": "heritage",
+   "title": "Historic England",
+   "url": "https://historicengland.org.uk/research/results/reports/7242/CanalandRiverNavigationsNationalOverview"
+  }
+ },
+ {
+  "id": "heritage-bell-mill-stanley",
+  "name": "Bell Mill, Stanley Mills",
+  "subject": "Industrial heritage",
+  "lat": 56.4792,
+  "lon": -3.441,
+  "text": "The bend in the River Tay explains why a cotton mill was built here in 1786. Its machinery could draw power from the river. Textile production at Stanley Mills lasted roughly two centuries.",
+  "source": {
+   "kind": "heritage",
+   "title": "Historic Scotland",
+   "url": "https://www.historicenvironment.scot/visit/all/stanley-mills/history-and-stories/"
+  }
+ },
+ {
+  "id": "heritage-ballycopeland",
+  "name": "Ballycopeland Windmill",
+  "subject": "Industrial heritage",
+  "lat": 54.60806,
+  "lon": -5.55667,
+  "text": "This County Down windmill worked until the First World War. Bringing it back into working order took a generation: restoration began in 1950 and continued until 1978.",
+  "source": {
+   "kind": "heritage",
+   "title": "Department for Communities, Northern Ireland",
+   "url": "https://www.communities-ni.gov.uk/heritage-sites/ballycopeland-windmill"
+  }
+ },
+ {
+  "id": "heritage-blaenavon",
+  "name": "Blaenavon Ironworks",
+  "subject": "Industrial heritage",
+  "lat": 51.7765,
+  "lon": -3.0887,
+  "text": "Alongside the blast furnaces stands a tower built for lifting loads using the weight of water. Workers’ cottages survive at the ironworks too, putting the homes of the people who worked here beside the machinery.",
+  "source": {
+   "kind": "heritage",
+   "title": "Cadw",
+   "url": "https://cadw.gov.wales/sites/default/files/2024-12/Cadw%20Filming%20Locations%20Brochure%202025v1.pdf"
+  }
+ },
+ {
+  "id": "film-mount-sunday",
+  "name": "Mount Sunday — Edoras",
+  "subject": "Filming locations",
+  "lat": -43.54832,
+  "lon": 170.89318,
+  "text": "This Canterbury hill became Edoras, the hilltop capital of Rohan in The Lord of the Rings. The film buildings were taken away afterwards. The shape of Mount Sunday and the mountains around it are what you can recognise today.",
+  "source": {
+   "kind": "heritage",
+   "title": "New Zealand Department of Conservation",
+   "url": "https://www.doc.govt.nz/parks-and-recreation/places-to-go/lord-of-the-rings-locations/"
+  }
+ },
+ {
+  "id": "film-himeji",
+  "name": "Himeji Castle",
+  "subject": "Filming locations",
+  "lat": 34.83944,
+  "lon": 134.69389,
+  "text": "James Bond and Akira Kurosawa share a filming location here. Himeji Castle appeared in You Only Live Twice and was also used in Kurosawa’s films Ran and Kagemusha.",
+  "source": {
+   "kind": "heritage",
+   "title": "National Film Archive of Japan location database",
+   "url": "https://jl-db.nfaj.go.jp/en/location/280212001/"
+  }
  }
 ]

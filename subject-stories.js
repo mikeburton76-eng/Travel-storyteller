@@ -23,7 +23,11 @@ function fields(subject){
  const nature=['Animal stories','Woods and nature reserves','Geology','Hidden waterways','Rivers and bridges'].includes(subject);
  return {subject,section:walking?'walks':nature?'attractions':'history',theme:walking||nature?'nature':'history',displayCategory:walking?'walks':'attractions'};
 }
-const stored=require('./local-stories.json').map(row=>({
+const plaques=require('./plaque-stories.json').filter(p=>P.allowed(p.name,p.text)).map(p=>({
+ id:'openplaque-'+p.id,name:p.name+' plaque',subject:p.subject,text:p.text,lat:p.lat,lon:p.lon,
+ source:{kind:'heritage',title:'Open Plaques — '+p.name,url:'https://openplaques.org/plaques/'+p.id}
+}));
+const stored=[...require('./local-stories.json'),...plaques].map(row=>({
  ...fields(row.subject),id:row.pageId?'wiki-'+row.pageId:row.id,name:row.name,title:row.name,coord:{lat:row.lat,lon:row.lon},
  reason:row.text,background:row.text,selectionBasis:'source',
  source:row.source||{kind:'wikipedia',title:row.name,url:'https://en.wikipedia.org/?curid='+row.pageId}

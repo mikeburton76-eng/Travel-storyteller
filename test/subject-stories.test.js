@@ -27,3 +27,20 @@ test('nearby source evidence can identify other locations and archaeological per
  assert.equal(S.fromPage({...page,extract:'The fort was the site of a massacre.'}),null);
  assert.equal(S.fromPage({...page,coordinates:[]}),null);
 });
+
+test('the expanded catalogue supplies local plaque stories to Explore and route downloads',async t=>{
+ const later=Date.now()+2000;
+ t.mock.method(Date,'now',()=>later);
+ const plaque=S.stored.find(x=>x.name==='Buxton Railway Station fan window plaque');
+ const location={...plaque.coord,mode:'nearby',label:'Buxton'};
+ const guide=S.forGuide([],{location,radiusKm:1});
+ assert.ok(guide.some(x=>x.id===plaque.id));
+ assert.ok(guide.some(x=>x.id==='openplaque-8484'));
+ assert.ok(!guide.some(x=>x.id==='film-himeji'));
+ const {lat,lon}=location;
+ const coordinates=[[lon,lat],[lon+.002,lat]];
+ const fetchImpl=async url=>({ok:true,json:async()=>String(url).includes('routed-car')?{routes:[{distance:140,duration:30,geometry:{coordinates}}]}:{query:{pages:{}}}});
+ const plan=await planner.plan({from:{lat,lon,title:'Station'},to:{lat,lon:lon+.002,title:'Town'},radiusM:400},{fetchImpl});
+ assert.ok(plan.items.some(x=>x.id===plaque.id));
+ assert.match(drive.narration(plaque),/stations/i);
+});
