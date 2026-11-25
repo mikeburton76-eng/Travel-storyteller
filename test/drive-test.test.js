@@ -492,3 +492,29 @@ test('Buxton to Tideswell phone link previews and saves eight places within reac
  for(const point of trialRoute.via)assert.ok(require('../journey-route').project(point,area.coordinates).metres<10);
  assert.equal(a.requests,0);
 });
+
+test('slow traffic narrows playback at a pause and acceleration restores the driving range',async()=>{
+ const narrator=phoneNarrator();
+ const a=await app({voiceNarrator:narrator});
+ a.position({lon:0,speed:10});
+ a.advance(1000);a.position({lon:0,speed:0});
+ a.advance(12000);a.position({lon:0,speed:0});
+ assert.match(a.nodes.get('speed').textContent,/slow traffic · 35 m/);
+ a.advance(2000);a.position({lon:.0025,speed:2});await tick();
+ assert.equal(narrator.spoken.length,1);
+ a.advance(1000);a.position({lon:.0026,speed:6});
+ a.advance(4000);a.position({lon:.0028,speed:7});await tick();
+ assert.match(a.nodes.get('speed').textContent,/Driving · 400 m/);
+ assert.equal(narrator.spoken.length,2);
+ a.nodes.get('stop').onclick();
+});
+
+test('a paused walker can hear a close point without a heading',async()=>{
+ const narrator=phoneNarrator();
+ const a=await app({voiceNarrator:narrator});
+ for(const seconds of [0,6,6]){
+  a.advance(seconds*1000);a.position({...item.coord,speed:0,heading:null});
+ }
+ await tick();assert.equal(narrator.spoken.length,2);
+ a.nodes.get('stop').onclick();
+});

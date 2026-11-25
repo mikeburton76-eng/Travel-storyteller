@@ -55,6 +55,37 @@
   if(!valid(fix))return [];
   return places(items).filter(item=>distance(fix,item.coord)<=radius);
  }
+ // Confirm changes of pace over several
+ // fixes to avoid switching back and forth at the threshold.
+ function createPaceDetector(){
+  let mode='detecting',candidate=null,since=0,lastTime=null,anchor=null;
+  return function update(fix){
+   if(lastTime!==null&&fix.time<=lastTime)return mode;
+   if(lastTime!==null&&fix.time-lastTime>15000){candidate=null;anchor=null;}
+   lastTime=fix.time;
+   if(!valid(fix)||!Number.isFinite(fix.accuracy)||fix.accuracy<0||fix.accuracy>35){candidate=null;anchor=null;return mode;}
+   let speed=fix.speed;
+   if(!anchor)anchor=fix;
+   const seconds=(fix.time-anchor.time)/1000;
+   if(!Number.isFinite(speed)||speed<0){
+    if(seconds<5)return mode;
+    const metres=distance(anchor,fix);
+    if(metres<=Math.max(8,anchor.accuracy+fix.accuracy)){
+     if(seconds<12)return mode;
+     speed=0;
+    }else speed=metres/seconds;
+   }
+   anchor=fix;
+   const drivingThreshold=mode==='detecting'?2.7:4;
+   const next=speed>drivingThreshold&&speed<=55?'driving':speed>=0&&speed<=2.7?'walking':null;
+   if(!next||next===mode){candidate=null;return mode;}
+   if(next!==candidate){candidate=next;since=fix.time;}
+   const delay=next==='walking'?12000:mode==='detecting'?0:4000;
+   if(fix.time-since>=delay){mode=next;candidate=null;}
+   return mode;
+  };
+ }
+ function playbackRadius(mode){return mode==='walking'?35:PLAYBACK_METRES;}
  function motion(fix,previous,lastHeading=null){
   if(!valid(fix)||!Number.isFinite(fix.accuracy)||fix.accuracy>75||fix.accuracy<0)return null;
   let speed=Number.isFinite(fix.speed)&&fix.speed>=0?fix.speed:null,heading=Number.isFinite(fix.heading)&&fix.heading>=0&&fix.heading<360?fix.heading:null;
@@ -75,13 +106,18 @@
  }
  function approaching(item,fix,movement,played=new Set(),prepareMetres=Math.max(PLAYBACK_METRES+500,Math.min(3000,Math.max(1000,(movement?.speed||0)*90)))){
   if(!valid(item.coord)||!valid(fix)||!Number.isFinite(fix.accuracy)||fix.accuracy<0||fix.accuracy>75||played.has(key(item)))return null;
-  if(!movement)return null;
+  if(!movement||movement.mode==='detecting')return null;
+  if(movement.mode==='walking'){
+   if(fix.accuracy>35)return null;
+   prepareMetres=Math.min(prepareMetres,Math.max(100,movement.speed*90));
+  }
   if(item.romanRoad?.line)return followingRomanRoad(item.romanRoad.line,fix)?{item,metres:0,ahead:0,cross:0,eta:0,trigger:true}:null;
   const metres=distance(fix,item.coord),delta=angle(movement.heading,bearing(fix,item.coord));
-  if(delta>65||metres<20)return null;
+  if(movement.mode==='walking'&&metres<=35)return {item,metres,ahead:metres,cross:0,eta:null,trigger:true,arrival:item.kind==='arrival'};
+  if(!Number.isFinite(movement.heading)||delta>65||metres<20)return null;
   const cross=metres*Math.sin(rad(delta)),ahead=metres*Math.cos(rad(delta));
   if(cross>Math.max(250,PLAYBACK_METRES*.625)||ahead>prepareMetres)return null;
-  return {item,metres,ahead,cross,eta:movement.speed>0?ahead/movement.speed:null,trigger:metres<=PLAYBACK_METRES,arrival:item.kind==='arrival'};
+  return {item,metres,ahead,cross,eta:movement.speed>0?ahead/movement.speed:null,trigger:metres<=playbackRadius(movement.mode),arrival:item.kind==='arrival'};
  }
  function choose(items,fix,movement,played){return items.map(i=>approaching(i,fix,movement,played)).filter(Boolean).sort((a,b)=>Number(b.trigger)-Number(a.trigger)||a.metres-b.metres||Number(!!a.arrival)-Number(!!b.arrival))[0]||null;}
  function movingAway(item,fix,movement){return valid(item?.coord)&&valid(fix)&&!!movement&&distance(fix,item.coord)>35&&angle(movement.heading,bearing(fix,item.coord))>100;}
@@ -173,7 +209,7 @@
  }
 
  function fullStory(item,opening){return [opening,...extraFacts(item,opening)].filter(Boolean).join(' ');}
- const api={fullStory,followingRomanRoad,placePhoto,placeIcon,completeSentences,canonicalPlaces,nearbyIntroduction,narration,followUp,DISTANCE_OPTIONS,setPlaybackMetres,get PLAYBACK_METRES(){return PLAYBACK_METRES;},movingAway,startChime,distance,bearing,angle,valid,key,places,nearbyPlaces,motion,approaching,choose,opening};
+ const api={createPaceDetector,playbackRadius,fullStory,followingRomanRoad,placePhoto,placeIcon,completeSentences,canonicalPlaces,nearbyIntroduction,narration,followUp,DISTANCE_OPTIONS,setPlaybackMetres,get PLAYBACK_METRES(){return PLAYBACK_METRES;},movingAway,startChime,distance,bearing,angle,valid,key,places,nearbyPlaces,motion,approaching,choose,opening};
  if(typeof module!=='undefined')module.exports=api;else globalThis.DriveLogic=api;
 })();
 
