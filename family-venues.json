@@ -11902,6 +11902,156 @@
   "description": "Walk, jog or run a timed 5K with other participants."
  },
  {
+  "name": "Escape Hunt Basingstoke",
+  "lat": 51.2647,
+  "lon": -1.0873,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/basingstoke"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "RG21 7BA"
+ },
+ {
+  "name": "Escape Hunt Birmingham Cannon Street",
+  "lat": 52.4794,
+  "lon": -1.8986,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/birmingham-cannon-street"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "B4 6SX"
+ },
+ {
+  "name": "Escape Hunt Birmingham Resorts World",
+  "lat": 52.4479,
+  "lon": -1.7177,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/birmingham-resorts-world"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "B40 1PU"
+ },
+ {
+  "name": "Escape Hunt Bournemouth",
+  "lat": 50.719,
+  "lon": -1.8795,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/bournemouth"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "BH2 5AU"
+ },
+ {
+  "name": "Escape Hunt Bristol",
+  "lat": 51.4584,
+  "lon": -2.5856,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/bristol"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "BS1 3BX"
+ },
+ {
+  "name": "Escape Hunt Cambridge",
+  "lat": 52.2031,
+  "lon": 0.1235,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/cambridge"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "CB2 3AR"
+ },
+ {
+  "name": "Escape Hunt Canterbury",
+  "lat": 51.2856,
+  "lon": 1.0867,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/canterbury"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "CT1 1BN"
+ },
+ {
+  "name": "Escape Hunt Cardiff",
+  "lat": 51.4791,
+  "lon": -3.1747,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/cardiff"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "CF10 2GS"
+ },
+ {
+  "name": "Escape Hunt Cheltenham",
+  "lat": 51.9029,
+  "lon": -2.0763,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/cheltenham"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "GL50 3FF"
+ },
+ {
+  "name": "Escape Hunt Colchester",
+  "lat": 51.8885,
+  "lon": 0.9024,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/colchester"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "CO1 1LJ"
+ },
+ {
+  "name": "Escape Hunt Edinburgh",
+  "lat": 55.9561,
+  "lon": -3.1854,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/edinburgh"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "EH1 3AU"
+ },
+ {
+  "name": "Escape Hunt Exeter",
+  "lat": 50.7236,
+  "lon": -3.5324,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/exeter"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "EX4 3HP"
+ },
+ {
+  "name": "Escape Hunt Glasgow",
+  "lat": 55.8572,
+  "lon": -4.2542,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/glasgow"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "G1 4BW"
+ },
+ {
+  "name": "Escape Hunt Kingston",
+  "lat": 51.4091,
+  "lon": -0.3043,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/kingston"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "KT1 1BL"
+ },
+ {
+  "name": "Escape Hunt Lakeside",
+  "lat": 51.4881,
+  "lon": 0.2821,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/lakeside"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "RM20 2ZP"
+ },
+ {
   "name": "Escape Hunt Leeds",
   "postcode": "LS1 8TL",
   "lat": 53.8001,
@@ -11910,6 +12060,126 @@
    "Escape rooms": "https://escapehunt.com/uk/leeds"
   },
   "description": "Solve clues together in a themed escape room."
+ },
+ {
+  "name": "Escape Hunt Liverpool",
+  "lat": 53.3997,
+  "lon": -2.9908,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/liverpool"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "L3 4AE"
+ },
+ {
+  "name": "Escape Hunt London Oxford Street",
+  "lat": 51.5163,
+  "lon": -0.1339,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/london-oxford-street"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "W1D 1BP"
+ },
+ {
+  "name": "Escape Hunt Manchester",
+  "lat": 53.4853,
+  "lon": -2.2435,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/manchester"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "M4 3TR"
+ },
+ {
+  "name": "Escape Hunt Milton Keynes",
+  "lat": 52.0411,
+  "lon": -0.7491,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/milton-keynes"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "MK9 3XS"
+ },
+ {
+  "name": "Escape Hunt Norwich",
+  "lat": 52.6263,
+  "lon": 1.2954,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/norwich"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "NR1 3DD"
+ },
+ {
+  "name": "Escape Hunt Oxford",
+  "lat": 51.7505,
+  "lon": -1.2608,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/oxford"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "OX1 1TR"
+ },
+ {
+  "name": "Escape Hunt Reading",
+  "lat": 51.4548,
+  "lon": -0.9696,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/reading"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "RG1 2HG"
+ },
+ {
+  "name": "Escape Hunt Sheffield",
+  "lat": 53.3776,
+  "lon": -1.4734,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/sheffield"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "S1 4PA"
+ },
+ {
+  "name": "Escape Hunt Wandsworth",
+  "lat": 51.4576,
+  "lon": -0.1938,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/wandsworth"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "SW18 1UL"
+ },
+ {
+  "name": "Escape Hunt Watford",
+  "lat": 51.6562,
+  "lon": -0.3966,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/watford"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "WD17 2AU"
+ },
+ {
+  "name": "Escape Hunt Woking",
+  "lat": 51.3193,
+  "lon": -0.5578,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/woking"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "GU21 6EN"
+ },
+ {
+  "name": "Escape Hunt Worcester",
+  "lat": 52.1898,
+  "lon": -2.2196,
+  "activities": {
+   "Escape rooms": "https://escapehunt.com/uk/worcester"
+  },
+  "description": "Work together to solve clues in a themed escape room.",
+  "postcode": "WR1 2BY"
  },
  {
   "name": "Eston Leisure Centre",
@@ -21858,6 +22128,16 @@
   }
  },
  {
+  "name": "Lost City Apocalypse Adventure Golf, Belfast",
+  "postcode": "BT3 9QQ",
+  "lat": 54.603919,
+  "lon": -5.915391,
+  "activities": {
+   "Crazy golf": "https://www.lostcityadventuregolf.com/belfast-odyssey/find-us/"
+  },
+  "description": "Play a round of apocalypse-themed adventure golf at Queens Quay."
+ },
+ {
   "name": "Lost Shore Surf Resort parkrun",
   "lat": 55.920006,
   "lon": -3.397714,
@@ -24361,6 +24641,126 @@
   "activities": {
    "Swimming": "https://haloleisure.org.uk/centres/much-wenlock-leisure-centre/"
   }
+ },
+ {
+  "name": "Mulligans Basildon",
+  "lat": 51.585214,
+  "lon": 0.463183,
+  "activities": {
+   "Crazy golf": "https://www.mrmulligan.com/venues/basildon"
+  },
+  "description": "Challenge your group to a round of adventure golf.",
+  "postcode": "SS14 3WB"
+ },
+ {
+  "name": "Mulligans Bournemouth",
+  "lat": 50.718779,
+  "lon": -1.879506,
+  "activities": {
+   "Crazy golf": "https://www.mrmulligan.com/venues/bournemouth"
+  },
+  "description": "Challenge your group to a round of adventure golf.",
+  "postcode": "BH2 5DD"
+ },
+ {
+  "name": "Mulligans Bristol",
+  "lat": 51.523053,
+  "lon": -2.602466,
+  "activities": {
+   "Crazy golf": "https://www.mrmulligan.com/venues/bristol"
+  },
+  "description": "Challenge your group to a round of adventure golf.",
+  "postcode": "BS10 7SR"
+ },
+ {
+  "name": "Mulligans Cheltenham",
+  "lat": 51.903319,
+  "lon": -2.076428,
+  "activities": {
+   "Crazy golf": "https://www.mrmulligan.com/venues/cheltenham"
+  },
+  "description": "Challenge your group to a round of adventure golf.",
+  "postcode": "GL50 4FA"
+ },
+ {
+  "name": "Mulligans Guildford",
+  "lat": 51.237049,
+  "lon": -0.571076,
+  "activities": {
+   "Crazy golf": "https://www.mrmulligan.com/venues/guildford"
+  },
+  "description": "Challenge your group to a round of adventure golf.",
+  "postcode": "GU1 4AA"
+ },
+ {
+  "name": "Mulligans Hemel Hempstead",
+  "lat": 51.747477,
+  "lon": -0.455785,
+  "activities": {
+   "Crazy golf": "https://www.mrmulligan.com/venues/hemel-hempstead"
+  },
+  "description": "Challenge your group to a round of adventure golf.",
+  "postcode": "HP2 4JS"
+ },
+ {
+  "name": "Mulligans Milton Keynes",
+  "lat": 52.043919,
+  "lon": -0.749424,
+  "activities": {
+   "Crazy golf": "https://www.mrmulligan.com/venues/milton-keynes"
+  },
+  "description": "Challenge your group to a round of adventure golf.",
+  "postcode": "MK9 3PU"
+ },
+ {
+  "name": "Mulligans Newcastle",
+  "lat": 54.972975,
+  "lon": -1.618312,
+  "activities": {
+   "Crazy golf": "https://www.mrmulligan.com/venues/newcastle"
+  },
+  "description": "Challenge your group to a round of adventure golf.",
+  "postcode": "NE1 5RZ"
+ },
+ {
+  "name": "Mulligans Sidcup",
+  "lat": 51.431512,
+  "lon": 0.076593,
+  "activities": {
+   "Crazy golf": "https://www.mrmulligan.com/venues/sidcup"
+  },
+  "description": "Challenge your group to a round of adventure golf.",
+  "postcode": "BR7 6RP"
+ },
+ {
+  "name": "Mulligans Stevenage",
+  "lat": 51.899819,
+  "lon": -0.208629,
+  "activities": {
+   "Crazy golf": "https://www.mrmulligan.com/venues/stevenage"
+  },
+  "description": "Challenge your group to a round of adventure golf.",
+  "postcode": "SG1 2UA"
+ },
+ {
+  "name": "Mulligans Tonbridge",
+  "lat": 51.197752,
+  "lon": 0.285541,
+  "activities": {
+   "Crazy golf": "https://www.mrmulligan.com/venues/tonbridge"
+  },
+  "description": "Challenge your group to a round of adventure golf.",
+  "postcode": "TN9 1PP"
+ },
+ {
+  "name": "Mulligans Worcester",
+  "lat": 52.190249,
+  "lon": -2.220061,
+  "activities": {
+   "Crazy golf": "https://www.mrmulligan.com/venues/worcester"
+  },
+  "description": "Challenge your group to a round of adventure golf.",
+  "postcode": "WR1 2QE"
  },
  {
   "name": "Muncaster Castle parkrun",
@@ -36482,6 +36882,16 @@
   "activities": {
    "Swimming": "https://be-well.org.uk/centres/tiller-leisure-centre/"
   }
+ },
+ {
+  "name": "Timescape Live Escape Games, Belfast",
+  "postcode": "BT1 1FF",
+  "lat": 54.602362,
+  "lon": -5.930962,
+  "activities": {
+   "Escape rooms": "https://timescapegames.com/"
+  },
+  "description": "Choose a themed team challenge, from a Titanic mystery to a casino heist."
  },
  {
   "name": "Tinside Lido",
