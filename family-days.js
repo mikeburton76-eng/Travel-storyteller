@@ -20,18 +20,21 @@ function render(){
  const type=byId('kind').value;
  const nearby=venues.filter(v=>!type||Object.hasOwn(v.activities,type)).map(v=>({v,d:miles(base,v)})).filter(x=>x.d<=radius).sort((a,b)=>a.d-b.d);
  byId('heading').textContent='Around '+base.label;
- byId('summary').textContent=nearby.length?nearby.length+' listed '+(nearby.length===1?'venue':'venues')+' within '+radius+' miles · nearest first':'No listed venues within '+radius+' miles. Try a wider distance or another activity.';
+ byId('summary').textContent=nearby.length?nearby.length+' listed '+(nearby.length===1?'listing':'listings')+' within '+radius+' miles · nearest first':'No listed activities within '+radius+' miles. Try a wider distance or another activity.';
  const list=byId('list');list.replaceChildren();
  for(const {v,d} of nearby){
-  const article=element('article','');
-  article.append(element('small',Object.keys(v.activities).join(' · ')+' · '+d.toFixed(1)+' miles'),element('h3',v.name));
-  if(v.playNote)article.append(element('p',v.playNote));
+  const article=element('article','');article.className='card';
+  const body=element('div','');body.className='body';article.append(body);
+  const kinds=Object.keys(v.activities);
+  const options=new Intl.ListFormat('en-GB',{type:'conjunction'}).format(kinds.map(k=>k.toLowerCase()));
+  body.append(element('small',Object.keys(v.activities).join(' · ')+' · '+d.toFixed(1)+' miles'),element('h3',v.name));
+  body.append(element('p',v.description || v.playNote || ('Try '+options+' here.')));
   for(const [kind,url] of Object.entries(v.activities)){
-   const link=element('a',kind+' details');link.href=url;article.append(link);
+   const link=element('a',kind+' details');link.href=url;body.append(link);
   }
   const map=element('a','Check the drive');const q=new URLSearchParams({api:'1',origin:base.lat+','+base.lon,destination:v.name+' '+(v.postcode||''),travelmode:'driving'});
   if(!v.postcode)q.set('destination',v.lat+','+v.lon);
-  map.href='https://www.google.com/maps/dir/?'+q;article.append(map);list.append(article);
+  map.href='https://www.google.com/maps/dir/?'+q;body.append(map);list.append(article);
  }
 }
 byId('kind').onchange=render;

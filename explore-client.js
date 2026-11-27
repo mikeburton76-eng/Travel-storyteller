@@ -5,14 +5,14 @@ $('researchOptions').hidden=!researchMode;
 const standardSections={
  attractions:['📍','Sights & heritage','Landmarks, museums, historic places and local stories'],
  walks:['🥾','Walks & gardens','Documented walks, gardens and parks'],
- family:['👨‍👩‍👧','Family activities','Ideas for time together'],
+ family:['👨‍👩‍👧','Friends & family activities','Things to do together'],
  events:['🎭','What’s on','Festivals, fairs and local events']
 };
 const buxtonSections={
  history:['🏛️','Architecture & heritage','Historic buildings, spa heritage and local stories'],
  nature:['🌿','Nature & scenery','Caves, gardens and viewpoints'],
  arts:['🎨','Arts & culture','Theatres, museums and galleries'],
- family:['👨‍👩‍👧','Family days out','Play areas and family activities'],
+ family:['👨‍👩‍👧','Friends & family activities','Days out, games and places to play'],
  walks:['🥾','Walks','Published routes around Buxton'],
  events:['🎭','What’s on','Dated events and performances']
 };
@@ -125,6 +125,7 @@ function renderCategories(){
  if(familyFinder){
   const loc=guide?.location;
   familyFinder.hidden=selected!=='family'||!hasFamilyTaster();
+  familyFinder.textContent='Find more activities for friends and family within 30 miles';
   familyFinder.href=loc&&!familyFinder.hidden?'/family-days.html?'+new URLSearchParams({place:loc.label,lat:loc.lat,lon:loc.lon}):'/family-days.html';
  }
  for(const [id,path]of [['foodTile','/food-open-test'],['stayTile','/stay']]){if($(id)){const params=new URLSearchParams();if(guide?.location){params.set('place',guide.location.label);if(Number.isFinite(guide.location.lat)&&Number.isFinite(guide.location.lon)){params.set('lat',guide.location.lat);params.set('lon',guide.location.lon);}}$(id).href=path+(params.toString()?'?'+params.toString():'');}}
