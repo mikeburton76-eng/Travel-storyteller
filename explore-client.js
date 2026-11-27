@@ -102,11 +102,15 @@ function itemsForCategory(items,category){
  const unique=new Map(matched.map(item=>[item.id,item]));
  return [...unique.values()].sort((a,b)=>distanceFromReference(a)-distanceFromReference(b)||a.name.localeCompare(b.name,'en'));
 }
+function hasFamilyTaster(){
+ const loc=guide?.location;
+ return !!$('familyFinder') && !!loc && loc.lat>=49.7 && loc.lat<=61.1 && loc.lon>=-8.3 && loc.lon<=2.1;
+}
 function renderCategories(){
  sections=isBuxtonPilot()?buxtonSections:standardSections;
  const visible=isBuxtonPilot()?Object.keys(sections):Object.keys(sections).filter(key=>key==='events'
   ? guide&&itemsForCategory(guide.items,key).length
-  : !guide||guide.complete===false||itemsForCategory(guide.items,key).length);
+  : (key==='family'&&hasFamilyTaster())||!guide||guide.complete===false||itemsForCategory(guide.items,key).length);
  if(!visible.length)$('backToCategories').hidden=true;
  if(!visible.includes(selected))selected=visible[0]||'attractions';
  $('tabs').replaceChildren();
@@ -116,6 +120,12 @@ function renderCategories(){
   const symbol=node('span',icon);symbol.className='category-icon';symbol.setAttribute('aria-hidden','true');
   const copy=document.createElement('span');copy.className='category-copy';copy.append(node('strong',name),node('small',hint));
   b.append(symbol,copy);b.onclick=()=>{selected=key;selectedSegment='';renderCategories();if(guide){render()}else $('categoryMsg').textContent='Choose a location below to explore '+name.toLowerCase()+'.'};$('tabs').append(b);
+ }
+ const familyFinder=$('familyFinder');
+ if(familyFinder){
+  const loc=guide?.location;
+  familyFinder.hidden=selected!=='family'||!hasFamilyTaster();
+  familyFinder.href=loc&&!familyFinder.hidden?'/family-days.html?'+new URLSearchParams({place:loc.label,lat:loc.lat,lon:loc.lon}):'/family-days.html';
  }
  for(const [id,path]of [['foodTile','/food-open-test'],['stayTile','/stay']]){if($(id)){const params=new URLSearchParams();if(guide?.location){params.set('place',guide.location.label);if(Number.isFinite(guide.location.lat)&&Number.isFinite(guide.location.lon)){params.set('lat',guide.location.lat);params.set('lon',guide.location.lon);}}$(id).href=path+(params.toString()?'?'+params.toString():'');}}
  $('categoryMsg').textContent=guide?(visible.length?'':'No supported suggestions found for this search yet. Try a nearby town.'):'Choose what interests you, then search a place or use your location.';
@@ -146,7 +156,7 @@ function render(){
  $('checked').textContent='Sources retrieved '+new Date(guide.checkedAt).toLocaleString('en-GB')+'. Next refresh when in use after '+new Date(guide.cacheUntil).toLocaleString('en-GB')+'.';
  $('areaSources').replaceChildren();for(const source of guide.sources){$('areaSources').append(link(source.kind==='wikivoyage'?'Travel guide ↗':source.kind==='openstreetmap'?'Map data: OpenStreetMap ↗':'Place background ↗',source.url),document.createTextNode(' '))}
  renderCategories();renderVisitorInformation();if($('listenNearby'))$('listenNearby').disabled=!guide.items.length;
- if(!isBuxtonPilot()&&!Object.keys(sections).some(key=>itemsForCategory(guide.items,key).length)&&guide.complete!==false){$('results').hidden=true;return;}
+ if(!isBuxtonPilot()&&!hasFamilyTaster()&&!Object.keys(sections).some(key=>itemsForCategory(guide.items,key).length)&&guide.complete!==false){$('results').hidden=true;return;}
  $('sectionTitle').textContent=sections[selected][1]+' near '+guide.location.label;$('sectionHelp').textContent=(isBuxtonPilot()?sections[selected][2]:categoryHelp[selected]||sections[selected][2])+' Nearest first; distances are in a straight line.';
  if(selected==='attractions'){
   const where=mappedPoint(guide.location)?guide.location.lat+','+guide.location.lon:guide.location.label;

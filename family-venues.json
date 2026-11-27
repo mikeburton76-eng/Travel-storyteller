@@ -1,0 +1,2487 @@
+[
+ {
+  "name": "Abbey Leisure Complex",
+  "lat": 52.2093,
+  "lon": 0.1551,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cambridge/abbeyleisurecomplex/swimming"
+  }
+ },
+ {
+  "name": "Abbey Sports Centre, Berinsfield",
+  "lat": 51.6633,
+  "lon": -1.17614,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/south-oxfordshire/abbey-sports-centre/swimming"
+  }
+ },
+ {
+  "name": "Abraham Moss Library & Leisure Centre",
+  "lat": 53.512,
+  "lon": -2.23623,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/manchester/abraham-moss/swimming"
+  }
+ },
+ {
+  "name": "AirHop Sheffield",
+  "lat": 53.41275,
+  "lon": -1.40646,
+  "activities": {
+   "Trampolining": "https://meadowhall.co.uk/eatdrinkshop/airhop"
+  }
+ },
+ {
+  "name": "Albany Leisure Centre",
+  "lat": 51.66794,
+  "lon": -0.04546,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/enfield/albany-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Alton Towers",
+  "lat": 52.99054,
+  "lon": -1.89395,
+  "activities": {
+   "Theme park": "https://www.altontowers.com/explore/theme-park/rides-attractions/"
+  }
+ },
+ {
+  "name": "Andersonstown Leisure Centre",
+  "lat": 54.5733,
+  "lon": -5.98752,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/belfast/andersonstown-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Appleby Leisure Centre",
+  "lat": 54.5794,
+  "lon": -2.49327,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/westmorland-and-furness/appleby/swimming"
+  }
+ },
+ {
+  "name": "Arcadia Library & Leisure Centre",
+  "lat": 53.4461,
+  "lon": -2.19301,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/manchester/arcadia-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Archway Leisure Centre",
+  "lat": 51.56577,
+  "lon": -0.13585,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/islington/archway/swimming"
+  }
+ },
+ {
+  "name": "Arnos Pools",
+  "lat": 51.6155,
+  "lon": -0.13011,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/enfield/arnos-pools/swimming"
+  }
+ },
+ {
+  "name": "Atherton Leisure Centre",
+  "lat": 51.5444,
+  "lon": 0.01453,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/newham/atherton-leisure-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/newham/atherton-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "Ballysillan Leisure Centre",
+  "lat": 54.6236,
+  "lon": -5.97038,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/belfast/ballysillan-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Barking Sporthouse and Gym",
+  "lat": 51.5459,
+  "lon": 0.11122,
+  "activities": {
+   "Climbing": "https://www.better.org.uk/leisure-centre/london/barking-and-dagenham/barking-sporthouse-and-gym/climbing",
+   "Trampolining": "https://www.better.org.uk/leisure-centre/london/barking-and-dagenham/barking-sporthouse-and-gym/trampoline-park"
+  }
+ },
+ {
+  "name": "Barnet Burnt Oak Leisure Centre",
+  "lat": 51.6049,
+  "lon": -0.25534,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/barnet/barnet-burnt-oak-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "Barnet Copthall Leisure Centre",
+  "lat": 51.6044,
+  "lon": -0.22711,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/barnet/barnet-copthall-leisure-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/barnet/barnet-copthall-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "Basingstoke Sports Centre",
+  "lat": 51.2659,
+  "lon": -1.08899,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/basingstoke-and-newbury/basingstoke-sports-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/basingstoke-and-newbury/basingstoke-sports-centre/soft-play"
+  }
+ },
+ {
+  "name": "Bath Sports and Leisure Centre",
+  "lat": 51.3816,
+  "lon": -2.35432,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/banes/bath-sports-and-leisure-centre/swimming",
+   "Trampolining": "https://www.better.org.uk/leisure-centre/banes/bath-sports-and-leisure-centre/trampoline-park"
+  }
+ },
+ {
+  "name": "Bellingham Leisure & Lifestyle Centre",
+  "lat": 51.4327,
+  "lon": -0.02025,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/lewisham/bellingham-leisure-and-lifestyle-centre/soft-play"
+  }
+ },
+ {
+  "name": "Better Gym Sleaford",
+  "lat": 53.0059,
+  "lon": -0.39691,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/north-kesteven/better-gym-sleaford/swimming"
+  }
+ },
+ {
+  "name": "Better Gym Walthamstow Stadium",
+  "lat": 51.6035,
+  "lon": -0.01548,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/waltham-forest/walthamstow-stadium/soft-play"
+  }
+ },
+ {
+  "name": "Birchwood Leisure Centre",
+  "lat": 53.2162,
+  "lon": -0.60226,
+  "activities": {
+   "Climbing": "https://www.better.org.uk/leisure-centre/lincoln/birchwood-leisure-centre/climbing",
+   "Soft play": "https://www.better.org.uk/leisure-centre/lincoln/birchwood-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "Blaydon Leisure Centre",
+  "lat": 54.95795,
+  "lon": -1.69792,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/gateshead/blaydon-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Bodmin Leisure Centre",
+  "lat": 50.455,
+  "lon": -4.70935,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cornwall/bodmin-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Botwell Green Sports and Leisure Centre",
+  "lat": 51.5075,
+  "lon": -0.41821,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/hillingdon/botwell-green/swimming"
+  }
+ },
+ {
+  "name": "Britannia Leisure Centre",
+  "lat": 51.5353,
+  "lon": -0.08361,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/hackney/britannia-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Brook Leisure Centre",
+  "lat": 54.554,
+  "lon": -6.0212,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/belfast/brook-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Bude Leisure Centre",
+  "lat": 50.8274,
+  "lon": -4.52946,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cornwall/bude-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Burnholme Sports Centre",
+  "lat": 53.9636,
+  "lon": -1.04773,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/york/burnholme/soft-play"
+  }
+ },
+ {
+  "name": "Cally Pool & Gym",
+  "lat": 51.5385,
+  "lon": -0.11691,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/islington/cally/swimming"
+  }
+ },
+ {
+  "name": "Canons Leisure Centre",
+  "lat": 51.3997,
+  "lon": -0.16134,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/merton/canons-leisure-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/merton/canons-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "Carterton Leisure Centre",
+  "lat": 51.7661,
+  "lon": -1.58684,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/west-oxfordshire/carterton-leisure-centre/swimming",
+   "Trampolining": "https://www.better.org.uk/leisure-centre/west-oxfordshire/carterton-leisure-centre/trampoline-park"
+  }
+ },
+ {
+  "name": "Charlton Lido and Lifestyle Club",
+  "lat": 51.4751,
+  "lon": 0.03897,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/greenwich/charlton-lido/soft-play"
+  }
+ },
+ {
+  "name": "Chelsea Sports Centre",
+  "lat": 51.4874,
+  "lon": -0.16782,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/kensington-and-chelsea/chelsea-sports-centre/swimming"
+  }
+ },
+ {
+  "name": "Chingford Leisure Centre",
+  "lat": 51.6171,
+  "lon": -0.00556,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/waltham-forest/chingford-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Chipping Norton Leisure Centre",
+  "lat": 51.9374,
+  "lon": -1.54341,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/west-oxfordshire/chipping-norton-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Clambers, Royal Commonwealth Pool",
+  "postcode": "EH16 5BB",
+  "lat": 55.939183,
+  "lon": -3.172728,
+  "activities": {
+   "Soft play": "https://www.edinburghleisure.co.uk/clambers-soft-play/"
+  },
+  "playNote": "Baby, toddler and junior play zones. Edinburgh Leisure lists this soft play for ages 0–10."
+ },
+ {
+  "name": "Clissold Leisure Centre",
+  "lat": 51.5579,
+  "lon": -0.0846,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/hackney/clissold-leisure-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/hackney/clissold-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "Crystal Palace National Sports Centre",
+  "lat": 51.4204,
+  "lon": -0.06855,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/crystal-palace/crystal-palace-national-sports-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/crystal-palace/crystal-palace-national-sports-centre/soft-play"
+  }
+ },
+ {
+  "name": "Didcot Wave Leisure Centre",
+  "lat": 51.6008,
+  "lon": -1.24957,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/south-oxfordshire/didcot-wave-leisure-pool/swimming"
+  }
+ },
+ {
+  "name": "Donyngs Leisure Centre, Redhill",
+  "lat": 51.2407,
+  "lon": -0.17753,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/reigate-and-banstead/donyngs-leisure-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/reigate-and-banstead/donyngs-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "Dorcan Better Health & Recreation Complex",
+  "lat": 51.5603,
+  "lon": -1.7293,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/swindon/dorcan-better-health-recreation-complex/swimming"
+  }
+ },
+ {
+  "name": "Dorking Sports Centre",
+  "lat": 51.2353,
+  "lon": -0.32497,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/mole-valley/dorking-sports-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/mole-valley/dorking-sports-centre/soft-play"
+  }
+ },
+ {
+  "name": "Dunston Leisure Centre",
+  "lat": 54.94699,
+  "lon": -1.65343,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/gateshead/dunston-leisure-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/gateshead/dunston-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "East End Pool",
+  "lat": 54.9766,
+  "lon": -1.57771,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/newcastle/east-end-pool/soft-play"
+  }
+ },
+ {
+  "name": "East Ham Leisure Centre",
+  "lat": 51.5334,
+  "lon": 0.05897,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/newham/east-ham-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "East Manchester Leisure Centre",
+  "lat": 53.4779,
+  "lon": -2.19497,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/manchester/east-manchester/swimming"
+  }
+ },
+ {
+  "name": "Eastern Leisure Centre",
+  "lat": 51.5121,
+  "lon": -3.12932,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cardiff/eastern/swimming"
+  }
+ },
+ {
+  "name": "Edmonton Leisure Centre",
+  "lat": 51.62421,
+  "lon": -0.06047,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/enfield/edmonton-leisure-centre/soft-play",
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/enfield/edmonton-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Energise Leisure Centre",
+  "lat": 53.9466,
+  "lon": -1.12825,
+  "activities": {
+   "Climbing": "https://www.better.org.uk/leisure-centre/york/energise/climbing",
+   "Swimming": "https://www.better.org.uk/leisure-centre/york/energise/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/york/energise/soft-play"
+  }
+ },
+ {
+  "name": "Fairwater Leisure Centre",
+  "lat": 51.4993,
+  "lon": -3.24867,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cardiff/fairwater/swimming"
+  }
+ },
+ {
+  "name": "Falls Leisure Centre",
+  "lat": 54.5993,
+  "lon": -5.94966,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/belfast/falls-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Faringdon Leisure Centre",
+  "lat": 51.6483,
+  "lon": -1.5892,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/vale-of-white-horse/faringdon-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Finchley Lido Leisure Centre",
+  "lat": 51.6048,
+  "lon": -0.17354,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/barnet/finchley-lido-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Finsbury Leisure Centre",
+  "lat": 51.52613,
+  "lon": -0.09515,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/islington/finsbury/soft-play"
+  }
+ },
+ {
+  "name": "Flip Out Aintree",
+  "lat": 53.47799,
+  "lon": -2.95083,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/aintree"
+  }
+ },
+ {
+  "name": "Flip Out Ashford",
+  "lat": 51.15084,
+  "lon": 0.88565,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/ashford"
+  }
+ },
+ {
+  "name": "Flip Out Basingstoke",
+  "lat": 51.26536,
+  "lon": -1.0859,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/basingstoke"
+  }
+ },
+ {
+  "name": "Flip Out Blackburn",
+  "lat": 53.72984,
+  "lon": -2.45514,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/blackburn"
+  }
+ },
+ {
+  "name": "Flip Out Bradford",
+  "lat": 53.79451,
+  "lon": -1.74974,
+  "activities": {
+   "Indoor adventure": "https://www.flipout.co.uk/locations/bradford"
+  }
+ },
+ {
+  "name": "Flip Out Brent Cross",
+  "lat": 51.56871,
+  "lon": -0.22754,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/brent-cross"
+  }
+ },
+ {
+  "name": "Flip Out Canary Wharf",
+  "lat": 51.50514,
+  "lon": -0.02126,
+  "activities": {
+   "Indoor adventure": "https://www.flipout.co.uk/locations/canary-wharf"
+  }
+ },
+ {
+  "name": "Flip Out Chester",
+  "lat": 53.24653,
+  "lon": -2.92967,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/chester"
+  }
+ },
+ {
+  "name": "Flip Out Chichester",
+  "lat": 50.84175,
+  "lon": -0.7525,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/chichester"
+  }
+ },
+ {
+  "name": "Flip Out Coventry",
+  "lat": 52.40832,
+  "lon": -1.51723,
+  "activities": {
+   "Indoor adventure": "https://www.flipout.co.uk/locations/coventry"
+  }
+ },
+ {
+  "name": "Flip Out Croydon",
+  "lat": 51.37419,
+  "lon": -0.10259,
+  "activities": {
+   "Indoor adventure": "https://www.flipout.co.uk/locations/croydon"
+  }
+ },
+ {
+  "name": "Flip Out Cwmbran",
+  "lat": 52.8575,
+  "lon": -4.62586,
+  "activities": {
+   "Indoor adventure": "https://www.flipout.co.uk/locations/cwmbran"
+  }
+ },
+ {
+  "name": "Flip Out Doncaster",
+  "lat": 53.52375,
+  "lon": -1.1364,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/doncaster"
+  }
+ },
+ {
+  "name": "Flip Out Glasgow",
+  "lat": 55.83457,
+  "lon": -4.23171,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/glasgow"
+  }
+ },
+ {
+  "name": "Flip Out Hounslow",
+  "lat": 51.46969,
+  "lon": -0.36191,
+  "activities": {
+   "Indoor adventure": "https://www.flipout.co.uk/locations/hounslow"
+  }
+ },
+ {
+  "name": "Flip Out Lakeside",
+  "lat": 51.48809,
+  "lon": 0.28205,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/lakeside"
+  }
+ },
+ {
+  "name": "Flip Out Leeds",
+  "lat": 53.83207,
+  "lon": -1.46326,
+  "activities": {
+   "Indoor adventure": "https://www.flipout.co.uk/locations/leeds"
+  }
+ },
+ {
+  "name": "Flip Out Liverpool",
+  "lat": 53.40532,
+  "lon": -2.98069,
+  "activities": {
+   "Indoor adventure": "https://www.flipout.co.uk/locations/liverpool"
+  }
+ },
+ {
+  "name": "Flip Out Livingston",
+  "lat": 55.88352,
+  "lon": -3.52113,
+  "activities": {
+   "Indoor adventure": "https://www.flipout.co.uk/locations/livingston"
+  }
+ },
+ {
+  "name": "Flip Out London E6",
+  "lat": 51.53256,
+  "lon": 0.05081,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/london-e6"
+  }
+ },
+ {
+  "name": "Flip Out Manchester",
+  "lat": 53.48361,
+  "lon": -2.19215,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/manchester"
+  }
+ },
+ {
+  "name": "Flip Out Peterborough",
+  "lat": 52.60477,
+  "lon": -0.2762,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/peterborough"
+  }
+ },
+ {
+  "name": "Flip Out Portsmouth",
+  "lat": 50.84726,
+  "lon": -1.09021,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/portsmouth"
+  }
+ },
+ {
+  "name": "Flip Out Preston",
+  "lat": 53.76027,
+  "lon": -2.68104,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/preston"
+  }
+ },
+ {
+  "name": "Flip Out Rochdale",
+  "lat": 53.59786,
+  "lon": -2.17406,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/rochdale"
+  }
+ },
+ {
+  "name": "Flip Out Rushden Lakes",
+  "lat": 52.30088,
+  "lon": -0.62741,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/rushden-lakes"
+  }
+ },
+ {
+  "name": "Flip Out Sandwell",
+  "lat": 52.49877,
+  "lon": -2.01852,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/sandwell"
+  }
+ },
+ {
+  "name": "Flip Out Somerset",
+  "lat": 50.98376,
+  "lon": -3.20315,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/somerset"
+  }
+ },
+ {
+  "name": "Flip Out Southampton",
+  "lat": 50.98177,
+  "lon": -1.38987,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/southampton"
+  }
+ },
+ {
+  "name": "Flip Out Stoke",
+  "lat": 52.88573,
+  "lon": -2.14995,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/stoke"
+  }
+ },
+ {
+  "name": "Flip Out Telford",
+  "lat": 52.67626,
+  "lon": -2.44735,
+  "activities": {
+   "Indoor adventure": "https://www.flipout.co.uk/locations/telford"
+  }
+ },
+ {
+  "name": "Flip Out Watford",
+  "lat": 51.6544,
+  "lon": -0.39445,
+  "activities": {
+   "Indoor adventure": "https://www.flipout.co.uk/locations/watford"
+  }
+ },
+ {
+  "name": "Flip Out York",
+  "lat": 53.97527,
+  "lon": -1.13039,
+  "activities": {
+   "Trampolining": "https://www.flipout.co.uk/locations/york"
+  }
+ },
+ {
+  "name": "Forest Hill Pools",
+  "lat": 51.4379,
+  "lon": -0.05741,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/lewisham/forest-hill-pools/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/lewisham/forest-hill-pools/soft-play"
+  }
+ },
+ {
+  "name": "Fulwood Leisure Centre",
+  "lat": 53.7862,
+  "lon": -2.71914,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/preston/fulwood-leisure-centre/soft-play",
+   "Swimming": "https://www.better.org.uk/leisure-centre/preston/fulwood-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Fun4All Macclesfield",
+  "postcode": "SK10 2DG",
+  "lat": 53.26569,
+  "lon": -2.11735,
+  "activities": {
+   "Soft play": "https://fun4all.co.uk/macclesfield/"
+  },
+  "playNote": "Baby play pen, a separate toddler and preschool frame, and a three-level main frame for ages 4 and up."
+ },
+ {
+  "name": "Gateshead International Stadium",
+  "lat": 54.96078,
+  "lon": -1.58351,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/gateshead/gateshead-international-stadium/soft-play"
+  }
+ },
+ {
+  "name": "Glass Mill Leisure Centre",
+  "lat": 51.4642,
+  "lon": -0.01638,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/lewisham/glass-mill-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Go Ape Aberfoyle",
+  "lat": 56.1827,
+  "lon": -4.38569,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/aberfoyle/"
+  }
+ },
+ {
+  "name": "Go Ape Alexandra Palace",
+  "lat": 51.59699,
+  "lon": -0.1293,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/alexandra-palace/"
+  }
+ },
+ {
+  "name": "Go Ape Alice Holt",
+  "lat": 51.17063,
+  "lon": -0.8379,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/alice-holt/"
+  }
+ },
+ {
+  "name": "Go Ape Battersea Park",
+  "lat": 51.47561,
+  "lon": -0.16174,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/battersea-park/"
+  }
+ },
+ {
+  "name": "Go Ape Bedgebury",
+  "lat": 51.07103,
+  "lon": 0.44888,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/bedgebury/"
+  }
+ },
+ {
+  "name": "Go Ape Black Park",
+  "lat": 51.53999,
+  "lon": -0.54979,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/black-park/"
+  }
+ },
+ {
+  "name": "Go Ape Blackburn",
+  "lat": 53.74056,
+  "lon": -2.51565,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/blackburn/"
+  }
+ },
+ {
+  "name": "Go Ape Bracknell",
+  "lat": 51.38739,
+  "lon": -0.74047,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/bracknell/"
+  }
+ },
+ {
+  "name": "Go Ape Buxton",
+  "lat": 53.24954,
+  "lon": -1.92584,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/buxton/"
+  }
+ },
+ {
+  "name": "Go Ape Cannock Chase",
+  "lat": 52.75103,
+  "lon": -1.97236,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/cannock-chase/"
+  }
+ },
+ {
+  "name": "Go Ape Chelmsford Hylands Park",
+  "lat": 51.71637,
+  "lon": 0.43087,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/chelmsford-hylands-park/"
+  }
+ },
+ {
+  "name": "Go Ape Cockfosters",
+  "lat": 51.65421,
+  "lon": -0.15184,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/cockfosters/"
+  }
+ },
+ {
+  "name": "Go Ape Coventry",
+  "lat": 52.41511,
+  "lon": -1.41164,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/coventry/"
+  }
+ },
+ {
+  "name": "Go Ape Crawley",
+  "lat": 51.09587,
+  "lon": -0.17913,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/crawley/"
+  }
+ },
+ {
+  "name": "Go Ape Dalby Forest",
+  "lat": 54.27979,
+  "lon": -0.6874,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/dalby/"
+  }
+ },
+ {
+  "name": "Go Ape Dalkeith Edinburgh",
+  "lat": 55.90302,
+  "lon": -3.05875,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/dalkeith-edinburgh/"
+  }
+ },
+ {
+  "name": "Go Ape Delamere Forest",
+  "lat": 53.22976,
+  "lon": -2.67322,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/delamere/"
+  }
+ },
+ {
+  "name": "Go Ape Forest of Dean Beechenhurst",
+  "lat": 51.80614,
+  "lon": -2.56096,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/forest-of-dean-beechenhurst/"
+  }
+ },
+ {
+  "name": "Go Ape Forest of Dean Mallards Pike ",
+  "lat": 51.78185,
+  "lon": -2.52839,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/forest-of-dean-mallards-pike/"
+  }
+ },
+ {
+  "name": "Go Ape Glentress Forest Peebles",
+  "lat": 55.6508,
+  "lon": -3.1347,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/glentress-forest/"
+  }
+ },
+ {
+  "name": "Go Ape Grizedale Forest",
+  "lat": 54.34072,
+  "lon": -3.02449,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/grizedale/"
+  }
+ },
+ {
+  "name": "Go Ape Haldon Forest",
+  "lat": 50.65174,
+  "lon": -3.58334,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/haldon/"
+  }
+ },
+ {
+  "name": "Go Ape Leeds Castle Kent",
+  "lat": 51.25414,
+  "lon": 0.62419,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/leeds-castle/"
+  }
+ },
+ {
+  "name": "Go Ape Margam Country Park",
+  "lat": 51.56217,
+  "lon": -3.72144,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/margam/"
+  }
+ },
+ {
+  "name": "Go Ape Matfen",
+  "lat": 55.03022,
+  "lon": -1.94715,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/matfen/"
+  }
+ },
+ {
+  "name": "Go Ape Moors Valley Country Park",
+  "lat": 50.85044,
+  "lon": -1.8483,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/moors-valley/"
+  }
+ },
+ {
+  "name": "Go Ape Normanby Hall",
+  "lat": 53.63914,
+  "lon": -0.65957,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/normanby-hall/"
+  }
+ },
+ {
+  "name": "Go Ape Rivington",
+  "lat": 53.61959,
+  "lon": -2.56413,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/rivington/"
+  }
+ },
+ {
+  "name": "Go Ape Salcey Forest",
+  "lat": 52.15612,
+  "lon": -0.84082,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/salcey-forest/"
+  }
+ },
+ {
+  "name": "Go Ape Sherwood Pines",
+  "lat": 53.16709,
+  "lon": -1.08606,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/sherwood-pines/"
+  }
+ },
+ {
+  "name": "Go Ape Southampton",
+  "lat": 50.94443,
+  "lon": -1.34436,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/southampton/"
+  }
+ },
+ {
+  "name": "Go Ape Temple Newsam",
+  "lat": 53.7869,
+  "lon": -1.45352,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/temple-newsam/"
+  }
+ },
+ {
+  "name": "Go Ape Thetford Forest",
+  "lat": 52.43452,
+  "lon": 0.66295,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/thetford/"
+  }
+ },
+ {
+  "name": "Go Ape Wendover",
+  "lat": 51.77205,
+  "lon": -0.71364,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/wendover/"
+  }
+ },
+ {
+  "name": "Go Ape Whinlatter Forest",
+  "lat": 54.6098,
+  "lon": -3.22858,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/whinlatter/"
+  }
+ },
+ {
+  "name": "Go Ape Woburn",
+  "lat": 51.99925,
+  "lon": -0.59957,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/woburn/"
+  }
+ },
+ {
+  "name": "Go Ape Wyre",
+  "lat": 52.36454,
+  "lon": -2.36912,
+  "activities": {
+   "Outdoor adventure": "https://goape.co.uk/locations/wyre/"
+  }
+ },
+ {
+  "name": "Gosforth Leisure Centre",
+  "lat": 55.0108,
+  "lon": -1.62404,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/newcastle/gosforth/swimming"
+  }
+ },
+ {
+  "name": "Gosling Sports Park",
+  "lat": 51.7919,
+  "lon": -0.21245,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/welwyn/gosling-sports-park/soft-play",
+   "Trampolining": "https://www.better.org.uk/leisure-centre/welwyn/gosling-sports-park/trampoline-park"
+  }
+ },
+ {
+  "name": "Grove Wellbeing Centre",
+  "lat": 54.6216,
+  "lon": -5.92429,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/belfast/grove-wellbeing-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/belfast/grove-wellbeing-centre/soft-play"
+  }
+ },
+ {
+  "name": "Hampton Sports & Fitness Centre",
+  "lat": 51.42906,
+  "lon": -0.37355,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/richmond-upon-thames/hampton-sports-and-fitness-centre/soft-play"
+  }
+ },
+ {
+  "name": "Hatfield Leisure Centre",
+  "lat": 51.7502,
+  "lon": -0.22604,
+  "activities": {
+   "Trampolining": "https://www.better.org.uk/leisure-centre/welwyn-hatfield/hatfield-leisure-centre/trampoline-park"
+  }
+ },
+ {
+  "name": "Hatfield Swim Centre",
+  "lat": 51.762,
+  "lon": -0.23172,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/welwyn-hatfield/hatfield-swim-centre/swimming"
+  }
+ },
+ {
+  "name": "Helston Sports Centre",
+  "lat": 50.1103,
+  "lon": -5.2709,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cornwall/helston-sports-centre/swimming"
+  }
+ },
+ {
+  "name": "Hendon Leisure Centre",
+  "lat": 51.574,
+  "lon": -0.21552,
+  "activities": {
+   "Climbing": "https://www.better.org.uk/leisure-centre/london/barnet/hendon-leisure-centre/climbing"
+  }
+ },
+ {
+  "name": "Heworth Leisure Centre",
+  "lat": 54.94634,
+  "lon": -1.56696,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/gateshead/heworth-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Highbury Leisure Centre",
+  "lat": 51.5477,
+  "lon": -0.10327,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/islington/highbury/swimming"
+  }
+ },
+ {
+  "name": "Highgrove Pool and Fitness Centre",
+  "lat": 51.5798,
+  "lon": -0.40928,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/hillingdon/highgrove-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Hillingdon Sports & Leisure Complex",
+  "lat": 51.5509,
+  "lon": -0.46693,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/hillingdon/hillingdon-sports-lc/soft-play",
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/hillingdon/hillingdon-sports-lc/swimming"
+  }
+ },
+ {
+  "name": "Horley Leisure Centre",
+  "lat": 51.176,
+  "lon": -0.18044,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/reigate-and-banstead/horley-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Hough End Leisure Centre",
+  "lat": 53.43,
+  "lon": -2.245,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/manchester/hough-end/swimming"
+  }
+ },
+ {
+  "name": "Indiana Land, Dundonald",
+  "postcode": "BT16 1XT",
+  "lat": 54.587146,
+  "lon": -5.815671,
+  "activities": {
+   "Soft play": "https://www.theicebowl.com/activities/indiana-land"
+  },
+  "playNote": "Separate baby and toddler area. The venue sets an upper age of 11 and a height limit of 5 feet."
+ },
+ {
+  "name": "Indoor Tennis Centre and Ozone Complex",
+  "lat": 54.5902,
+  "lon": -5.91459,
+  "activities": {
+   "Climbing": "https://www.better.org.uk/leisure-centre/belfast/indoor-tennis-centre-and-ozone-complex/climbing"
+  }
+ },
+ {
+  "name": "Ironmonger Row Baths",
+  "lat": 51.5266,
+  "lon": -0.09486,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/islington/ironmonger-row-baths/swimming"
+  }
+ },
+ {
+  "name": "Jesus Green Lido",
+  "lat": 52.2133,
+  "lon": 0.12302,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cambridge/jesusgreenlido/swimming"
+  }
+ },
+ {
+  "name": "John Bunyan Sports & Fitness",
+  "lat": 52.11909,
+  "lon": -0.45361,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/bedfordshire/john-bunyan-sports-centre/soft-play"
+  }
+ },
+ {
+  "name": "Jump Heaven, Hazel Grove",
+  "lat": 53.37805,
+  "lon": -2.1397,
+  "activities": {
+   "Trampolining": "https://jumpheaven.com/"
+  }
+ },
+ {
+  "name": "Kendal Leisure Centre",
+  "lat": 54.3151,
+  "lon": -2.73842,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/westmorland-and-furness/kendal/swimming"
+  }
+ },
+ {
+  "name": "Kensington Leisure Centre",
+  "lat": 51.5137,
+  "lon": -0.21405,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/kensington-and-chelsea/kensington-leisure-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/kensington-and-chelsea/kensington-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "Keynsham Leisure Centre",
+  "lat": 51.4137,
+  "lon": -2.49671,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/banes/keynsham-leisure-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/banes/keynsham-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "Kings Hall Leisure Centre",
+  "lat": 51.5514,
+  "lon": -0.05241,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/hackney/kings-hall-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Kings Hedges Learner Pool",
+  "lat": 52.2328,
+  "lon": 0.12257,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cambridge/kingshedgeslearnerpool/swimming"
+  }
+ },
+ {
+  "name": "Leatherhead Leisure Centre",
+  "lat": 51.29031,
+  "lon": -0.33376,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/mole-valley/leatherhead-leisure-centre/soft-play",
+   "Swimming": "https://www.better.org.uk/leisure-centre/mole-valley/leatherhead-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Leyton Leisure Centre",
+  "lat": 51.573,
+  "lon": -0.00879,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/waltham-forest/leyton-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Leytonstone Leisure Centre",
+  "lat": 51.5599,
+  "lon": 0.00394,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/waltham-forest/leytonstone-leisure-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/waltham-forest/leytonstone-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "Lillie Road Fitness Centre",
+  "lat": 51.483,
+  "lon": -0.2159,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/hammersmith-and-fulham/lillie-road/soft-play"
+  }
+ },
+ {
+  "name": "Link Centre",
+  "lat": 51.5594,
+  "lon": -1.83094,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/swindon/the-link-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/swindon/the-link-centre/soft-play"
+  }
+ },
+ {
+  "name": "Liskeard Leisure Centre",
+  "lat": 50.4606,
+  "lon": -4.46345,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cornwall/liskeard-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Lisnasharragh Leisure Centre",
+  "lat": 54.577,
+  "lon": -5.882,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/belfast/lisnasharragh/swimming"
+  }
+ },
+ {
+  "name": "Little Rascals, Buxton",
+  "postcode": "SK17 7LF",
+  "lat": 53.260036,
+  "lon": -1.892446,
+  "activities": {
+   "Soft play": "https://www.visitbuxton.co.uk/things-to-do/families-outdoors/"
+  },
+  "playNote": "Indoor soft-play centre in Fairfield. Check current sessions and age guidance with the venue."
+ },
+ {
+  "name": "Llanishen Leisure Centre",
+  "lat": 51.5273,
+  "lon": -3.19081,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cardiff/llanishen/swimming"
+  }
+ },
+ {
+  "name": "London Fields Lido",
+  "lat": 51.5423,
+  "lon": -0.0615,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/hackney/london-fields-lido/swimming"
+  }
+ },
+ {
+  "name": "Maindy Centre",
+  "lat": 51.4968,
+  "lon": -3.1912,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cardiff/maindy-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Mambo Play Centre, Cardiff",
+  "postcode": "CF24 5PG",
+  "lat": 51.473392,
+  "lon": -3.151943,
+  "activities": {
+   "Soft play": "https://www.mamboplay.com/things-to-do/"
+  },
+  "playNote": "Separate baby and toddler area, plus a main play frame for older children. Check the activity guide for individual age recommendations."
+ },
+ {
+  "name": "Manchester Aquatics Centre",
+  "lat": 53.4698,
+  "lon": -2.23552,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/manchester/manchester-aquatics-centre/swimming"
+  }
+ },
+ {
+  "name": "Meadway Sports Centre",
+  "lat": 51.4522,
+  "lon": -1.02798,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/reading/meadway/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/reading/meadway/soft-play"
+  }
+ },
+ {
+  "name": "Mini Monsterz, Whitby",
+  "postcode": "YO21 1RL",
+  "lat": 54.468841,
+  "lon": -0.634407,
+  "activities": {
+   "Soft play": "https://minimonsterz.co.uk/"
+  },
+  "playNote": "Indoor play in Ruswarp with separate areas for different ages."
+ },
+ {
+  "name": "Morden Leisure Centre",
+  "lat": 51.3926,
+  "lon": -0.20569,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/merton/morden-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Moss Side Leisure Centre & Hulme High Street Library",
+  "lat": 53.461,
+  "lon": -2.24756,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/manchester/moss-side/swimming"
+  }
+ },
+ {
+  "name": "MyActive Buxton",
+  "lat": 53.25799,
+  "lon": -1.91862,
+  "activities": {
+   "Swimming": "https://www.myactive.uk/buxton/swim"
+  }
+ },
+ {
+  "name": "New Addington Leisure & Community Centre",
+  "lat": 51.3407,
+  "lon": -0.01599,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/croydon/new-addington-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "New Barnet Leisure Centre",
+  "lat": 51.6537,
+  "lon": -0.16979,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/barnet/new-barnet-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Newbury Better Health & Fitness Centre",
+  "lat": 51.4054,
+  "lon": -1.32256,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/basingstoke-and-newbury/newbury-better-health-and-fitness-centre/swimming"
+  }
+ },
+ {
+  "name": "Newcastle City Baths",
+  "lat": 54.97719,
+  "lon": -1.6107,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/newcastle/newcastle-city-baths/swimming"
+  }
+ },
+ {
+  "name": "Newcastle Trampoline Park and Gym",
+  "lat": 54.977,
+  "lon": -1.65885,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/newcastle/trampoline-gym/soft-play"
+  }
+ },
+ {
+  "name": "Newham Leisure Centre",
+  "lat": 51.5182,
+  "lon": 0.03245,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/newham/newham-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Newquay Leisure World",
+  "lat": 50.4103,
+  "lon": -5.06851,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cornwall/newquay-leisure-world/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/cornwall/newquay-leisure-world/soft-play",
+   "Trampolining": "https://www.better.org.uk/leisure-centre/cornwall/newquay-leisure-world/trampoline-park"
+  }
+ },
+ {
+  "name": "North City Family and Fitness Centre",
+  "lat": 53.5128,
+  "lon": -2.20917,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/manchester/north-city/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/manchester/north-city/soft-play"
+  }
+ },
+ {
+  "name": "Oasis Sports Centre",
+  "lat": 51.5157,
+  "lon": -0.12589,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/camden/oasis-sports-centre/swimming"
+  }
+ },
+ {
+  "name": "Olympia Leisure Centre and Spa",
+  "lat": 54.5854,
+  "lon": -5.96,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/belfast/olympia-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "One NK",
+  "lat": 53.1867,
+  "lon": -0.59537,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/north-kesteven/one-nk/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/north-kesteven/one-nk/soft-play"
+  }
+ },
+ {
+  "name": "Palmer Park Leisure Centre & Stadium",
+  "lat": 51.4518,
+  "lon": -0.93751,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/reading/palmer-park/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/reading/palmer-park/soft-play"
+  }
+ },
+ {
+  "name": "Pancras Square Leisure",
+  "lat": 51.534,
+  "lon": -0.12677,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/camden/pancras-square/swimming"
+  }
+ },
+ {
+  "name": "Paradise Island Adventure Golf · Cheshire Oaks",
+  "lat": 53.26471,
+  "lon": -2.88613,
+  "activities": {
+   "Crazy golf": "https://www.paradiseislandgolf.com/location/cheshire-oaks/"
+  }
+ },
+ {
+  "name": "Paradise Island Adventure Golf · Derby",
+  "lat": 52.91909,
+  "lon": -1.47244,
+  "activities": {
+   "Crazy golf": "https://www.paradiseislandgolf.com/location/derby/"
+  }
+ },
+ {
+  "name": "Paradise Island Adventure Golf · Glasgow",
+  "lat": 55.87897,
+  "lon": -4.37114,
+  "activities": {
+   "Crazy golf": "https://www.paradiseislandgolf.com/location/glasgow/"
+  }
+ },
+ {
+  "name": "Paradise Island Adventure Golf · Manchester",
+  "lat": 53.4657,
+  "lon": -2.34808,
+  "activities": {
+   "Crazy golf": "https://www.paradiseislandgolf.com/location/manchester/"
+  }
+ },
+ {
+  "name": "Paradise Island Adventure Golf · Plymouth",
+  "lat": 50.37072,
+  "lon": -4.13694,
+  "activities": {
+   "Crazy golf": "https://www.paradiseislandgolf.com/location/plymouth/"
+  }
+ },
+ {
+  "name": "Paradise Island Adventure Golf · Rushden Lakes",
+  "lat": 52.30093,
+  "lon": -0.62782,
+  "activities": {
+   "Crazy golf": "https://www.paradiseislandgolf.com/location/rushden-lakes/"
+  }
+ },
+ {
+  "name": "Paradise Island Adventure Golf · Sheffield",
+  "lat": 53.40103,
+  "lon": -1.41437,
+  "activities": {
+   "Crazy golf": "https://www.paradiseislandgolf.com/location/sheffield/"
+  }
+ },
+ {
+  "name": "Parkside Pools and Gym",
+  "lat": 52.2016,
+  "lon": 0.13131,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cambridge/parksidepools/swimming"
+  }
+ },
+ {
+  "name": "Peak Wildlife Park",
+  "lat": 53.06119,
+  "lon": -1.92383,
+  "activities": {
+   "Wildlife park": "https://www.peakwildlifepark.co.uk/your-visit"
+  }
+ },
+ {
+  "name": "Penrith Leisure Centre",
+  "lat": 54.6601,
+  "lon": -2.74923,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/westmorland-and-furness/penrithlc/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/westmorland-and-furness/penrithlc/soft-play"
+  }
+ },
+ {
+  "name": "Pentwyn Leisure Centre",
+  "lat": 51.5211,
+  "lon": -3.1446,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/cardiff/pentwyn/soft-play"
+  }
+ },
+ {
+  "name": "Peter May Sports Centre",
+  "lat": 51.6008,
+  "lon": -0.00994,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/waltham-forest/peter-may-sports-centre/soft-play"
+  }
+ },
+ {
+  "name": "Phoenix Fitness Centre and Janet Adegoke Swimming Pool",
+  "lat": 51.5127,
+  "lon": -0.23535,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/hammersmith-and-fulham/phoenix-fitness-centre-and-janet-adegoke-swimming-pool/swimming"
+  }
+ },
+ {
+  "name": "Pools on the Park",
+  "lat": 51.46532,
+  "lon": -0.30609,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/richmond-upon-thames/pools-on-the-park/swimming"
+  }
+ },
+ {
+  "name": "Queensbridge Sports and Community Centre",
+  "lat": 51.5426,
+  "lon": -0.07141,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/hackney/queensbridge-sport-and-community-centre/soft-play"
+  }
+ },
+ {
+  "name": "Rivermead Leisure Centre, Reading",
+  "lat": 51.4649,
+  "lon": -0.98448,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/reading/rivermead-leisure-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/reading/rivermead-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "Riverside Park and Pools, Wallingford",
+  "lat": 51.601,
+  "lon": -1.11846,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/south-oxfordshire/riverside-park-and-pools/swimming"
+  }
+ },
+ {
+  "name": "Robinson Pools & Fitness",
+  "lat": 52.14528,
+  "lon": -0.47376,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/bedfordshire/robinson-pools-fitness/swimming"
+  }
+ },
+ {
+  "name": "Saltash Leisure Centre",
+  "lat": 50.4094,
+  "lon": -4.22189,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cornwall/saltash-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Shankill Leisure Centre",
+  "lat": 54.6044,
+  "lon": -5.94523,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/belfast/shankill-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Sleaford Leisure Centre",
+  "lat": 52.9992,
+  "lon": -0.40361,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/north-kesteven/sleaford-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "South Norwood Leisure Centre",
+  "lat": 51.3937,
+  "lon": -0.06758,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/croydon/south-norwood-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "South Reading Leisure Centre",
+  "lat": 51.4266,
+  "lon": -0.96016,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/reading/south-reading/swimming"
+  }
+ },
+ {
+  "name": "Southbury Leisure Centre",
+  "lat": 51.65204,
+  "lon": -0.06214,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/enfield/southbury-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Southgate Leisure Centre",
+  "lat": 51.63433,
+  "lon": -0.12447,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/enfield/southgate-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "St Austell Leisure Centre",
+  "lat": 50.3399,
+  "lon": -4.78209,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cornwall/staustell-leisure-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/cornwall/staustell-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "St Ives Leisure Centre",
+  "lat": 50.2081,
+  "lon": -5.48775,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cornwall/st-ives/swimming"
+  }
+ },
+ {
+  "name": "Star Hub",
+  "lat": 51.4854,
+  "lon": -3.14313,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cardiff/star/swimming"
+  }
+ },
+ {
+  "name": "Sutcliffe Park Sports Centre",
+  "lat": 51.4528,
+  "lon": 0.02863,
+  "activities": {
+   "Climbing": "https://www.better.org.uk/leisure-centre/london/greenwich/sutcliffe-park-sports-centre/climbing"
+  }
+ },
+ {
+  "name": "Sutton Sports Village",
+  "lat": 51.3792,
+  "lon": -0.19561,
+  "activities": {
+   "Trampolining": "https://www.better.org.uk/leisure-centre/london/sutton/sutton-sports-village/trampoline-park",
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/sutton/sutton-sports-village/soft-play"
+  }
+ },
+ {
+  "name": "Tadworth Leisure and Community Centre",
+  "lat": 51.3023,
+  "lon": -0.2324,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/reigate-and-banstead/tadworth-leisure-and-community-centre/swimming"
+  }
+ },
+ {
+  "name": "Talacre Community Sports Centre",
+  "lat": 51.5475,
+  "lon": -0.14729,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/camden/talacre-community-sports-centre/soft-play"
+  }
+ },
+ {
+  "name": "Teddington Pools and Fitness Centre",
+  "lat": 51.4283,
+  "lon": -0.33164,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/richmond-upon-thames/teddington-pools-and-fitness-centre/swimming"
+  }
+ },
+ {
+  "name": "Teddington Sports Centre",
+  "lat": 51.42304,
+  "lon": -0.31031,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/richmond-upon-thames/teddington-sports-centre/soft-play"
+  }
+ },
+ {
+  "name": "Templemore Baths",
+  "lat": 54.5966,
+  "lon": -5.90156,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/belfast/templemorebaths/swimming"
+  }
+ },
+ {
+  "name": "Tenpin Acton",
+  "lat": 51.52516,
+  "lon": -0.28142,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/acton/"
+  }
+ },
+ {
+  "name": "Tenpin Bexleyheath",
+  "lat": 51.45497,
+  "lon": 0.1462,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/bexleyheath/"
+  }
+ },
+ {
+  "name": "Tenpin Birmingham Star City",
+  "lat": 52.50129,
+  "lon": -1.85822,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/birmingham-star-city/"
+  }
+ },
+ {
+  "name": "Tenpin Blackburn",
+  "lat": 53.74514,
+  "lon": -2.47915,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/blackburn/"
+  }
+ },
+ {
+  "name": "Tenpin Blackpool",
+  "lat": 53.80814,
+  "lon": -3.04826,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/blackpool/"
+  }
+ },
+ {
+  "name": "Tenpin Bristol",
+  "lat": 51.44801,
+  "lon": -2.55979,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/bristol/"
+  }
+ },
+ {
+  "name": "Tenpin Camberley",
+  "lat": 51.33745,
+  "lon": -0.74879,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/camberley/"
+  }
+ },
+ {
+  "name": "Tenpin Cambridge",
+  "lat": 52.19016,
+  "lon": 0.13715,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/cambridge/"
+  }
+ },
+ {
+  "name": "Tenpin Cardiff",
+  "lat": 51.5656,
+  "lon": -3.27607,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/cardiff/"
+  }
+ },
+ {
+  "name": "Tenpin Castleford",
+  "lat": 53.71019,
+  "lon": -1.3419,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/castleford/"
+  }
+ },
+ {
+  "name": "Tenpin Cheshire Oaks",
+  "lat": 53.26471,
+  "lon": -2.88613,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/cheshire-oaks/"
+  }
+ },
+ {
+  "name": "Tenpin Chichester",
+  "lat": 50.82998,
+  "lon": -0.78488,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/chichester/"
+  }
+ },
+ {
+  "name": "Tenpin Clydebank",
+  "lat": 55.90424,
+  "lon": -4.40271,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/clydebank/"
+  }
+ },
+ {
+  "name": "Tenpin Colchester",
+  "lat": 51.89726,
+  "lon": 0.90449,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/colchester/"
+  }
+ },
+ {
+  "name": "Tenpin Coventry",
+  "lat": 52.43419,
+  "lon": -1.43011,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/coventry/"
+  }
+ },
+ {
+  "name": "Tenpin Crewe",
+  "lat": 53.09595,
+  "lon": -2.44347,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/crewe/"
+  }
+ },
+ {
+  "name": "Tenpin Croydon",
+  "lat": 51.37821,
+  "lon": -0.12421,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/croydon/"
+  }
+ },
+ {
+  "name": "Tenpin Derby",
+  "lat": 52.89523,
+  "lon": -1.47788,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/derby/"
+  }
+ },
+ {
+  "name": "Tenpin Dewsbury",
+  "lat": 53.68951,
+  "lon": -1.62674,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/dewsbury/"
+  }
+ },
+ {
+  "name": "Tenpin Doncaster",
+  "lat": 53.51319,
+  "lon": -1.10548,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/doncaster/"
+  }
+ },
+ {
+  "name": "Tenpin Dudley",
+  "lat": 52.51584,
+  "lon": -2.07113,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/dudley/"
+  }
+ },
+ {
+  "name": "Tenpin Eastbourne",
+  "lat": 50.79184,
+  "lon": 0.27537,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/eastbourne/"
+  }
+ },
+ {
+  "name": "Tenpin Edinburgh Fountain Park",
+  "lat": 55.94076,
+  "lon": -3.21623,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/edinburgh-fountain-park/"
+  }
+ },
+ {
+  "name": "Tenpin Exeter",
+  "lat": 50.7146,
+  "lon": -3.53163,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/exeter/"
+  }
+ },
+ {
+  "name": "Tenpin Falkirk",
+  "lat": 56.00449,
+  "lon": -3.81943,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/falkirk/"
+  }
+ },
+ {
+  "name": "Tenpin Feltham",
+  "lat": 51.44241,
+  "lon": -0.40609,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/feltham/"
+  }
+ },
+ {
+  "name": "Tenpin Glasgow",
+  "lat": 55.87897,
+  "lon": -4.37114,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/glasgow/"
+  }
+ },
+ {
+  "name": "Tenpin Gloucester",
+  "lat": 51.86867,
+  "lon": -2.19731,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/gloucester/"
+  }
+ },
+ {
+  "name": "Tenpin Ipswich",
+  "lat": 52.06102,
+  "lon": 1.27813,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/ipswich/"
+  }
+ },
+ {
+  "name": "Tenpin Kingston",
+  "lat": 51.41195,
+  "lon": -0.29953,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/kingston/"
+  }
+ },
+ {
+  "name": "Tenpin Leamington Spa",
+  "lat": 52.27834,
+  "lon": -1.54817,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/leamington-spa/"
+  }
+ },
+ {
+  "name": "Tenpin Leeds",
+  "lat": 53.80235,
+  "lon": -1.5436,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/leeds/"
+  }
+ },
+ {
+  "name": "Tenpin Luton",
+  "lat": 51.88173,
+  "lon": -0.41796,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/luton/"
+  }
+ },
+ {
+  "name": "Tenpin Manchester Harpurhey",
+  "lat": 53.51266,
+  "lon": -2.21199,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/manchester-harpurhey/"
+  }
+ },
+ {
+  "name": "Tenpin Manchester Parrs Wood",
+  "lat": 53.40868,
+  "lon": -2.21951,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/manchester-parrs-wood/"
+  }
+ },
+ {
+  "name": "Tenpin Manchester Printworks",
+  "lat": 53.48519,
+  "lon": -2.24078,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/manchester-printworks/"
+  }
+ },
+ {
+  "name": "Tenpin Northampton",
+  "lat": 52.23803,
+  "lon": -0.93227,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/northampton/"
+  }
+ },
+ {
+  "name": "Tenpin Nottingham",
+  "lat": 52.93541,
+  "lon": -1.17669,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/nottingham/"
+  }
+ },
+ {
+  "name": "Tenpin Peterborough",
+  "lat": 52.57331,
+  "lon": -0.24554,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/peterborough/"
+  }
+ },
+ {
+  "name": "Tenpin Plymouth Barbican",
+  "lat": 50.36739,
+  "lon": -4.1252,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/plymouth-barbican/"
+  }
+ },
+ {
+  "name": "Tenpin Redditch",
+  "lat": 52.30571,
+  "lon": -1.94449,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/redditch/"
+  }
+ },
+ {
+  "name": "Tenpin Rochdale",
+  "lat": 53.60268,
+  "lon": -2.16362,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/rochdale/"
+  }
+ },
+ {
+  "name": "Tenpin Southport",
+  "lat": 53.65343,
+  "lon": -3.01111,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/southport/"
+  }
+ },
+ {
+  "name": "Tenpin Stafford",
+  "lat": 52.81286,
+  "lon": -2.12314,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/stafford/"
+  }
+ },
+ {
+  "name": "Tenpin Stoke",
+  "lat": 53.0247,
+  "lon": -2.1936,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/stoke/"
+  }
+ },
+ {
+  "name": "Tenpin Swansea",
+  "lat": 51.6215,
+  "lon": -3.94035,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/swansea/"
+  }
+ },
+ {
+  "name": "Tenpin Swindon",
+  "lat": 51.5608,
+  "lon": -1.83132,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/swindon/"
+  }
+ },
+ {
+  "name": "Tenpin Telford",
+  "lat": 52.67374,
+  "lon": -2.44646,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/telford/"
+  }
+ },
+ {
+  "name": "Tenpin Wakefield",
+  "lat": 53.68484,
+  "lon": -1.49468,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/wakefield/"
+  }
+ },
+ {
+  "name": "Tenpin Walsall",
+  "lat": 52.58689,
+  "lon": -1.98857,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/walsall/"
+  }
+ },
+ {
+  "name": "Tenpin Warrington",
+  "lat": 53.41486,
+  "lon": -2.59951,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/warrington/"
+  }
+ },
+ {
+  "name": "Tenpin Worcester",
+  "lat": 52.21506,
+  "lon": -2.21765,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/worcester/"
+  }
+ },
+ {
+  "name": "Tenpin Wrexham",
+  "lat": 53.04446,
+  "lon": -2.98859,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/wrexham/"
+  }
+ },
+ {
+  "name": "Tenpin York",
+  "lat": 53.99305,
+  "lon": -1.09763,
+  "activities": {
+   "Bowling": "https://www.tenpin.co.uk/our-locations/york/"
+  }
+ },
+ {
+  "name": "Thame Leisure Centre",
+  "lat": 51.7468,
+  "lon": -0.9936,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/south-oxfordshire/thame-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Thamesmere Leisure Centre",
+  "lat": 51.5078,
+  "lon": 0.1092,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/greenwich/thamesmere-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "The Eltham Centre",
+  "lat": 51.4515,
+  "lon": 0.05737,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/greenwich/eltham-centre/swimming"
+  }
+ },
+ {
+  "name": "The Greenwich Centre",
+  "lat": 51.4853,
+  "lon": 0.00848,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/greenwich/greenwichcentre/swimming"
+  }
+ },
+ {
+  "name": "The Hive Leisure Centre",
+  "lat": 52.4107,
+  "lon": 0.24921,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/ely/the-hive/soft-play",
+   "Swimming": "https://www.better.org.uk/leisure-centre/ely/the-hive/swimming"
+  }
+ },
+ {
+  "name": "The Queen's Diamond Jubilee Centre, Rugby",
+  "lat": 52.3687,
+  "lon": -1.25497,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/rugby/the-queens-diamond-jubilee-centre/swimming",
+   "Climbing": "https://www.better.org.uk/leisure-centre/rugby/the-queens-diamond-jubilee-centre/climbing",
+   "Soft play": "https://www.better.org.uk/leisure-centre/rugby/the-queens-diamond-jubilee-centre/soft-play"
+  }
+ },
+ {
+  "name": "The Sands Leisure Centre",
+  "lat": 54.8994,
+  "lon": -2.93546,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cumberland/the-sands-leisure-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/cumberland/the-sands-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "The Sovereign Centre",
+  "lat": 50.78204,
+  "lon": 0.31133,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/eastbourne/the-sovereign-centre/soft-play",
+   "Swimming": "https://www.better.org.uk/leisure-centre/eastbourne/the-sovereign-centre/swimming"
+  }
+ },
+ {
+  "name": "Thornton Heath Leisure Centre",
+  "lat": 51.3991,
+  "lon": -0.09695,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/croydon/thornton-heath-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Treetop Golf Cardiff",
+  "lat": 51.47919,
+  "lon": -3.17481,
+  "activities": {
+   "Crazy golf": "https://www.adventuregolf.com/cardiff"
+  }
+ },
+ {
+  "name": "Truro Leisure Centre",
+  "lat": 50.2636,
+  "lon": -5.10196,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cornwall/truro-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Ulverston Leisure Centre",
+  "lat": 54.1861,
+  "lon": -3.08594,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/westmorland-and-furness/ulverston/swimming"
+  }
+ },
+ {
+  "name": "Vauxhall Leisure Centre",
+  "lat": 51.4839,
+  "lon": -0.12344,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/lambeth/vauxhall-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Waddon Leisure Centre",
+  "lat": 51.3642,
+  "lon": -0.11768,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/croydon/waddon-leisure-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/croydon/waddon-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "Waltham Forest Feel Good Centre",
+  "lat": 51.5933,
+  "lon": -0.01499,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/waltham-forest/waltham-forest-feel-good-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/waltham-forest/waltham-forest-feel-good-centre/soft-play",
+   "Trampolining": "https://www.better.org.uk/leisure-centre/london/waltham-forest/waltham-forest-feel-good-centre/trampoline-park"
+  }
+ },
+ {
+  "name": "Wantage Leisure Centre",
+  "lat": 51.5852,
+  "lon": -1.42895,
+  "activities": {
+   "Soft play": "https://www.better.org.uk/leisure-centre/vale-of-white-horse/wantage-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "Wavelengths Leisure Centre",
+  "lat": 51.4776,
+  "lon": -0.02431,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/lewisham/wavelengths-leisure-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/london/lewisham/wavelengths-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "Wembley Leisure Centre",
+  "lat": 51.5606,
+  "lon": -0.28308,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/wembley/wembley-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "West View Better Health Leisure Centre",
+  "lat": 53.7693,
+  "lon": -2.68073,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/preston/west-view-better-health-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Western Leisure Centre",
+  "lat": 51.4758,
+  "lon": -3.24639,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/cardiff/western/swimming"
+  }
+ },
+ {
+  "name": "White Horse Leisure and Tennis Centre",
+  "lat": 51.674,
+  "lon": -1.26077,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/vale-of-white-horse/white-horse-leisure-and-tennis-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/vale-of-white-horse/white-horse-leisure-and-tennis-centre/soft-play"
+  }
+ },
+ {
+  "name": "Whiterock Leisure Centre",
+  "lat": 54.5917,
+  "lon": -5.98583,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/belfast/whiterock-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Wimbledon Leisure Centre and Spa",
+  "lat": 51.4201,
+  "lon": -0.19242,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/london/merton/wimbledon-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Windrush Leisure Centre, Witney",
+  "lat": 51.7835,
+  "lon": -1.48146,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/west-oxfordshire/windrush-leisure-centre/swimming",
+   "Soft play": "https://www.better.org.uk/leisure-centre/west-oxfordshire/windrush-leisure-centre/soft-play"
+  }
+ },
+ {
+  "name": "Woodstock Open Air Pool",
+  "lat": 51.8484,
+  "lon": -1.33913,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/west-oxfordshire/woodstock-open-air-pool/swimming"
+  }
+ },
+ {
+  "name": "Yarborough Leisure Centre",
+  "lat": 53.24621,
+  "lon": -0.54099,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/lincoln/yarborough-leisure-centre/swimming"
+  }
+ },
+ {
+  "name": "Yearsley Swimming Pool",
+  "lat": 53.976,
+  "lon": -1.07548,
+  "activities": {
+   "Swimming": "https://www.better.org.uk/leisure-centre/york/yearsley-pool/swimming"
+  }
+ },
+ {
+  "name": "York Leisure Centre",
+  "lat": 53.9852,
+  "lon": -1.05242,
+  "activities": {
+   "Climbing": "https://www.better.org.uk/leisure-centre/york/york-leisure-centre/climbing",
+   "Soft play": "https://www.better.org.uk/leisure-centre/york/york-leisure-centre/soft-play",
+   "Swimming": "https://www.better.org.uk/leisure-centre/york/york-leisure-centre/swimming"
+  }
+ }
+]

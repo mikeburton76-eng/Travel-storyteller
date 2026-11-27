@@ -74,3 +74,7 @@ the ideas. The current two-column card layout and main category tiles are reused
 Global venue discovery now additionally recognises amenity=cinema and
 leisure=escape_game. Known adult cinemas and disused cinemas are excluded. Film
 certificates and escape-room age guidance vary; no all-ages suitability is assumed.
+
+## Family days out taster
+
+Set FAMILY_TASTER_ENABLED=false and restart the app to hide the Explore link and disable the finder and its data routes. Remove the setting to enable it again. To add or remove a venue, edit family-venues.json and deploy. Follow an existing entry with a name, latitude, longitude and activity labels mapped to venue links. A single venue can have several activities. The town list is separate. Searching runs in the browser without generating a story.

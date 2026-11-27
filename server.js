@@ -241,11 +241,24 @@ const server = http.createServer(async (req, res) => {
     }catch(error){return reply(error.status||502,{error:error.status?error.message:'Arrival information is unavailable. Saved introductions remain usable.'});}
   }
 
+  const familyTasterEnabled = process.env.FAMILY_TASTER_ENABLED !== 'false';
+  const familyFiles = {
+    '/family-days.html': ['family-days.html', 'text/html; charset=utf-8'],
+    '/family-days.js': ['family-days.js', 'text/javascript; charset=utf-8'],
+    '/family-towns.json': ['family-towns.json', 'application/json; charset=utf-8'],
+    '/family-venues.json': ['family-venues.json', 'application/json; charset=utf-8']
+  };
   const exploreFiles = { '/journey-route.js':['journey-route.js','text/javascript; charset=utf-8'], '/route-test-data.js':['route-test-data.js','text/javascript; charset=utf-8'], '/drive-history.js': ['drive-history.js', 'text/javascript; charset=utf-8'], '/drive-player.js': ['drive-player.js', 'text/javascript; charset=utf-8'], '/return-state.js': ['return-state.js', 'text/javascript; charset=utf-8'], '/place-search.js': ['place-search.js', 'text/javascript; charset=utf-8'], '/drive-test': ['drive-test.html', 'text/html; charset=utf-8'], '/drive-client.js': ['drive-client.js', 'text/javascript; charset=utf-8'], '/drive-test.css': ['drive-test.css', 'text/css; charset=utf-8'], '/drive-logic.js': ['drive-logic.js', 'text/javascript; charset=utf-8'], '/drive-test-sw.js': ['drive-test-sw.js', 'text/javascript; charset=utf-8'], '/discover-design.css': ['discover-design.css', 'text/css; charset=utf-8'], '/narrator-settings.js': ['narrator-settings.js', 'text/javascript; charset=utf-8'], '/': ['explore.html', 'text/html; charset=utf-8'], '/explore-audio.js': ['explore-audio.js', 'text/javascript; charset=utf-8'], '/navigation.css': ['navigation.css', 'text/css; charset=utf-8'], '/navigation.js': ['navigation.js', 'text/javascript; charset=utf-8'], '/explore': ['explore.html', 'text/html; charset=utf-8'], '/explore-client.js': ['explore-client.js', 'text/javascript; charset=utf-8'] };
-  const exploreFile = exploreFiles[req.url.split('?')[0]];
+  const route = req.url.split('?')[0];
+  const exploreFile = exploreFiles[route] || (familyTasterEnabled && familyFiles[route]);
   if (req.method === 'GET' && exploreFile) {
     res.writeHead(200, { 'Content-Type': exploreFile[1], 'Cache-Control': 'private, no-store' });
-    return res.end(fs.readFileSync(path.join(__dirname, exploreFile[0]), 'utf8'));
+    let content = fs.readFileSync(path.join(__dirname, exploreFile[0]), 'utf8');
+    if (exploreFile[0] === 'explore.html') {
+      const familyLink = familyTasterEnabled ? '<p><a hidden id="familyFinder" href="/family-days.html">Find more family days out within 30 miles · UK taster</a></p>' : '';
+      content = content.replace('<!-- family-taster -->', familyLink);
+    }
+    return res.end(content);
   }
   if (req.method === 'POST' && req.url === '/api/explore') {
     try {
