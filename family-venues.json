@@ -337,6 +337,24 @@
   }
  },
  {
+  "name": "Ace adventures",
+  "lat": 57.5104291,
+  "lon": -3.6906338,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
+  "name": "Ackers Adventures",
+  "lat": 52.4693609,
+  "lon": -1.8751967,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Active Copley",
   "postcode": "SK15 3ET",
   "lat": 53.4868,
@@ -857,6 +875,15 @@
   "activities": {
    "Outdoor tennis": "http://www.alfrickandlulsley.org/"
   }
+ },
+ {
+  "name": "Alice Holt Forest",
+  "lat": 51.1694005,
+  "lon": -0.8387724,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Alice Holt parkrun",
@@ -1477,6 +1504,15 @@
   }
  },
  {
+  "name": "Aros Park Disc Golf",
+  "lat": 55.685292,
+  "lon": -5.2450329,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Arrow Vale Sports And Leisure Centre",
   "postcode": "B98 0EN",
   "lat": 52.2967,
@@ -1701,6 +1737,15 @@
   "description": "Visit to discover the wildlife here and check the visitor programme.",
   "lat": 51.724573,
   "lon": 0.186519
+ },
+ {
+  "name": "Ashton Court",
+  "lat": 51.438895,
+  "lon": -2.6429844,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Ashton Court parkrun",
@@ -2250,6 +2295,15 @@
   "description": "Children aged 4–14 can walk, jog or run this 2K course."
  },
  {
+  "name": "Ballers and Hackers Disc Golf Course",
+  "lat": 53.0359636,
+  "lon": -1.1894743,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Ballysillan Leisure Centre",
   "lat": 54.6236,
   "lon": -5.97038,
@@ -2736,6 +2790,15 @@
   }
  },
  {
+  "name": "Bassett Down Disc Golf",
+  "lat": 51.5261311,
+  "lon": -1.8424749,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Bath Odd Down junior parkrun",
   "lat": 51.363164,
   "lon": -2.376181,
@@ -3169,6 +3232,15 @@
   }
  },
  {
+  "name": "Bedworth Miners Welfare Disc Golf Course",
+  "lat": 52.4748343,
+  "lon": -1.4703655,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Bedworth parkrun",
   "lat": 52.476054,
   "lon": -1.47027,
@@ -3266,6 +3338,15 @@
   "activities": {
    "Swimming": "https://www.freedom-leisure.co.uk/centres/belfairs-swim-centre/"
   }
+ },
+ {
+  "name": "Belfast Disc Golf Course Mt Ober",
+  "lat": 54.5505963,
+  "lon": -5.8884496,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Belfast Victoria junior parkrun",
@@ -3715,6 +3796,15 @@
   "activities": {
    "Outdoor tennis": "https://www.google.com/maps/search/?api=1&query=Billingborough+Cricket+Club+NG34+0PA"
   }
+ },
+ {
+  "name": "Billingford Lakes",
+  "lat": 52.7401103,
+  "lon": 0.9727596,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Billingham Forum",
@@ -4711,6 +4801,15 @@
   }
  },
  {
+  "name": "Box End",
+  "lat": 52.1269692,
+  "lon": -0.5223384,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Box Recreation Ground",
   "postcode": "SN13 8NT",
   "lat": 51.41581,
@@ -4853,6 +4952,16 @@
   "activities": {
    "Swimming": "https://www.freedom-leisure.co.uk/centres/braintree-swimming-and-fitness/"
   }
+ },
+ {
+  "name": "Bramble Studio, Belfast",
+  "lat": 54.59653,
+  "lon": -5.924078,
+  "activities": {
+   "Pottery painting": "https://www.bramblestudio.co.uk/"
+  },
+  "description": "Book a pottery painting or creative workshop in Belfast.",
+  "postcode": "BT1 4HS"
  },
  {
   "name": "Bramcote Leisure Centre",
@@ -5114,6 +5223,15 @@
    "Junior 2K": "https://www.parkrun.org.uk/brettonpark-juniors/"
   },
   "description": "Children aged 4–14 can walk, jog or run this 2K course."
+ },
+ {
+  "name": "Brickendon Disc Golf Course",
+  "lat": 51.7554238,
+  "lon": -0.0754985,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Brickfields Park parkrun",
@@ -6331,6 +6449,24 @@
   }
  },
  {
+  "name": "Calcot Manor Disc Golf",
+  "lat": 51.6531892,
+  "lon": -2.2308791,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
+  "name": "Caldecott Hall",
+  "lat": 52.5555095,
+  "lon": 1.6470583,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Caldecott Hall Golf And Leisure",
   "postcode": "NR31 9EY",
   "lat": 52.55428,
@@ -6565,6 +6701,15 @@
   }
  },
  {
+  "name": "Cannock Chase Disc Golf Course",
+  "lat": 52.7525984,
+  "lon": -1.9728761,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Cannock Chase Forest junior parkrun",
   "lat": 52.751878,
   "lon": -1.969309,
@@ -6653,6 +6798,15 @@
   "activities": {
    "Outdoor tennis": "https://www.wokingham.gov.uk/sports-arts-and-activities/sports-courts-and-pitches"
   }
+ },
+ {
+  "name": "Canvey Island Waterside Park",
+  "lat": 51.5333592,
+  "lon": 0.5687527,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Capel Recreation Ground",
@@ -6936,6 +7090,15 @@
   }
  },
  {
+  "name": "Castle Heather Park",
+  "lat": 57.4574612,
+  "lon": -4.2121747,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Castle Hill Village Green",
   "postcode": "DA10 1AD",
   "lat": 51.43728,
@@ -7177,6 +7340,15 @@
   "activities": {
    "Outdoor tennis": "https://www.centralparkpeterborough.co.uk/"
   }
+ },
+ {
+  "name": "Central Park Foot and Disc Golf",
+  "lat": 50.3836222,
+  "lon": -4.1503,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Central Park junior parkrun",
@@ -8465,6 +8637,15 @@
   }
  },
  {
+  "name": "Clerkenhill Disc Golf",
+  "lat": 51.803772,
+  "lon": -4.8406041,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Clevedon Salthouse Fields parkrun",
   "lat": 51.434573,
   "lon": -2.866505,
@@ -8671,6 +8852,15 @@
    "Social 5K": "https://www.parkrun.org.uk/clumberpark/"
   },
   "description": "Walk, jog or run a timed 5K with other participants."
+ },
+ {
+  "name": "Cluny Activities",
+  "lat": 56.1553764,
+  "lon": -3.214268,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Co-Op Academy Grange",
@@ -9448,6 +9638,15 @@
   }
  },
  {
+  "name": "Cotwold View Disc Golf course",
+  "lat": 51.888253,
+  "lon": -1.4661315,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Coulsdon Memorial Ground",
   "postcode": "CR5 2HA",
   "lat": 51.31496,
@@ -9620,6 +9819,15 @@
   }
  },
  {
+  "name": "Craggan Outdoors",
+  "lat": 57.3136434,
+  "lon": -3.6272264,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Craig Park",
   "postcode": "N18 2HG",
   "lat": 51.61551,
@@ -9762,6 +9970,15 @@
    "Social 5K": "https://www.parkrun.org.uk/crichton/"
   },
   "description": "Walk, jog or run a timed 5K with other participants."
+ },
+ {
+  "name": "Cricklade House Hotel",
+  "lat": 51.6368972,
+  "lon": -1.8748474,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Cricklade Leisure Centre",
@@ -10514,6 +10731,15 @@
   }
  },
  {
+  "name": "Delamere Forest",
+  "lat": 53.2353486,
+  "lon": -2.6843161,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Delamere Park",
   "postcode": "M11 1JY",
   "lat": 53.4717,
@@ -10751,6 +10977,15 @@
   "description": "Walk, jog or run a timed 5K with other participants."
  },
  {
+  "name": "Diamond Jubillee Course",
+  "lat": 51.8798628,
+  "lon": 0.9492552,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Diana Sell Memorial Playground",
   "postcode": "CB11 3QL",
   "lat": 51.98394,
@@ -10853,6 +11088,15 @@
   "activities": {
    "Swimming": "https://activestoke.co.uk/homepage/18/dimensions-leisure-centre"
   }
+ },
+ {
+  "name": "Dinton Pastures Disc Golf course",
+  "lat": 51.4459032,
+  "lon": -0.8695078,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Dinton Pastures junior parkrun",
@@ -11209,6 +11453,24 @@
   "description": "Walk, jog or run a timed 5K with other participants."
  },
  {
+  "name": "Drumnadoicht",
+  "lat": 57.3321208,
+  "lon": -4.4779153,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
+  "name": "Drumoig Golf Centre",
+  "lat": 56.4170455,
+  "lon": -2.9143522,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Drumpellier Country parkrun",
   "lat": 55.871588,
   "lon": -4.065615,
@@ -11513,6 +11775,15 @@
    "Junior 2K": "https://www.parkrun.org.uk/duthie-juniors/"
   },
   "description": "Children aged 4–14 can walk, jog or run this 2K course."
+ },
+ {
+  "name": "Dyffryn Clwyd Footgolf Centre",
+  "lat": 53.1091604,
+  "lon": -3.3211428,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Dyke House Sport & Technology College",
@@ -12526,6 +12797,56 @@
   "description": "Walk, jog or run a timed 5K with other participants."
  },
  {
+  "name": "Escape Aberdeen",
+  "lat": 57.143685,
+  "lon": -2.100857,
+  "activities": {
+   "Escape rooms": "https://www.escape.game/escape-aberdeen"
+  },
+  "description": "Team up to solve clues and complete a themed escape challenge.",
+  "postcode": "AB11 6HD"
+ },
+ {
+  "name": "Escape Chelmsford",
+  "lat": 51.720127,
+  "lon": 0.487765,
+  "activities": {
+   "Escape rooms": "https://www.escape.game/escape-chelmsford"
+  },
+  "description": "Team up to solve clues and complete a themed escape challenge.",
+  "postcode": "CM2 9TQ"
+ },
+ {
+  "name": "Escape Dundee",
+  "lat": 56.461868,
+  "lon": -2.969739,
+  "activities": {
+   "Escape rooms": "https://www.escape.game/escape-dundee"
+  },
+  "description": "Team up to solve clues and complete a themed escape challenge.",
+  "postcode": "DD1 2AP"
+ },
+ {
+  "name": "Escape Glasgow",
+  "lat": 55.862846,
+  "lon": -4.255907,
+  "activities": {
+   "Escape rooms": "https://www.escape.game/escape-glasgow"
+  },
+  "description": "Team up to solve clues and complete a themed escape challenge.",
+  "postcode": "G2 1NF"
+ },
+ {
+  "name": "Escape Hull",
+  "lat": 53.745155,
+  "lon": -0.337671,
+  "activities": {
+   "Escape rooms": "https://www.escape.game/escape-hull"
+  },
+  "description": "Team up to solve clues and complete a themed escape challenge.",
+  "postcode": "HU1 3DL"
+ },
+ {
   "name": "Escape Hunt Basingstoke",
   "lat": 51.2647,
   "lon": -1.0873,
@@ -12804,6 +13125,46 @@
   },
   "description": "Work together to solve clues in a themed escape room.",
   "postcode": "WR1 2BY"
+ },
+ {
+  "name": "Escape Livingston",
+  "lat": 55.881629,
+  "lon": -3.512324,
+  "activities": {
+   "Escape rooms": "https://www.escape.game/escape-livingston"
+  },
+  "description": "Team up to solve clues and complete a themed escape challenge.",
+  "postcode": "EH54 6QF"
+ },
+ {
+  "name": "Escape Newcastle",
+  "lat": 54.975056,
+  "lon": -1.611184,
+  "activities": {
+   "Escape rooms": "https://www.escape.game/escape-newcastle"
+  },
+  "description": "Team up to solve clues and complete a themed escape challenge.",
+  "postcode": "NE1 8ER"
+ },
+ {
+  "name": "Escape Stirling",
+  "lat": 56.118712,
+  "lon": -3.93736,
+  "activities": {
+   "Escape rooms": "https://www.escape.game/escape-stirling"
+  },
+  "description": "Team up to solve clues and complete a themed escape challenge.",
+  "postcode": "FK8 1AX"
+ },
+ {
+  "name": "Escape Walton Pier",
+  "lat": 51.846534,
+  "lon": 1.271762,
+  "activities": {
+   "Escape rooms": "https://www.escape.game/escape-walton-pier"
+  },
+  "description": "Team up to solve clues and complete a themed escape challenge.",
+  "postcode": "CO14 8ES"
  },
  {
   "name": "Eskape Whitby",
@@ -13130,6 +13491,15 @@
   }
  },
  {
+  "name": "Family Disc Golf (Mt Edgcumbe)",
+  "lat": 50.329201,
+  "lon": -4.1967357,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Fan Boy Three · Manchester",
   "activities": {
    "Board-game cafés": "https://www.fanboy3.co.uk/"
@@ -13291,6 +13661,15 @@
    "Social 5K": "https://www.parkrun.org.uk/feldyroofitnesstrail/"
   },
   "description": "Walk, jog or run a timed 5K with other participants."
+ },
+ {
+  "name": "Felin Geri Disc Golf Course",
+  "lat": 52.0416187,
+  "lon": -4.4885434,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Felixstowe Leisure Centre",
@@ -14268,6 +14647,16 @@
   }
  },
  {
+  "name": "Frankie & Lola’s Inverness",
+  "lat": 57.450708,
+  "lon": -4.215489,
+  "activities": {
+   "Soft play": "https://frankieandlolas.co.uk/venue/inverness/plan-your-visit"
+  },
+  "description": "Visit the indoor play centre with younger children.",
+  "postcode": "IV2 6BZ"
+ },
+ {
   "name": "Frank’s Farm parkrun",
   "lat": 52.252306,
   "lon": -0.079185,
@@ -14593,6 +14982,15 @@
   "description": "Children aged 4–14 can walk, jog or run this 2K course."
  },
  {
+  "name": "Garlic Farm Disc Golf",
+  "lat": 50.6792539,
+  "lon": -1.2152874,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Garstang Swimming Centre",
   "postcode": "PR3 1HT",
   "lat": 53.907,
@@ -14635,6 +15033,15 @@
    "Social 5K": "https://www.parkrun.org.uk/gateshead/"
   },
   "description": "Walk, jog or run a timed 5K with other participants."
+ },
+ {
+  "name": "Gaudet Luce Disc Golf",
+  "lat": 52.1809825,
+  "lon": -2.1676326,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Gauntlet Bird of Prey - Eagle and Vulture Park",
@@ -14933,6 +15340,15 @@
   }
  },
  {
+  "name": "Gillys Disc Golf Course",
+  "lat": 52.2067252,
+  "lon": -1.6888906,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Girvan Prom parkrun",
   "lat": 55.243994,
   "lon": -4.862538,
@@ -15002,6 +15418,15 @@
   "activities": {
    "Outdoor tennis": "https://glebelands.schoolbookings.co.uk/sports-facilities"
   }
+ },
+ {
+  "name": "Glencoe Mountain Resort",
+  "lat": 56.6324173,
+  "lon": -4.8280819,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Glossop parkrun",
@@ -16322,6 +16747,15 @@
   "description": "Children aged 4–14 can walk, jog or run this 2K course."
  },
  {
+  "name": "Haigh Woodland Park",
+  "lat": 53.5747951,
+  "lon": -2.612237,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Haigh Woodland parkrun",
   "lat": 53.572714,
   "lon": -2.609519,
@@ -16581,6 +17015,15 @@
   "activities": {
    "Outdoor tennis": "https://www.better.org.uk/leisure-centre/london/richmond-upon-thames/hampton-sports-and-fitness-centre"
   }
+ },
+ {
+  "name": "Hamsterley Forest",
+  "lat": 54.67601,
+  "lon": -1.8612204,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Hamsterley Forest parkrun",
@@ -16860,6 +17303,15 @@
    "Social 5K": "https://www.parkrun.org.uk/harrogate/"
   },
   "description": "Walk, jog or run a timed 5K with other participants."
+ },
+ {
+  "name": "Harrogate Valley Gardens",
+  "lat": 53.9899468,
+  "lon": -1.5529132,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Harrow Drive Playing Fields",
@@ -17499,6 +17951,15 @@
    "Social 5K": "https://www.parkrun.org.uk/heaton/"
   },
   "description": "Walk, jog or run a timed 5K with other participants."
+ },
+ {
+  "name": "Heaven Farm",
+  "lat": 51.0192199,
+  "lon": 0.0038294,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Heavitree junior parkrun",
@@ -18281,6 +18742,15 @@
   }
  },
  {
+  "name": "Hindleap Warren",
+  "lat": 51.0720323,
+  "lon": 0.0181876,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Hindley Pool",
   "postcode": "WN2 3QN",
   "lat": 53.53355,
@@ -18288,6 +18758,15 @@
   "activities": {
    "Swimming": "https://bewellwigan.org/locations/hindley-pool/"
   }
+ },
+ {
+  "name": "Hinksey Heights Disc Golf",
+  "lat": 51.7351361,
+  "lon": -1.2762823,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Hinksey Outdoor Pool",
@@ -18550,6 +19029,756 @@
   "activities": {
    "Outdoor tennis": "https://www.hinckley-bosworth.gov.uk/info/200073/parks_and_open_spaces/221/hollycroft_park"
   }
+ },
+ {
+  "name": "Hollywood Bowl Ashford",
+  "lat": 51.1476974,
+  "lon": 0.875845,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/ashford"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "TN23 1PP"
+ },
+ {
+  "name": "Hollywood Bowl Banbridge",
+  "lat": 54.3309208,
+  "lon": -6.2763389,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/banbridge"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "BT32 4LF"
+ },
+ {
+  "name": "Hollywood Bowl Basildon",
+  "lat": 51.5853263,
+  "lon": 0.461704,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/basildon"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "SS14 3WB"
+ },
+ {
+  "name": "Hollywood Bowl Basingstoke",
+  "lat": 51.2631035,
+  "lon": -1.1179308,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/basingstoke"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "RG22 6PG"
+ },
+ {
+  "name": "Hollywood Bowl Belfast",
+  "lat": 54.6039621,
+  "lon": -5.9151101,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/belfast"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "BT3 9QQ"
+ },
+ {
+  "name": "Hollywood Bowl Bentley Bridge",
+  "lat": 52.5963498,
+  "lon": -2.0916379,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/wolverhampton-bentley-bridge"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "WV11 1BP"
+ },
+ {
+  "name": "Hollywood Bowl Birmingham Broadway Plaza",
+  "lat": 52.473425,
+  "lon": -1.9214082,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/birmingham-broadway-plaza"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "B16 8LP"
+ },
+ {
+  "name": "Hollywood Bowl Birmingham Resorts World",
+  "lat": 52.448463,
+  "lon": -1.7185961,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/birmingham-resorts-world"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "B40 1PU"
+ },
+ {
+  "name": "Hollywood Bowl Birmingham Rubery",
+  "lat": 52.3980164,
+  "lon": -2.0061904,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/birmingham-rubery"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "B45 9PL"
+ },
+ {
+  "name": "Hollywood Bowl Bolton",
+  "lat": 53.583031,
+  "lon": -2.5329515,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/bolton"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "BL6 6JA"
+ },
+ {
+  "name": "Hollywood Bowl Bournemouth Branksome",
+  "lat": 50.7265181,
+  "lon": -1.9170862,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/bournemouth-branksome"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "BH12 1DA"
+ },
+ {
+  "name": "Hollywood Bowl Bradford",
+  "lat": 53.7947457,
+  "lon": -1.7473172,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/bradford"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "BD1 5LD"
+ },
+ {
+  "name": "Hollywood Bowl Brighton",
+  "lat": 50.8149519,
+  "lon": -0.1052846,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/brighton"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "BN2 5UT"
+ },
+ {
+  "name": "Hollywood Bowl Bristol Cribbs Causeway",
+  "lat": 51.5234813,
+  "lon": -2.6009971,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/bristol-cribbs-causeway"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "BS10 7SR"
+ },
+ {
+  "name": "Hollywood Bowl Bristol Longwell Green",
+  "lat": 51.4493489,
+  "lon": -2.4994046,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/bristol-longwell-green"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "BS15 9LA"
+ },
+ {
+  "name": "Hollywood Bowl Bury",
+  "lat": 53.5942593,
+  "lon": -2.2915825,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/bury"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "BL9 0JX"
+ },
+ {
+  "name": "Hollywood Bowl Cardiff Red Dragon",
+  "lat": 51.4681913,
+  "lon": -3.1634491,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/cardiff-red-dragon"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "CF10 4JY"
+ },
+ {
+  "name": "Hollywood Bowl Cardiff St David's",
+  "lat": 51.4801839,
+  "lon": -3.174433,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/cardiff-st-davids"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "CF10 2LE"
+ },
+ {
+  "name": "Hollywood Bowl Carlisle",
+  "lat": 54.8830508,
+  "lon": -2.9314681,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/carlisle"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "CA2 4AS"
+ },
+ {
+  "name": "Hollywood Bowl Cheltenham",
+  "lat": 51.9031119,
+  "lon": -2.077155,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/cheltenham"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "GL50 4FA"
+ },
+ {
+  "name": "Hollywood Bowl Colchester",
+  "lat": 51.9225097,
+  "lon": 0.9005302,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/colchester"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "CO4 5UP "
+ },
+ {
+  "name": "Hollywood Bowl Crawley",
+  "lat": 51.1201683,
+  "lon": -0.1901273,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/crawley"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "RH10 8LR"
+ },
+ {
+  "name": "Hollywood Bowl Cwmbran",
+  "lat": 51.6537541,
+  "lon": -3.0199683,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/cwmbran"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "NP44 1QS"
+ },
+ {
+  "name": "Hollywood Bowl Dagenham",
+  "lat": 51.531775,
+  "lon": 0.1357758,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/dagenham"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "RM9 6UQ"
+ },
+ {
+  "name": "Hollywood Bowl Derby",
+  "lat": 52.9185082,
+  "lon": -1.47338,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/derby"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "DE1 2PL"
+ },
+ {
+  "name": "Hollywood Bowl Dundee",
+  "lat": 56.4802129,
+  "lon": -2.9234079,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/dundee"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "DD4 8JX"
+ },
+ {
+  "name": "Hollywood Bowl Dunfermline",
+  "lat": 56.0795261,
+  "lon": -3.3969783,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/dunfermline"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "KY11 8EX"
+ },
+ {
+  "name": "Hollywood Bowl Eastleigh",
+  "lat": 50.9670238,
+  "lon": -1.3536761,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/eastleigh"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "SO50 5SF"
+ },
+ {
+  "name": "Hollywood Bowl Finchley",
+  "lat": 51.6045867,
+  "lon": -0.174911,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/finchley"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "N12 0GL"
+ },
+ {
+  "name": "Hollywood Bowl Glasgow Coatbridge",
+  "lat": 55.8476471,
+  "lon": -4.0654414,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/glasgow-coatbridge"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "G69 7TZ"
+ },
+ {
+  "name": "Hollywood Bowl Glasgow Springfield Quay",
+  "lat": 55.8546105,
+  "lon": -4.2732434,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/glasgow-springfield-quay"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "G5 8NP"
+ },
+ {
+  "name": "Hollywood Bowl High Wycombe",
+  "lat": 51.6304587,
+  "lon": -0.75657,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/high-wycombe"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "HP11 2DB"
+ },
+ {
+  "name": "Hollywood Bowl Hull",
+  "lat": 53.7922148,
+  "lon": -0.3549893,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/hull"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "HU7 3DB"
+ },
+ {
+  "name": "Hollywood Bowl Inverness",
+  "lat": 57.4831176,
+  "lon": -4.1784233,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/inverness"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "IV2 7GD"
+ },
+ {
+  "name": "Hollywood Bowl Lakeside",
+  "lat": 51.4838993,
+  "lon": 0.2801443,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/lakeside"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "RM20 2AD"
+ },
+ {
+  "name": "Hollywood Bowl Leeds",
+  "lat": 53.8056122,
+  "lon": -1.580063,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/leeds"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "LS4 2DG"
+ },
+ {
+  "name": "Hollywood Bowl Leicester",
+  "lat": 52.6130061,
+  "lon": -1.1896384,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/leicester"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "LE19 1JZ"
+ },
+ {
+  "name": "Hollywood Bowl Lincoln",
+  "lat": 53.2203298,
+  "lon": -0.5128402,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/lincoln"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "LN4 1EF"
+ },
+ {
+  "name": "Hollywood Bowl Liverpool Edge Lane",
+  "lat": 53.4093302,
+  "lon": -2.9234832,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/liverpool-edge-lane"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "L13 1EW"
+ },
+ {
+  "name": "Hollywood Bowl Liverpool Speke",
+  "lat": 53.3494239,
+  "lon": -2.874713,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/liverpool-speke"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "L24 8QB"
+ },
+ {
+  "name": "Hollywood Bowl Livingston",
+  "lat": 55.883769,
+  "lon": -3.5178617,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/livingston"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "EH54 6HR"
+ },
+ {
+  "name": "Hollywood Bowl London at The O2",
+  "lat": 51.5009405,
+  "lon": 0.0053626,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/london-o2"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "SE10 0DX"
+ },
+ {
+  "name": "Hollywood Bowl Maidstone",
+  "lat": 51.2705634,
+  "lon": 0.5182208,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/maidstone"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "ME16 8SF"
+ },
+ {
+  "name": "Hollywood Bowl Manchester",
+  "lat": 53.4877319,
+  "lon": -2.112856,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/manchester"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "OL7 0PG"
+ },
+ {
+  "name": "Hollywood Bowl Merry Hill",
+  "lat": 52.4799811,
+  "lon": -2.1110849,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/merry-hill"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "DY5 1QX"
+ },
+ {
+  "name": "Hollywood Bowl Milton Keynes",
+  "lat": 52.0422528,
+  "lon": -0.7467695,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/milton-keynes"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "MK9 3XS"
+ },
+ {
+  "name": "Hollywood Bowl Norwich",
+  "lat": 52.6257187,
+  "lon": 1.3048035,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/norwich"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "NR1 1WZ"
+ },
+ {
+  "name": "Hollywood Bowl Oxford",
+  "lat": 51.7146284,
+  "lon": -1.2055178,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/oxford"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "OX4 4XP"
+ },
+ {
+  "name": "Hollywood Bowl Peterborough",
+  "lat": 52.5993189,
+  "lon": -0.2705219,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/peterborough"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "PE3 8YF"
+ },
+ {
+  "name": "Hollywood Bowl Poole Tower Park",
+  "lat": 50.7456028,
+  "lon": -1.9534149,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/poole-tower-park"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "BH12 4NY"
+ },
+ {
+  "name": "Hollywood Bowl Portsmouth",
+  "lat": 50.7961229,
+  "lon": -1.1055301,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/portsmouth"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "PO1 3TN"
+ },
+ {
+  "name": "Hollywood Bowl Preston",
+  "lat": 53.7612646,
+  "lon": -2.7000277,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/preston"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "PR1 2BL"
+ },
+ {
+  "name": "Hollywood Bowl Reading",
+  "lat": 51.4529665,
+  "lon": -0.9720704,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/reading"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "RG1 2AS"
+ },
+ {
+  "name": "Hollywood Bowl Rochester",
+  "lat": 51.3815167,
+  "lon": 0.4797799,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/rochester"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "ME2 2SS"
+ },
+ {
+  "name": "Hollywood Bowl Sheffield",
+  "lat": 53.4005779,
+  "lon": -1.4168448,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/sheffield"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "S9 2EP"
+ },
+ {
+  "name": "Hollywood Bowl Shrewsbury",
+  "lat": 52.7367298,
+  "lon": -2.7305155,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/shrewsbury"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "SY1 3AZ"
+ },
+ {
+  "name": "Hollywood Bowl Southampton",
+  "lat": 50.9039656,
+  "lon": -1.4085909,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/southampton"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "SO15 1DE"
+ },
+ {
+  "name": "Hollywood Bowl Stevenage",
+  "lat": 51.8988555,
+  "lon": -0.1854084,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/stevenage"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "SG1 2UA"
+ },
+ {
+  "name": "Hollywood Bowl Stirling",
+  "lat": 56.1245153,
+  "lon": -3.9352208,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/stirling"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "FK8 1UE"
+ },
+ {
+  "name": "Hollywood Bowl Stockton",
+  "lat": 54.5601694,
+  "lon": -1.2742956,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/stockton"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "TS17 7BU"
+ },
+ {
+  "name": "Hollywood Bowl Swindon",
+  "lat": 51.5695503,
+  "lon": -1.7542982,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/swindon"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "SN3 3SQ"
+ },
+ {
+  "name": "Hollywood Bowl Taunton",
+  "lat": 51.0240188,
+  "lon": -3.0656982,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/taunton"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "TA1 2LP"
+ },
+ {
+  "name": "Hollywood Bowl Tolworth",
+  "lat": 51.3780097,
+  "lon": -0.2795617,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/tolworth"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "KT5 9PB"
+ },
+ {
+  "name": "Hollywood Bowl Torquay",
+  "lat": 50.4614838,
+  "lon": -3.5208947,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/torquay"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": " TQ1 1DZ"
+ },
+ {
+  "name": "Hollywood Bowl Tunbridge Wells",
+  "lat": 51.1543246,
+  "lon": 0.2970208,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/tunbridge-wells"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "TN2 3UW"
+ },
+ {
+  "name": "Hollywood Bowl Uxbridge",
+  "lat": 51.545424,
+  "lon": -0.4766446,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/uxbridge"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "UB8 1LA"
+ },
+ {
+  "name": "Hollywood Bowl Washington",
+  "lat": 54.8991822,
+  "lon": -1.5313278,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/washington"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "NE38 7RZ"
+ },
+ {
+  "name": "Hollywood Bowl Watford Harlequin",
+  "lat": 51.6564083,
+  "lon": -0.3967399,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/watford-harlequin"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "WD17 2AU"
+ },
+ {
+  "name": "Hollywood Bowl Watford Woodside",
+  "lat": 51.6916622,
+  "lon": -0.3955381,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/watford-woodside"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "WD25 7JZ"
+ },
+ {
+  "name": "Hollywood Bowl Wellingborough",
+  "lat": 52.2903274,
+  "lon": -0.6865234,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/wellingborough"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "NN8 2EF"
+ },
+ {
+  "name": "Hollywood Bowl Westwood Cross",
+  "lat": 51.3595125,
+  "lon": 1.391841,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/westwood-cross"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "CT10 2BF"
+ },
+ {
+  "name": "Hollywood Bowl Wigan",
+  "lat": 53.5424669,
+  "lon": -2.6387613,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/wigan"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "WN3 4AG"
+ },
+ {
+  "name": "Hollywood Bowl Worthing",
+  "lat": 50.809144,
+  "lon": -0.3735981,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/worthing"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "BN11 3PZ"
+ },
+ {
+  "name": "Hollywood Bowl Yeovil",
+  "lat": 50.9401884,
+  "lon": -2.6261104,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/yeovil"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "BA20 1NP"
+ },
+ {
+  "name": "Hollywood Bowl York",
+  "lat": 53.9847431,
+  "lon": -1.0499157,
+  "activities": {
+   "Bowling": "https://www.hollywoodbowl.co.uk/york"
+  },
+  "description": "Book a lane for a game of ten-pin bowling together.",
+  "postcode": "YO32 9AF"
  },
  {
   "name": "Holme Pierrepont parkrun",
@@ -18873,6 +20102,15 @@
   "activities": {
    "Outdoor tennis": "http://www.horningsham.gov.uk"
   }
+ },
+ {
+  "name": "Horsenden Hill",
+  "lat": 51.5469716,
+  "lon": -0.3346632,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Horsforth Hall junior parkrun",
@@ -19543,6 +20781,15 @@
   }
  },
  {
+  "name": "Inshes Park",
+  "lat": 57.4632381,
+  "lon": -4.1919449,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Inspire: Luton Sports Village",
   "postcode": "LU2 8DD",
   "lat": 51.906,
@@ -19604,6 +20851,15 @@
   "activities": {
    "Outdoor tennis": "http://www.mineheadtowncouncil.co.uk"
   }
+ },
+ {
+  "name": "Iron Pit woods",
+  "lat": 52.4833669,
+  "lon": -0.6581705,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Ironmonger Row Baths",
@@ -19739,6 +20995,15 @@
   "activities": {
    "Outdoor tennis": "https://www.hounslow.gov.uk/"
   }
+ },
+ {
+  "name": "Jeskyns Community Woodland",
+  "lat": 51.4030869,
+  "lon": 0.3877376,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Jeskyns Community Woodland parkrun",
@@ -20208,6 +21473,15 @@
   }
  },
  {
+  "name": "Kenward Place",
+  "lat": 51.2402418,
+  "lon": 0.4227403,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Kesgrave junior parkrun",
   "lat": 52.058171,
   "lon": 1.256579,
@@ -20477,6 +21751,15 @@
    "Junior 2K": "https://www.parkrun.org.uk/kinggeorgeplayingfields-juniors/"
   },
   "description": "Children aged 4–14 can walk, jog or run this 2K course."
+ },
+ {
+  "name": "King George V Disc Golf Course",
+  "lat": 53.1283839,
+  "lon": -1.1694634,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "King George V Fields (Ferndown)",
@@ -21634,6 +22917,15 @@
   "description": "Walk, jog or run a timed 5K with other participants."
  },
  {
+  "name": "Lappa Valley Disc Golf",
+  "lat": 50.3594583,
+  "lon": -5.0398737,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Largs Prom parkrun",
   "lat": 55.802062,
   "lon": -4.873064,
@@ -21885,6 +23177,15 @@
   "activities": {
    "Swimming": "https://haloleisure.org.uk/centres/herefordshire/ledbury-swimming-pool"
   }
+ },
+ {
+  "name": "Lee Valley Disc Golf Course",
+  "lat": 51.6887337,
+  "lon": -0.0140762,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Lee Valley Hockey And Tennis Centre",
@@ -22212,6 +23513,15 @@
   }
  },
  {
+  "name": "Lichfield Disc Golf Course",
+  "lat": 52.6848834,
+  "lon": -1.8387294,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Lichfield Leisure Centre",
   "postcode": "WS13 7RB",
   "lat": 52.69952,
@@ -22354,6 +23664,15 @@
   "activities": {
    "Swimming": "https://www.liverpool.gov.uk/"
   }
+ },
+ {
+  "name": "Lifford Park",
+  "lat": 53.5050274,
+  "lon": -2.5034381,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Lighthorne Sports Ground",
@@ -22607,6 +23926,15 @@
   }
  },
  {
+  "name": "Little Hay Golf Course",
+  "lat": 51.7344383,
+  "lon": -0.5219028,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Little Horwood Recreation Ground",
   "postcode": "MK17 0PF",
   "lat": 51.97101,
@@ -22805,6 +24133,15 @@
   }
  },
  {
+  "name": "Lloyd Park Disc Golf Course",
+  "lat": 51.364198,
+  "lon": -0.0769472,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Lloyd parkrun, Croydon",
   "lat": 51.364807,
   "lon": -0.079973,
@@ -22877,6 +24214,15 @@
    "Social 5K": "https://www.parkrun.org.uk/lochneaton/"
   },
   "description": "Walk, jog or run a timed 5K with other participants."
+ },
+ {
+  "name": "Loch Tay",
+  "lat": 56.4940591,
+  "lon": -4.2505074,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Lochend Woods parkrun",
@@ -23067,6 +24413,15 @@
   "activities": {
    "Outdoor tennis": "http://www.traffordleisure.co.uk"
   }
+ },
+ {
+  "name": "Longford Park Disc Golf Course",
+  "lat": 53.4482957,
+  "lon": -2.2914004,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Longhope Recreation Ground",
@@ -23983,6 +25338,16 @@
   }
  },
  {
+  "name": "Marble Arch Caves",
+  "postcode": "BT92 1EW",
+  "lat": 54.258568,
+  "lon": -7.813116,
+  "activities": {
+   "Cave tours": "https://marblearchcaves.co.uk/plan-your-visit/"
+  },
+  "description": "Take a guided tour through the underground passages in County Fermanagh."
+ },
+ {
   "name": "Marble Hill Park",
   "postcode": "TW1 2NL",
   "lat": 51.44994,
@@ -24587,6 +25952,15 @@
   }
  },
  {
+  "name": "Mendip Activity Center",
+  "lat": 51.3302899,
+  "lon": -2.8133154,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Menston Park",
   "postcode": "LS29 6DN",
   "lat": 53.88786,
@@ -24657,6 +26031,15 @@
   "activities": {
    "Outdoor tennis": "http://www.merewilts.org"
   }
+ },
+ {
+  "name": "Mereside",
+  "lat": 52.6899992,
+  "lon": -2.7304771,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Meridian Leisure Centre And Woodlane Playing Fields",
@@ -25057,6 +26440,16 @@
   "description": "Walk, jog or run a timed 5K with other participants."
  },
  {
+  "name": "Mills Observatory, Dundee",
+  "lat": 56.464913,
+  "lon": -3.012566,
+  "activities": {
+   "Astronomy": "https://www.leisureandculturedundee.com/culture/mills"
+  },
+  "description": "Explore astronomy exhibits and check the observing programme at Balgay Park.",
+  "postcode": "DD2 2UB"
+ },
+ {
   "name": "Milnrow Memorial Park junior parkrun",
   "lat": 53.604202,
   "lon": -2.10291,
@@ -25382,6 +26775,15 @@
   "description": "Children aged 4–14 can walk, jog or run this 2K course."
  },
  {
+  "name": "Moors valley Disc Golf",
+  "lat": 50.8546375,
+  "lon": -1.8529855,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Moors Valley junior parkrun",
   "lat": 50.851371,
   "lon": -1.849369,
@@ -25434,6 +26836,15 @@
   "activities": {
    "Outdoor tennis": "https://www.google.com/maps/search/?api=1&query=Morchard+Bishop+Playingfield+Association+EX17+6PE"
   }
+ },
+ {
+  "name": "Morden Disc Golf Course 9 hole disc golf course",
+  "lat": 51.3914758,
+  "lon": -0.206638,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Morden Leisure Centre",
@@ -26753,6 +28164,15 @@
   "activities": {
    "Swimming": "https://www.everyoneactive.com/centre/north-herts-leisure-centre/"
   }
+ },
+ {
+  "name": "North Hill Farm",
+  "lat": 51.6651889,
+  "lon": -0.5107071,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "North Marine junior parkrun",
@@ -28520,6 +29940,24 @@
   }
  },
  {
+  "name": "Pembrey Disc Golf Course",
+  "lat": 51.6776914,
+  "lon": -4.3011904,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
+  "name": "Pembrokeshire Sunflowers/Pumpkins",
+  "lat": 52.0482772,
+  "lon": -4.7494583,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Penallta junior parkrun",
   "lat": 51.644903,
   "lon": -3.245668,
@@ -29165,6 +30603,15 @@
   "activities": {
    "Outdoor tennis": "https://www.erithtown.com/erith-town-announce-the-planet-turf-crossways-arena/"
   }
+ },
+ {
+  "name": "Plas Newydd Disc Golf",
+  "lat": 53.2191904,
+  "lon": -4.2187466,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Plas Newydd junior parkrun",
@@ -30033,6 +31480,36 @@
   }
  },
  {
+  "name": "Putt & Play Harrow",
+  "lat": 51.5815032,
+  "lon": -0.3376807,
+  "activities": {
+   "Crazy golf": "https://www.hollywoodbowl.co.uk/harrow-putt-play"
+  },
+  "description": "Play indoor mini golf with friends and family.",
+  "postcode": "HA1 1HS"
+ },
+ {
+  "name": "Putt & Play Leeds",
+  "lat": 53.8000487,
+  "lon": -1.4239499,
+  "activities": {
+   "Crazy golf": "https://www.hollywoodbowl.co.uk/leeds-putt-play"
+  },
+  "description": "Play indoor mini golf with friends and family.",
+  "postcode": "LS15 8GB"
+ },
+ {
+  "name": "Putt & Play Rochdale",
+  "lat": 53.6177635,
+  "lon": -2.1581247,
+  "activities": {
+   "Crazy golf": "https://www.hollywoodbowl.co.uk/rochdale-putt-play"
+  },
+  "description": "Play indoor mini golf with friends and family.",
+  "postcode": "OL16 1BE"
+ },
+ {
   "name": "Puttenham Recreation Ground",
   "postcode": "GU3 1AS",
   "lat": 51.22285,
@@ -30630,6 +32107,15 @@
   }
  },
  {
+  "name": "Reboot Disc Golf",
+  "lat": 55.9907485,
+  "lon": -2.5882244,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Rectory Road Recreation Ground",
   "postcode": "GU14 7HX",
   "lat": 51.29643,
@@ -30700,6 +32186,15 @@
   "activities": {
    "Outdoor tennis": "https://www.wimborne.gov.uk/open-spaces-play-areas-and-sport-pitches/"
   }
+ },
+ {
+  "name": "Redditch Disc Golf Course",
+  "lat": 52.3071011,
+  "lon": -1.9116211,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Redgrave Sports Centre",
@@ -31001,6 +32496,15 @@
   }
  },
  {
+  "name": "Ripley Castle",
+  "lat": 54.0396906,
+  "lon": -1.5703947,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Ripon Leisure And Wellbeing Hub (The Jack Laugher Centre)",
   "postcode": "HG4 1TT",
   "lat": 54.12862,
@@ -31035,6 +32539,15 @@
    "Social 5K": "https://www.parkrun.org.uk/risingsun/"
   },
   "description": "Walk, jog or run a timed 5K with other participants."
+ },
+ {
+  "name": "River Hamble Country Park",
+  "lat": 50.8968279,
+  "lon": -1.2936396,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "River Park Tennis Courts And 3G Pitch",
@@ -31506,6 +33019,15 @@
   }
  },
  {
+  "name": "Rosshall Park Disc Golf Course",
+  "lat": 55.8375303,
+  "lon": -4.3618941,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Rossington Leisure Centre",
   "postcode": "DN11 0DU",
   "lat": 53.47835,
@@ -31696,6 +33218,15 @@
   }
  },
  {
+  "name": "Rowlestone Disc Golf",
+  "lat": 51.9395955,
+  "lon": -2.9097158,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Rowney Green",
   "postcode": "B48 7QN",
   "lat": 52.34405,
@@ -31793,6 +33324,15 @@
   "activities": {
    "Outdoor tennis": "http://www.oldham.gov.uk"
   }
+ },
+ {
+  "name": "Ruchill Park",
+  "lat": 55.8859747,
+  "lon": -4.27248,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Ruchill parkrun",
@@ -32045,6 +33585,15 @@
   "activities": {
    "Outdoor tennis": "http://www.highamferrers-tc.gov.uk"
   }
+ },
+ {
+  "name": "Salcey Forest",
+  "lat": 52.1600338,
+  "lon": -0.8299977,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Salcey Forest parkrun",
@@ -32938,6 +34487,15 @@
   }
  },
  {
+  "name": "Sharley Park Disc Golf Course",
+  "lat": 53.1663197,
+  "lon": -1.4041458,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Sharnbrook Playing Field",
   "postcode": "MK44 1JP",
   "lat": 52.2256,
@@ -33136,6 +34694,15 @@
   "activities": {
    "Outdoor tennis": "http://www.newark-sherwooddc.gov.uk/sherwoodavenue"
   }
+ },
+ {
+  "name": "Sherwood Pines Disc Golf Course",
+  "lat": 53.1658381,
+  "lon": -1.0884856,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Sherwood Pines parkrun",
@@ -33417,6 +34984,15 @@
   "activities": {
    "Outdoor tennis": "http://www.bradforddistrictparks.org/events/booking.php"
   }
+ },
+ {
+  "name": "Silver Birch Disc Golf Course",
+  "lat": 53.2504618,
+  "lon": -3.6440498,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Silver Jubilee Park (Coseley)",
@@ -34484,6 +36060,15 @@
   }
  },
  {
+  "name": "Spot On Wake Disc Golf Course",
+  "lat": 52.2624501,
+  "lon": -1.7911675,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Spring Hill Tennis Courts",
   "postcode": "E5 9BN",
   "lat": 51.57323,
@@ -34500,6 +36085,15 @@
    "Junior 2K": "https://www.parkrun.org.uk/springburn-juniors/"
   },
   "description": "Children aged 4–14 can walk, jog or run this 2K course."
+ },
+ {
+  "name": "Springburn Park",
+  "lat": 55.8891498,
+  "lon": -4.225738,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Springburn parkrun, Glasgow",
@@ -34619,6 +36213,15 @@
   "description": "Walk, jog or run a timed 5K with other participants."
  },
  {
+  "name": "St Andrews University",
+  "lat": 56.3396962,
+  "lon": -2.8177443,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "St Ann'S Well Gardens",
   "postcode": "BN3 1RL",
   "lat": 50.83013,
@@ -34671,6 +36274,15 @@
   "activities": {
    "Outdoor tennis": "http://www.lbbd.gov.uk"
   }
+ },
+ {
+  "name": "St Columbs Disc Golf Course",
+  "lat": 55.0013567,
+  "lon": -7.3111453,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "St Davids Playing Fields",
@@ -35385,6 +36997,15 @@
   "description": "Children aged 4–14 can walk, jog or run this 2K course."
  },
  {
+  "name": "Stokesley Disc Golf Course",
+  "lat": 54.4668407,
+  "lon": -1.1733347,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Stokesley Leisure And Wellbeing Hub",
   "postcode": "TS9 5JJ",
   "lat": 54.46825,
@@ -35437,6 +37058,15 @@
    "Social 5K": "https://www.parkrun.org.uk/stonehaven/"
   },
   "description": "Walk, jog or run a timed 5K with other participants."
+ },
+ {
+  "name": "Stonehenge Disc Golf",
+  "lat": 51.1562987,
+  "lon": -1.7620184,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Stonehouse junior parkrun",
@@ -36162,6 +37792,15 @@
   }
  },
  {
+  "name": "Sysonby Acres",
+  "lat": 52.7710213,
+  "lon": -0.9298139,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Tabletop MK · Milton Keynes",
   "activities": {
    "Board-game cafés": "https://www.boardtodeath.co.uk/"
@@ -36321,6 +37960,15 @@
   "activities": {
    "Outdoor tennis": "https://clubspark.lta.org.uk/TannerStPark"
   }
+ },
+ {
+  "name": "Tapnell Farm Disc Golf",
+  "lat": 50.6795343,
+  "lon": -1.4709438,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Tarka Leisure Centre",
@@ -36527,6 +38175,15 @@
    "Social 5K": "https://www.parkrun.org.uk/telford/"
   },
   "description": "Walk, jog or run a timed 5K with other participants."
+ },
+ {
+  "name": "Telford Town Park",
+  "lat": 52.6837751,
+  "lon": -2.4421534,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Teme Cleobury",
@@ -37172,6 +38829,15 @@
   "activities": {
    "Outdoor tennis": "https://www.gnosallparishcouncil.org.uk/index.php?page=Recreation"
   }
+ },
+ {
+  "name": "The Arc Disc Golf Course",
+  "lat": 55.8960888,
+  "lon": -4.2420708,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "The Arcanist's Tavern · London",
@@ -37890,6 +39556,16 @@
   }
  },
  {
+  "name": "The Magic of Life Butterfly House",
+  "lat": 52.390965,
+  "lon": -3.892816,
+  "activities": {
+   "Wildlife park": "https://www.magicoflife.org/contact-us.html"
+  },
+  "description": "Visit the butterfly house in the Rheidol valley near Aberystwyth.",
+  "postcode": "SY23 3NB"
+ },
+ {
   "name": "The Martello Ground",
   "postcode": "IP11 9HT",
   "lat": 51.97032,
@@ -37906,6 +39582,15 @@
    "Junior 2K": "https://www.parkrun.org.uk/themeadows-juniors/"
   },
   "description": "Children aged 4–14 can walk, jog or run this 2K course."
+ },
+ {
+  "name": "The Mole Resort",
+  "lat": 50.9673134,
+  "lon": -3.917508,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "The Mystery junior parkrun, Wavertree",
@@ -38407,6 +40092,15 @@
   }
  },
  {
+  "name": "Thetford Forest High Lodge",
+  "lat": 52.4352153,
+  "lon": 0.6641426,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Thetford parkrun",
   "lat": 52.4156,
   "lon": 0.743766,
@@ -38488,6 +40182,15 @@
    "Social 5K": "https://www.parkrun.org.uk/thonocklanefarm/"
   },
   "description": "Walk, jog or run a timed 5K with other participants."
+ },
+ {
+  "name": "Thoresby Park",
+  "lat": 53.2361348,
+  "lon": -1.0446928,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Thornaby Pool",
@@ -38714,6 +40417,15 @@
   "activities": {
    "Swimming": "https://be-well.org.uk/centres/tiller-leisure-centre/"
   }
+ },
+ {
+  "name": "Tilney Sports",
+  "lat": 52.7315622,
+  "lon": 0.3099346,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Timescape Live Escape Games, Belfast",
@@ -38997,6 +40709,15 @@
   }
  },
  {
+  "name": "Torvean 18 hole free to play",
+  "lat": 57.4630297,
+  "lon": -4.236281,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Torvean junior parkrun",
   "lat": 57.462625,
   "lon": -4.246426,
@@ -39194,6 +40915,15 @@
    "Social 5K": "https://www.parkrun.org.uk/tremorfa/"
   },
   "description": "Walk, jog or run a timed 5K with other participants."
+ },
+ {
+  "name": "Trentham Gardens",
+  "lat": 52.9396723,
+  "lon": -2.2063226,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Trentham Gardens parkrun",
@@ -39502,6 +41232,24 @@
   "activities": {
    "Outdoor tennis": "https://www.google.com/maps/search/?api=1&query=Ulgham+Village+Playing+Field+NE61+3BG"
   }
+ },
+ {
+  "name": "Ulster University Arboretum Disc Golf Course",
+  "lat": 55.1540415,
+  "lon": -6.6789871,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
+  "name": "Ultimate Adventure Centre",
+  "lat": 51.0198781,
+  "lon": -4.2362192,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Ulverston Leisure Centre",
@@ -39854,6 +41602,24 @@
   "activities": {
    "Swimming": "https://www.everyoneactive.com/centre/uttoxeter-leisure-centre/"
   }
+ },
+ {
+  "name": "UWE Frenchay",
+  "lat": 51.5039985,
+  "lon": -2.5458266,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
+  "name": "UWE Glenside",
+  "lat": 51.4903194,
+  "lon": -2.5163009,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Vale Farm Sports Centre",
@@ -41371,6 +43137,15 @@
   }
  },
  {
+  "name": "Wendover Woods Disc Golf",
+  "lat": 51.7664514,
+  "lon": -0.7043985,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Wendover Woods parkrun",
   "lat": 51.76894,
   "lon": -0.716782,
@@ -41648,6 +43423,15 @@
   "activities": {
    "Outdoor tennis": "http://www.wolverhampton.gov.uk"
   }
+ },
+ {
+  "name": "West Park Golf",
+  "lat": 51.7343893,
+  "lon": 0.4566749,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "West Park Leisure Centre (Long Eaton)",
@@ -42036,6 +43820,15 @@
   }
  },
  {
+  "name": "Wheathampstead Golf",
+  "lat": 51.8095844,
+  "lon": -0.3126721,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Wherwell Playing Fields",
   "postcode": "SP11 7JP",
   "lat": 51.17015,
@@ -42089,6 +43882,15 @@
   "activities": {
    "Swimming": "https://www.shropshireleisurecentres.com/whitchurch-swimming-fitness-centre/"
   }
+ },
+ {
+  "name": "Whitcombe Farm",
+  "lat": 50.8015358,
+  "lon": -2.7280823,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "White Horse Leisure and Tennis Centre",
@@ -42812,6 +44614,15 @@
   "description": "Children aged 4–14 can walk, jog or run this 2K course."
  },
  {
+  "name": "Windmill Leisure",
+  "lat": 51.5142552,
+  "lon": -2.5156142,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Windrush Leisure Centre, Witney",
   "lat": 51.7835,
   "lon": -1.48146,
@@ -42837,6 +44648,15 @@
    "Social 5K": "https://www.parkrun.org.uk/windynook/"
   },
   "description": "Walk, jog or run a timed 5K with other participants."
+ },
+ {
+  "name": "Windy Oaks",
+  "lat": 56.5296179,
+  "lon": -6.2260074,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Wingham Wildlife Park",
@@ -43433,6 +45253,15 @@
   "description": "Children aged 4–14 can walk, jog or run this 2K course."
  },
  {
+  "name": "Woolacombe Bay Disc Golf",
+  "lat": 51.1757109,
+  "lon": -4.1966486,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
+ },
+ {
   "name": "Woolacombe Dunes parkrun",
   "lat": 51.159264,
   "lon": -4.209982,
@@ -43819,6 +45648,15 @@
    "Social 5K": "https://www.parkrun.org.uk/wyreforest/"
   },
   "description": "Walk, jog or run a timed 5K with other participants."
+ },
+ {
+  "name": "Wyre Forest- Forestry England",
+  "lat": 52.3639567,
+  "lon": -2.368467,
+  "activities": {
+   "Disc golf": "https://www.discgolfuk.co.uk/pages/where-to-play"
+  },
+  "description": "Play disc golf by aiming a flying disc at baskets along the course."
  },
  {
   "name": "Wythall Park",

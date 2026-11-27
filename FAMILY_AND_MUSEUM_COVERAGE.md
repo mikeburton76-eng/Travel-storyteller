@@ -78,3 +78,7 @@ certificates and escape-room age guidance vary; no all-ages suitability is assum
 ## Family days out taster
 
 Set FAMILY_TASTER_ENABLED=false and restart the app to hide the Explore link and disable the finder and its data routes. Remove the setting to enable it again. To add or remove a venue, edit family-venues.json and deploy. Follow an existing entry with a name, latitude, longitude and activity labels mapped to venue links. A single venue can have several activities. The town list is separate. Searching runs in the browser without generating a story.
+
+## Friends and family directory follow-up
+
+Keep checking independent soft play and play cafés, seaside crazy golf, escape rooms, bowling, disc golf, public climbing sessions, board-game cafés, pottery studios, wildlife parks, aquariums and regional visitor attractions. Include caves and dark-sky centres where visitors can book or visit. Prioritise towns with few indoor choices and gaps in Scotland, Wales and Northern Ireland. Match operator addresses and activities against the existing catalogue before counting a new venue. Store a practical sentence, source and location in the standalone activity finder.
